@@ -255,72 +255,139 @@ python -m http.server 8080 --directory frontend
 
 **Cíl:** Vedoucí může spravovat 160+ komisařů a vidět je na mapě
 
+### ⚠️ KLÍČOVÝ KONCEPT - PIN per Station (ne per Person):
+
+**Důležitá změna designu:**
+- ✅ **PIN je vázaný na STANICI**, ne na člověka
+- ✅ Na stanici se PŘIŘADÍ člověk (lze kdykoliv změnit)
+- ✅ PINy jsou **perzistentní** (přežijí restart serveru) - uloženo v `data/pins.json`
+- ✅ Změna člověka na stanici → PIN zůstává STEJNÝ
+
+**Příklad:**
+```
+PIN 1234 → Stanice TK-01 "Zatáčka u lesa"
+           ├─ Aktuálně obsazeno: Jan Novák (+420...)
+           ├─ Lze změnit na: Petr Nový (stejný PIN 1234!)
+           └─ Historie: Jan (8:00-12:00), Petr (12:00-16:00)
+```
+
+**Výhody:**
+- 🔒 Stabilní PINy (TK-01 má vždy PIN 1234, i přes roky)
+- 🔄 Snadná výměna lidí (onemocnění, střídání směn)
+- 📱 Rozeslat SMS s PINem PŘED rally (už víš číslo stanice)
+- 📊 Centrální správa "Stanice obsazená/volná"
+
 ### Co se implementuje:
 
-1. **Admin API Endpoints** (`backend/api/admin.py`)
-   - `POST /api/admin/generate-pin` - generovat PIN pro komisaře
-   - `POST /api/admin/assign-station` - přiřadit stanici komisaři
-   - `POST /api/admin/reassign-station` - změnit přiřazení (s důvodem)
-   - `GET /api/admin/commissioners` - seznam všech komisařů
-   - `DELETE /api/admin/revoke-pin` - deaktivovat PIN
+1. **Přepracování PIN systému** (`backend/models/station.py`, `backend/core/auth.py`)
+   - **BREAKING CHANGE:** Refaktor `KomisarAccess` → `StationAccess`
+   - Model:
+     ```python
+     StationAccess:
+       pin_code: str              # 1234
+       station_id: str            # TK-01
+       station_name: str          # "Zatáčka u lesa"
+       station_type: StationType  # corner, timing, etc.
+       capacity: int              # 1-3 lidé
+       assigned_users: list[AssignedUser]  # historie + aktuální
+       created_at: datetime
+     
+     AssignedUser:
+       name: str
+       phone: str
+       role: UserRole
+       assigned_at: datetime
+       assigned_until: datetime | None
+       is_active: bool
+     ```
+   - Migrace z `data/pins.json` (osoba → stanice)
+   - Perzistence zajištěna (už implementováno v Fázi 1)
+
+2. **Admin API Endpoints** (`backend/api/admin.py`)
+   - `POST /api/admin/station/create-pin` - vytvořit PIN pro novou stanici
+   - `POST /api/admin/station/{station_id}/assign-user` - přiřadit člověka na stanici (PIN zůstává)
+   - `POST /api/admin/station/{station_id}/reassign-user` - změnit člověka (s důvodem)
+   - `POST /api/admin/station/{station_id}/release-user` - uvolnit stanici
+   - `GET /api/admin/stations` - seznam všech stanic + obsazenost
+   - `GET /api/admin/station/{station_id}/history` - historie změn obsazení
+   - `DELETE /api/admin/station/{station_id}/pin` - smazat PIN stanice (admin only)
    - Všechny vyžadují vedení role (auth check)
 
-2. **Station Registry** (`backend/core/station_registry.py`)
+3. **Station Registry** (`backend/core/station_registry.py`)
    - Hardcoded definice stanic (různé typy)
    - Track points, timing, parking, medical, atd.
    - Capacity management (více lidí na jednu stanici)
-   - Assignment tracking
+   - Assignment tracking s historií
 
-3. **Station API** (`backend/api/stations.py`)
-   - `GET /api/stations` → všechny stanice + obsazenost
-   - `GET /api/stations/{station_id}/users` → kdo je přiřazen
+4. **Station API** (`backend/api/stations.py`)
+   - `GET /api/stations` → všechny stanice + obsazenost + current user
+   - `GET /api/stations/{station_id}` → detail stanice + historie
+   - `GET /api/stations/{station_id}/users` → kdo je/byl přiřazen
 
-4. **Frontend: Admin Dashboard** (`frontend/js/admin.js`)
-   - **Commissioner Management:**
-     - Tabulka všech komisařů (virtual scrolling pro 160+)
-     - Filtry: role, status (online/offline), přiřazení
-     - Search by name
-     - Hromadné akce (bulk reassign)
+5. **Frontend: Admin Dashboard** (`frontend/js/admin.js`)
+   - **Station Management:**
+     - Tabulka všech stanic (virtual scrolling pro 160+)
+     - Filtry: typ, status (obsazená/volná/offline), role
+     - Search by station ID nebo název
    - **PIN Generation:**
-     - Přidat komisaře: jméno + telefon → vygeneruje PIN
+     - Vytvořit novou stanici → auto-generuje PIN
      - Zobrazit PIN (pro SMS nebo QR kód)
-   - **Station Assignment:**
-     - Drag & drop komisařů na stanice
-     - Capacity warnings (stanice plná)
-     - Real-time reassignment s notifikací
+     - Export do CSV/Excel (stanice + PIN + aktuální obsazení)
+   - **User Assignment:**
+     - Přiřadit člověka na stanici: jméno + telefon + role
+     - Změnit člověka (modal s potvrzením)
+     - Uvolnit stanici
+     - Důvod změny (optional, pro historii)
+   - **History View:**
+     - Kdo byl na stanici kdy
+     - Důvody změn obsazení
+   - **Real-time updates:**
+     - Notifikace komisaři při přiřazení/změně
+     - Auto-update v admin panelu
 
-5. **Frontend: Station markers** (`frontend/js/map.js`)
+6. **Frontend: Station markers** (`frontend/js/map.js`)
    - Různé ikony podle typu (track, timing, parking)
-   - Marker tooltip: obsazenost, jména komisařů
-   - Barva podle statusu: online/offline
-   - Click → detail stanice
+   - Marker tooltip: ID stanice, obsazenost, jména aktuálně přiřazených lidí
+   - Barva podle statusu: zelená (online + obsazená), žlutá (volná), červená (offline)
+   - Click → detail stanice (historie obsazení)
 
-6. **WebSocket Notifications**
-   - Komisař dostane notifikaci při přiřazení/změně
-   - Auto-update mapy při změně
+7. **WebSocket Notifications**
+   - Komisař dostane notifikaci při přiřazení/změně stanice
+   - Zpráva: "Byl jste přiřazen na stanici TK-01 (Zatáčka u lesa)"
+   - Auto-update mapy při změně obsazení
    - Potvrzení od komisaře (optional)
 
-7. **Optimizations**
+8. **Optimizations**
    - Virtual scrolling v admin tabulce (jen 20 řádků renderováno)
    - Debounced search
    - Lazy loading markers (jen viditelné)
 
 ### Testování:
 ```bash
-# Vygenerovat 50+ PIN kódů
-# Přiřadit komisaře na různé stanice
-# Změnit přiřazení během "závodu"
-# Ověřit notifikace komisařům
-# Test capacity limits
+# 1. Vytvořit 50+ stanic s PINy
+# 2. Přiřadit lidi na stanice (různé konfigurace)
+# 3. Změnit člověka na stanici během "závodu" (PIN zůstává stejný)
+# 4. Test: Restart serveru → PINy stále platné
+# 5. Test: Změna Jana na Petra na TK-01 → PIN 1234 funguje pro Petra
+# 6. Ověřit notifikace komisařům při změně
+# 7. Test capacity limits (3 lidé na jednu stanici)
+# 8. Historie obsazení stanice
 ```
 
 ### Výstup:
-- Funkční admin panel pro správu velkého počtu komisařů
-- Dynamická mapa s různými typy stanic
+- Funkční admin panel pro správu **STANIC** (ne jednotlivých lidí)
+- **Perzistentní PINy** vázané na stanice (data/pins.json)
+- Snadná změna obsazení bez nutnosti generovat nové PINy
+- Dynamická mapa s různými typy stanic + obsazenost
 - Real-time updates při změnách
+- Historie všech změn obsazení
 
-**Trvání:** 6-8 hodin (rozšířeno o admin funkcionalitu)  
-**Kritérium úspěchu:** Vedoucí může spravovat 160 komisařů efektivně
+**Trvání:** 8-10 hodin (rozšířeno o redesign PIN systému + historii)  
+**Kritérium úspěchu:** 
+- ✅ PIN je vázaný na stanici, ne na člověka
+- ✅ Změna člověka na stanici neresetuje PIN
+- ✅ Vedoucí může spravovat 160 stanic efektivně
+- ✅ PINy přežijí restart serveru
 
 ---
 

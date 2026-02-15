@@ -38,40 +38,30 @@ app.include_router(auth_router)
 
 @app.on_event("startup")
 async def startup_event():
-    """Generate test PINs on server startup for MVP testing."""
-    # Generate test komisař PINs
-    komisar1 = auth_manager.generate_pin(
-        name="Jan Testovací",
-        role=UserRole.KOMISAR_TRAT,
-        phone="+420123456789",
-        station_id="TK-01"
-    )
-    
-    komisar2 = auth_manager.generate_pin(
-        name="Eva Zkušební",
-        role=UserRole.KOMISAR_ZATACKA,
-        phone="+420987654321",
-        station_id="ZT-05"
-    )
+    """Load existing PINs and display credentials on server startup."""
+    # Load existing PINs from data/pins.json (persistent storage)
+    all_pins = auth_manager.list_all_pins()
     
     print("=" * 60)
-    print("🔐 TESTOVACÍ PŘIHLAŠOVACÍ ÚDAJE")
+    print("🔐 PŘIHLAŠOVACÍ ÚDAJE")
     print("=" * 60)
     print("\n📋 VEDENÍ RZ (Username + Password):")
     print("   Username: admin")
     print("   Password: demo123")
-    print("\n📋 KOMISAŘI (PIN kód):")
-    print(f"   Komisař 1: {komisar1.name}")
-    print(f"   PIN: {komisar1.pin_code}")
-    print(f"   Role: {komisar1.role.value}")
-    print(f"   Stanice: {komisar1.station_id}")
-    print()
-    print(f"   Komisař 2: {komisar2.name}")
-    print(f"   PIN: {komisar2.pin_code}")
-    print(f"   Role: {komisar2.role.value}")
-    print(f"   Stanice: {komisar2.station_id}")
+    
+    if all_pins:
+        print("\n📋 KOMISAŘI (PIN kód):")
+        for komisar in all_pins:
+            print(f"\n   {komisar.name}")
+            print(f"   PIN: {komisar.pin_code}")
+            print(f"   Role: {komisar.role.value}")
+            print(f"   Stanice: {komisar.station_id or 'Nepřiřazena'}")
+    else:
+        print("\n⚠️  ŽÁDNÉ KOMISAŘ PINy - použij Admin Panel pro generování")
+    
     print("\n" + "=" * 60)
     print(f"✅ Server běží na http://{settings.HOST}:{settings.PORT}")
+    print(f"📊 Načteno PINů: {len(all_pins)}")
     print("=" * 60)
 
 

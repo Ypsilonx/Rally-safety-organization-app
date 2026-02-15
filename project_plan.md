@@ -1,114 +1,414 @@
-Technická specifikace projektu: RALLY Safety App
+# Rally Safety App - Technická Specifikace
 
-Tento dokument shrnuje koncept a architekturu progresivní webové aplikace (PWA) pro koordinaci traťových komisařů a vedení RZ (Rychlostní zkoušky) během rally soutěží.
+**Verze:** 0.1.0  
+**Datum:** 15. února 2026  
+**Status:** 🚧 Ve vývoji
 
-1. Cíl aplikace
+---
 
-Zajistit v reálném čase přehled o situaci na trati, poloze a stavu jednotlivých stanovišť a umožnit okamžitou komunikaci mezi komisaři a vedením (Start/Cíl) s důrazem na bezpečnost, přehlednost a odolnost vůči výpadkům signálu.
+## 📋 Obsah
 
-2. Klíčové role a funkce
+1. [Přehled projektu](#-přehled-projektu)
+2. [Klíčové role a funkce](#-klíčové-role-a-funkce)
+3. [Technický stack](#️-technický-stack)
+4. [Architektura systému](#-architektura-systému)
+5. [Autentizace a bezpečnost](#-autentizace-a-bezpečnost)
+6. [Vitality monitoring](#-vitality-monitoring)
+7. [Struktura projektu](#-struktura-projektu)
+8. [UI/UX koncept](#-uiux-koncept)
+9. [Budoucí rozšíření](#-budoucí-rozšíření)
 
-A. Vedení RZ (Start & Cíl)
+---
 
-Globální přehled: Interaktivní mapa s trasou RZ, vytyčenými stanovišti a diváckými zónami.
+## 🎯 Přehled projektu
 
-Monitoring konektivity (Vitality): Vizualizace stáří dat z každého stanoviště. Detekce offline stavu v reálném čase.
+Rally Safety App je **progresivní webová aplikace (PWA)** pro koordinaci traťových komisařů a vedení Rychlostní zkoušky (RZ) během rally soutěží.
 
-Broadcast: Možnost odeslat urgentní hlášení všem stanovištím najednou (např. "STOP RZ - Nebezpečí").
+### Hlavní cíl
+Zajistit **v reálném čase** přehled o situaci na trati, poloze a stavu jednotlivých stanovišť a umožnit **okamžitou komunikaci** mezi komisaři a vedením (Start/Cíl) s důrazem na:
+- ✅ **Bezpečnost** - kritické zprávy mají prioritu
+- ✅ **Přehlednost** - vizuální zpětná vazba o stavu RZ
+- ✅ **Odolnost** - funguje i při výpadku signálu
 
-Administrace: Textová komunikace mezi vedoucím (Start) a zástupcem (Cíl) pro potvrzování stavu trati.
+### Klíčové vlastnosti
+- 📱 **Mobile-first** design pro práci v terénu
+- 🌐 **Offline-first** - funguje bez internetu
+- ⚡ **Real-time** komunikace přes WebSockets
+- 🗺️ **Interaktivní mapa** s trasou a stanovišti
+- 🚨 **Rychlá hlášení** - velká tlačítka pro okamžitou reakci
+- 👥 **Škálování** - podpora pro 160+ komisařů současně
 
-B. Traťový komisař (Stanoviště)
+---
 
-Lokalizace: Zobrazení vlastní polohy vůči trase RZ a sousedním stanovištím (přehled o okolí).
+## 👥 Klíčové role a funkce
 
-Rychlá hlášení: Systém velkých, snadno ovladatelných tlačítek pro okamžité hlášení stavu (Nehoda, Diváci v nebezpečí, Stanoviště připraveno).
+### 🎖️ Vedení RZ (Start & Cíl)
 
-Vizuální zpětná vazba: Celá aplikace mění barvu záhlaví podle globálního stavu RZ (zelená = OK, červená = STOP).
+**Role:** Vedoucí rallye (Start) + Zástupce (Cíl)
 
-3. Technické řešení
+**Funkce:**
+- 🗺️ **Globální přehled**
+  - Interaktivní mapa s trasou RZ
+  - Vytyčená stanoviště a divácké zóny
+  - Real-time pozice všech komisařů
+  
+- 💚 **Monitoring konektivity (Vitality)**
+  - Vizualizace stáří dat z každého stanoviště
+  - Detekce offline stavu v reálném čase
+  - Varování při dlouhé latenci zpráv
+  
+- 📢 **Broadcast messaging**
+  - Urgentní hlášení všem stanovištím najednou
+  - Kritická zpráva: "STOP RZ - Nebezpečí"
+  - Selective broadcast (jen určité role/oblasti)
+  
+- 👨‍💼 **Administrace**
+  - Správa komisařů a přiřazování stanic
+  - Generování PIN kódů pro stanice
+  - Textová komunikace Start ↔ Cíl
+  - Historie všech událostí
 
-Frontend (PWA - Mobile First)
+### 🚩 Traťový komisař (Stanoviště)
 
-Technologie: HTML5, CSS3, Moderní JavaScript.
+**Role:** Komisař tratě, zatáčky, časoměřič, parking, zdravotník, atd.
 
-Mapové jádro: Leaflet.js / MapLibre (zvoleno pro efektivní práci s vektorovými daty a offline dlaždicemi).
+**Funkce:**
+- 📍 **Lokalizace**
+  - Zobrazení vlastní pozice na mapě
+  - Vzdálenost k trase a sousedním stanovištím
+  - Přehled o okolí
+  
+- 🚨 **Rychlá hlášení** (FAB - Floating Action Button)
+  - ⛑️ **NEHODA** - kritické hlášení
+  - ⚠️ **DIVÁCI V NEBEZPEČÍ** - vysoká priorita
+  - ✅ **STANOVIŠTĚ PŘIPRAVENO** - potvrzení ready
+  - 💬 **Volný text** - doplňující informace
+  
+- 🎨 **Vizuální zpětná vazba**
+  - 🟢 **Zelená** - RZ běží normálně
+  - 🟡 **Žlutá** - Varování na trati
+  - 🔴 **Červená** - STOP RZ (okamžitá akce)
+  - ⚪ **Šedá** - Ztráta spojení
 
-Offline Resilience:
+---
 
-Service Workers: Zajišťují chod aplikace a dostupnost mapových podkladů i bez internetu.
+## 🛠️ Technický stack
 
-IndexedDB (Outbox): Lokální fronta zpráv. Pokud není signál, hlášení se uloží a čeká na konektivitu.
+### Frontend (PWA)
 
-Background Sync: Automatické odeslání dat na pozadí, jakmile telefon detekuje signál.
+| Kategorie | Technologie | Důvod výběru |
+|-----------|-------------|--------------|
+| **Core** | HTML5, CSS3, Vanilla JavaScript | Rychlost, bez závislostí |
+| **Mapa** | Leaflet.js / MapLibre | Efektivní práce s vektorovými daty, offline tiles |
+| **Offline** | Service Workers | Cache strategie pro offline režim |
+| **Storage** | IndexedDB | Fronta zpráv pro offline messaging |
+| **Sync** | Background Sync API | Automatické odeslání dat při obnovení signálu |
 
-Backend (Python)
+**Offline resilience:**
+- ✅ Service Workers zajišťují dostupnost mapy i bez internetu
+- ✅ IndexedDB (Outbox) ukládá zprávy do fronty při výpadku
+- ✅ Background Sync odesílá zprávy automaticky po obnovení signálu
 
-Framework: FastAPI (vybráno pro asynchronní povahu a vysoký výkon).
+### Backend (Python)
 
-Komunikace: WebSockets pro okamžitý obousměrný přenos dat mezi všemi uzly.
+| Kategorie | Technologie | Důvod výběru |
+|-----------|-------------|--------------|
+| **Framework** | FastAPI | Asynchronní, vysoký výkon, moderní Python |
+| **WebSockets** | Uvicorn + FastAPI WebSocket | Real-time obousměrná komunikace |
+| **Validace** | Pydantic v2 | Striktní typování, validace dat |
+| **Auth** | Bcrypt + Sessions | Bezpečné hashing hesel |
+| **Logging** | JSONL + Python logging | Strukturované logy pro analýzu |
 
-Validace: Pydantic modely pro striktní definici datových struktur (zprávy, incidenty, poloha).
+---
 
-4. Logika hlídání času a validity (Vitality)
+## 🏗️ Architektura systému
 
-Parametr
+### Komunikační model
 
-Popis
+```
+┌─────────────────┐                 ┌─────────────────┐
+│  Komisař (PWA)  │◄───WebSocket───►│  FastAPI Server │
+│                 │                 │                 │
+│  - Leaflet Map  │                 │  - Connection   │
+│  - Offline DB   │                 │    Manager      │
+│  - Service      │                 │  - Event Logger │
+│    Worker       │                 │  - Auth         │
+└─────────────────┘                 └─────────────────┘
+                                            │
+                                            ▼
+                                    ┌───────────────┐
+                                    │  data/        │
+                                    │  - pins.json  │
+                                    │  - logs/*.jsonl│
+                                    └───────────────┘
+```
 
-created_at
+### Message Flow
 
-Čas vzniku incidentu v mobilu komisaře (zdroj pravdy pro bezpečnost).
+```
+1. Komisař klikne "NEHODA" →
+2. WebSocket odešle JSON zprávu →
+3. Server validuje (Pydantic) →
+4. Event logger zaznamená do JSONL →
+5. ConnectionManager broadcastuje:
+   - Critical → VŠEM
+   - Normal → jen vedení
+6. Vedení obdrží notifikaci + UI se zbarví červeně
+```
 
-received_at
+---
 
-Čas, kdy zpráva skutečně dorazila na server.
+## 🔐 Autentizace a bezpečnost
 
-Heartbeat
+### 2-Tier systém
 
-Každých 30s posílá mobil "ping". Pokud chybí > 2 minuty, ikona na mapě zešedne (Offline).
+| Role | Metoda | Implementace |
+|------|--------|--------------|
+| **Vedení RZ** | Username + Password | Bcrypt hash, session token (8h) |
+| **Komisaři** | PIN kód (4 číslice) | Vázaný na STANICI, ne člověka |
 
-Latence
+### 🔑 PIN per Station (Klíčový koncept)
 
-Pokud received_at - created_at > 60s, vedení uvidí varování: "ZPRÁVA ZPOŽDĚNA O X MIN".
+**Architektonické rozhodnutí:**
+> **PIN je vázaný na STANICI, ne na člověka!**
 
-5. Navržená struktura projektu (Modulární)
+#### Příklad workflow:
 
+**1. Před rally (Příprava):**
+```
+Vedoucí vytvoří stanici TK-01 "Zatáčka u lesa"
+→ Systém auto-generuje PIN: 1234
+→ Vedoucí přiřadí: Jan Novák → TK-01
+→ SMS na Jana: "Váš PIN pro TK-01: 1234"
+```
+
+**2. Den rally (Změna obsazení):**
+```
+Jan onemocní v 12:00
+→ Vedoucí v admin panelu: Změnit obsazení TK-01
+→ Nový člověk: Petr Nový
+→ PIN zůstává STEJNÝ: 1234 ✅
+→ Petr používá PIN 1234 pro stanici TK-01
+```
+
+**3. Historie:**
+```
+Stanice TK-01 (PIN: 1234):
+├─ Jan Novák    (08:00 - 12:00)
+└─ Petr Nový    (12:00 - 16:00)
+```
+
+#### ✅ Výhody tohoto přístupu:
+
+- 🔒 **Stabilní PINy** - TK-01 má vždy PIN 1234 (i přes roky)
+- 🔄 **Snadná výměna** - Změna člověka bez resetování PINu
+- 📱 **Předem rozeslat SMS** - Už víš čísla stanic před rally
+- 📊 **Centrální správa** - "Stanice obsazená/volná/offline"
+- ⏱️ **Vícedenní rally** - Den 1: Jan, Den 2: Petr (stejný PIN)
+
+### Bezpečnostní opatření
+
+- ✅ Bcrypt hashing pro hesla vedení (12 rounds)
+- ✅ Session tokeny s expirací (8 hodin)
+- ✅ PIN validace při každém WebSocket připojení
+- ✅ Perzistence PINů v `data/pins.json` (přežije restart)
+- ✅ Event logging všech autentizačních pokusů
+
+---
+
+## 💚 Vitality monitoring
+
+### Parametry sledování
+
+| Parametr | Význam | Akce |
+|----------|--------|------|
+| `created_at` | Čas vzniku události v mobilu komisaře | Zdroj pravdy pro bezpečnost |
+| `received_at` | Čas doručení na server | Výpočet latence |
+| `heartbeat` | Ping každých 30 sekund | Detekce offline stavu |
+| `latency` | `received_at - created_at` | Varování při > 60s |
+
+### Logika detekce stavu
+
+```python
+# Heartbeat timeout
+if (now - last_heartbeat) > 120s:
+    status = "OFFLINE"  # Ikona na mapě zešedne
+
+# Latence varování
+if (received_at - created_at) > 60s:
+    alert = f"⚠️ ZPRÁVA ZPOŽDĚNA O {latency} MIN"
+```
+
+### Vizualizace na mapě
+
+| Barva | Stav | Popis |
+|-------|------|-------|
+| 🟢 Zelená | Online + OK | Heartbeat < 2 min, RZ běží |
+| 🟡 Žlutá | Online + Varování | Latence > 60s nebo incident |
+| 🔴 Červená | Critical incident | STOP RZ aktivní |
+| ⚪ Šedá | Offline | Bez heartbeatu > 2 min |
+
+---
+
+## 📁 Struktura projektu
+
+### Adresářová struktura
+
+```
 rally-safety-app/
-├── backend/                # FastAPI aplikace
-│   ├── main.py             # Vstupní bod
-│   ├── api/                # REST a WebSocket endpointy
-│   ├── core/               # Konfigurace, Auth, WebSocket Manager
-│   ├── models/             # Pydantic schémata (datové struktury)
-│   └── services/           # Logika synchronizace a výpočty latence
-├── frontend/               # PWA (Static files)
-│   ├── index.html          # Hlavní mapové rozhraní
-│   ├── js/                 # Logika mapy, API klient, Offline manager
-│   ├── css/                # Responzivní design pro mobilní zařízení
-│   └── service-worker.js   # Strategie pro offline cache a sync
-└── data/                   # Definice tratí (GPX / GeoJSON)
+├── backend/                      # 🐍 FastAPI aplikace
+│   ├── main.py                   # Vstupní bod serveru
+│   ├── api/                      # REST a WebSocket endpointy
+│   │   ├── __init__.py
+│   │   ├── auth.py               # Login endpointy (vedení + komisař)
+│   │   └── stations.py           # (Fáze 5) Station management
+│   ├── core/                     # Jádro aplikace
+│   │   ├── __init__.py
+│   │   ├── config.py             # Konfigurace z .env
+│   │   ├── auth.py               # Auth manager + PIN persistence
+│   │   ├── connection_manager.py # WebSocket pool + broadcast
+│   │   └── event_logger.py       # JSONL event logging
+│   ├── models/                   # Pydantic schémata
+│   │   ├── __init__.py
+│   │   ├── auth.py               # Login request/response
+│   │   ├── message.py            # StationMessage, Priority
+│   │   ├── station.py            # Station, StationType
+│   │   └── user.py               # User, UserRole, KomisarAccess
+│   ├── services/                 # Business logika
+│   │   ├── __init__.py
+│   │   └── vitality.py           # (Fáze 3) Heartbeat monitoring
+│   ├── tests/                    # Testy
+│   │   ├── __init__.py
+│   │   ├── test_pins.py          # Helper pro zobrazení PINů
+│   │   └── test_websocket_client.py
+│   └── requirements.txt          # Python dependencies
+│
+├── frontend/                     # 📱 PWA (Static files)
+│   ├── index.html                # Hlavní HTML + login screen
+│   ├── manifest.json             # PWA manifest
+│   ├── js/                       # JavaScript moduly
+│   │   ├── app.js                # Main app orchestration
+│   │   ├── auth.js               # (Fáze 2) Login logika
+│   │   ├── websocket.js          # (Fáze 2) WS client
+│   │   ├── map.js                # (Fáze 4) Leaflet integrace
+│   │   ├── offline.js            # (Fáze 7) Offline queue
+│   │   └── admin.js              # (Fáze 5) Admin panel
+│   ├── css/
+│   │   └── styles.css            # Responzivní mobile-first CSS
+│   └── service-worker.js         # (Fáze 7) PWA caching & sync
+│
+├── data/                         # 📊 Data files
+│   ├── pins.json                 # Perzistentní PIN storage
+│   └── example-track.geojson     # (Fáze 4) Sample trať
+│
+├── logs/                         # 📝 JSONL event logs
+│   └── rz_session_*.jsonl        # Auto-generated per session
+│
+├── docs/                         # 📚 Dokumentace
+├── .env                          # Environment variables
+├── .env.example                  # Example env file
+├── .gitignore
+├── README.md
+├── ROADMAP.md                    # Development roadmap (10 fází)
+├── STATUS.md                     # Current progress tracking
+├── DEVELOPMENT.md                # Coding standards
+└── project_plan.md               # Tento dokument
+```
 
+---
 
-6. UI/UX Koncept
+## 🎨 UI/UX koncept
 
-Dominance mapy: Mapa zabírá 100 % plochy, ovládací prvky jsou průhledné nebo vysouvací.
+### Mobile-First design
 
-FAB (Floating Action Button): Jediné výrazné tlačítko v rohu pro vyvolání menu hlášení. Minimalizuje nechtěné kliknutí a šetří místo.
+**Principy:**
+- 📱 **Dotykové ovládání** - velká tlačítka (min 44x44px)
+- 🗺️ **Dominance mapy** - Mapa zabírá 80-100% plochy
+- 🎯 **FAB pattern** - Jediné plovoucí tlačítko pro hlavní akce
+- ⚡ **Okamžitá zpětná vazba** - Vizuální potvrzení každé akce
+- 🌐 **Offline indikátor** - Jasný status spojení
 
-Barvy stavů:
+### Barvy stavů RZ
 
-Zelená: Závod probíhá (standardní stav).
+| Barva | Hex | Použití | UI změna |
+|-------|-----|---------|----------|
+| 🟢 **Zelená** | `#22C55E` | RZ běží normálně | Standardní header |
+| 🟡 **Žlutá** | `#EAB308` | Varování na trati | Žluté záhlaví |
+| 🔴 **Červená** | `#EF4444` | STOP RZ / Nehoda | Celá app červená, vibrace |
+| ⚪ **Šedá** | `#9CA3AF` | Offline / Nedostupné | Šedá ikona na mapě |
 
-Žlutá: Varování na trati (zpomalení).
+### FAB (Floating Action Button)
 
-Červená: RZ zastavena (okamžitá akce).
+```
+┌────────────────────────────────┐
+│         🗺️ MAPA                │
+│                                │
+│    [Marker]    [Marker]        │
+│                                │
+│         [Marker]               │
+│                        ┌─────┐ │
+│                        │ 🚨  │ │ ← FAB
+│                        │     │ │   (60x60px)
+└────────────────────────┴─────┴─┘
+```
 
-Šedá: Stanoviště nedostupné (ztráta signálu).
+**Klik na FAB → Modal s velkými tlačítky:**
+```
+┌──────────────────────────────┐
+│  Nahlásit událost            │
+├──────────────────────────────┤
+│  ⛑️  NEHODA (Critical)       │
+├──────────────────────────────┤
+│  ⚠️  DIVÁCI V NEBEZPEČÍ      │
+├──────────────────────────────┤
+│  ✅  STANOVIŠTĚ OK           │
+├──────────────────────────────┤
+│  💬  Jiné (text)             │
+└──────────────────────────────┘
+```
 
-7. Budoucí rozšiřitelnost
+---
 
-Telemetry Integration: Napojení na GPS trackery přímo ve vozech pro automatickou detekci zastavení vozu.
+## 🚀 Budoucí rozšíření
 
-Multimedia: Možnost pořídit a odeslat fotografii incidentu (asynchronně, až signál dovolí).
+### Fáze 8-10 (Plánované)
 
-Reporting: Automatické generování PDF reportu o průběhu RZ pro bezpečnostního delegáta po skončení závodu.
+- 📡 **Telemetry integrace**
+  - Napojení na GPS trackery ve vozech
+  - Automatická detekce zastavení vozu
+  - Real-time tracking posádek
+
+- 📸 **Multimedia podpora**
+  - Focení incidentu (async upload)
+  - Video záznam z kritických situací
+  - Offline fronta pro média
+
+- 📄 **Reporting & Export**
+  - Auto-generování PDF reportu po RZ
+  - Export událostí pro bezpečnostního delegáta
+  - Statistiky a analýzy (časové rozložení, heatmapy)
+
+- 🔔 **Push notifikace**
+  - Native push i při zavřené app
+  - Kritické zprávy s prioritou
+  
+- 🌍 **Multi-rally podpora**
+  - Správa více závodů najednou
+  - Šablony tras a stanic
+  - Import/export konfigurace
+
+---
+
+## 📚 Související dokumenty
+
+- [ROADMAP.md](ROADMAP.md) - Detailní plán vývoje (10 fází)
+- [STATUS.md](STATUS.md) - Aktuální stav projektu
+- [DEVELOPMENT.md](DEVELOPMENT.md) - Coding standards
+- [README.md](README.md) - Úvodní dokumentace
+- [SETUP.md](SETUP.md) - Návod na instalaci
+
+---
+
+**Verze dokumentu:** 1.0  
+**Poslední aktualizace:** 15. února 2026  
+**Status:** ✅ Fáze 0-1 dokončeny, Fáze 2 připravena

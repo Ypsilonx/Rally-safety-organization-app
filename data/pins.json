@@ -1,0 +1,16 @@
+{
+  "1234": {
+    "name": "Jan Testovací",
+    "role": "komisar_trat",
+    "phone": "+420123456789",
+    "station_id": "TK-01",
+    "created_at": "2026-02-15T15:00:00.000000"
+  },
+  "5678": {
+    "name": "Eva Zkušební",
+    "role": "komisar_zatacka",
+    "phone": "+420987654321",
+    "station_id": "ZT-05",
+    "created_at": "2026-02-15T15:00:00.000000"
+  }
+}

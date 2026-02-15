@@ -1,7 +1,9 @@
 """Authentication utilities - password hashing and PIN management."""
 
+import json
 import secrets
 from datetime import datetime, timedelta
+from pathlib import Path
 from typing import Optional
 
 import bcrypt
@@ -12,10 +14,65 @@ from backend.models.user import KomisarAccess, VEDENI_CREDENTIALS, UserRole
 class AuthManager:
     """Manages authentication for both vedení and komisaři."""
     
-    def __init__(self):
-        # In-memory storage for MVP (would be database in production)
-        self.komisar_pins: dict[str, KomisarAccess] = {}
+    def __init__(self, pins_file: str = "data/pins.json"):
+        """Initialize auth manager with persistent PIN storage.
+        
+        Args:
+            pins_file: Path to JSON file for storing PINs
+        """
+        self.pins_file = Path(pins_file)
+        self.pins_file.parent.mkdir(exist_ok=True)
+        
+        # Load existing PINs from file or initialize empty
+        self.komisar_pins: dict[str, KomisarAccess] = self._load_pins()
         self.active_sessions: dict[str, dict] = {}  # session_token -> user_data
+    
+    def _load_pins(self) -> dict[str, KomisarAccess]:
+        """Load PINs from JSON file.
+        
+        Returns:
+            Dictionary of PIN code -> KomisarAccess
+        """
+        if not self.pins_file.exists():
+            return {}
+        
+        try:
+            with open(self.pins_file, 'r', encoding='utf-8') as f:
+                data = json.load(f)
+            
+            # Convert JSON to KomisarAccess objects
+            pins = {}
+            for pin_code, pin_data in data.items():
+                pins[pin_code] = KomisarAccess(
+                    pin_code=pin_code,
+                    name=pin_data["name"],
+                    role=UserRole(pin_data["role"]),
+                    phone=pin_data.get("phone"),
+                    station_id=pin_data.get("station_id"),
+                    created_at=pin_data.get("created_at")
+                )
+            return pins
+        except Exception as e:
+            print(f"⚠️ Warning: Failed to load PINs from {self.pins_file}: {e}")
+            return {}
+    
+    def _save_pins(self) -> None:
+        """Save PINs to JSON file for persistence."""
+        try:
+            data = {}
+            for pin_code, komisar in self.komisar_pins.items():
+                data[pin_code] = {
+                    "name": komisar.name,
+                    "role": komisar.role.value,
+                    "phone": komisar.phone,
+                    "station_id": komisar.station_id,
+                    "created_at": komisar.created_at
+                }
+            
+            with open(self.pins_file, 'w', encoding='utf-8') as f:
+                json.dump(data, f, ensure_ascii=False, indent=2)
+        except Exception as e:
+            print(f"❌ Error: Failed to save PINs to {self.pins_file}: {e}")
     
     def verify_password(self, username: str, password: str) -> Optional[dict]:
         """Verify vedení username + password.
@@ -122,6 +179,7 @@ class AuthManager:
         )
         
         self.komisar_pins[pin_code] = komisar
+        self._save_pins()  # Persist to file
         return komisar
     
     def remove_pin(self, pin_code: str) -> bool:
@@ -135,6 +193,7 @@ class AuthManager:
         """
         if pin_code in self.komisar_pins:
             del self.komisar_pins[pin_code]
+            self._save_pins()  # Persist to file
             return True
         return False
     

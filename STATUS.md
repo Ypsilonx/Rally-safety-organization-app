@@ -95,8 +95,16 @@ backend/
 ✅ 2-tier autentizace (vedení + komisaři)  
 ✅ Event logger do JSONL formátu  
 ✅ Selective broadcast (role, station, critical)  
+✅ **Perzistentní PINy** (data/pins.json) - přežijí restart serveru  
 ✅ Testovací helper scripty  
 ✅ Debug API endpoint pro PIN management  
+
+### Important Notes:
+⚠️ **Architektonické rozhodnutí pro Fázi 5:**
+- PINy budou vázané na **STANICE**, ne na lidi
+- Umožní snadnou výměnu lidí bez resetování PINů
+- Perzistence již implementována (data/pins.json)
+- Detail v [ROADMAP.md Fáze 5](ROADMAP.md#-fáze-5-admin-panel--stanice-na-mapě)
 
 ### Issues:
 - ✅ test_pins.py správně přepsán na API-based místo instance confusion  
@@ -164,7 +172,10 @@ _Žádné aktivní issues_
 - ✅ FastAPI server s WebSocket + 2-tier auth
 - ✅ Event logging do JSONL
 - ✅ Selective broadcasting implementována
+- ✅ **Perzistentní PINy** - implementováno ukládání do data/pins.json
 - ✅ Všechny testy úspěšné (login, WebSocket, logging)
+- 🏗️ **Architektonické rozhodnutí:** PINy budou vázané na STANICE (ne lidi) - implementace v Fázi 5
+- 📝 Aktualizován ROADMAP.md - Fáze 5 rozšířena o PIN-per-station koncept
 - 📝 Připraveno na Fázi 2
 
 ### 2026-02-14
