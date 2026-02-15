@@ -6,17 +6,17 @@
 
 ---
 
-## 📍 Fáze 0: Příprava projektu
+## 📍 Fáze 0: Příprava projektu ✅
 
 **Cíl:** Nastavit vývojové prostředí a základní strukturu
 
 ### Úkoly:
 - [x] Vytvořit project_plan.md
-- [ ] Vytvořit adresářovou strukturu projektu
-- [ ] Nastavit Git repository
-- [ ] Připravit Python virtual environment
-- [ ] Vytvořit `.gitignore`
-- [ ] Vytvořit `requirements.txt` a `manifest.json`
+- [x] Vytvořit adresářovou strukturu projektu
+- [x] Nastavit Git repository
+- [x] Připravit Python virtual environment
+- [x] Vytvořit `.gitignore`
+- [x] Vytvořit `requirements.txt`
 
 ### Výstup:
 - Prázdná, ale kompletní struktura projektu

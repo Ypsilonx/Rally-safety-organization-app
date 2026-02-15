@@ -19,6 +19,10 @@
 - Complete current phase fully before moving to next
 - Do not skip steps or combine phases
 - Each phase has specific deliverables - stick to them
+- **IMPORTANT:** When completing tasks, update BOTH STATUS.md AND ROADMAP.md
+  - Check off completed tasks in ROADMAP.md (add checkmarks)
+  - Mark phases as complete with ✅ emoji in ROADMAP.md headings
+  - Keep both files synchronized at all times
 
 ### 4. Modular Architecture
 - Keep modules small and focused (single responsibility)
@@ -225,7 +229,7 @@ class WebSocketConnectionFactory {
 ## ⚠️ Critical Rules Recap
 
 1. ✅ Follow ROADMAP.md phases strictly
-2. ✅ Update STATUS.md frequently
+2. ✅ Update **BOTH** STATUS.md AND ROADMAP.md after completing tasks
 3. ✅ Keep code modular and simple
 4. ✅ Test before marking complete
 5. ❌ NO extra .md files (update existing instead)
