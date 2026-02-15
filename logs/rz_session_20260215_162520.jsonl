@@ -1,0 +1,2 @@
+{"timestamp": "2026-02-15T15:25:56.103478", "event_type": "login", "severity": "warning", "user_type": "komisar", "user_id": "8651", "name": "Unknown", "role": "unknown", "success": false}
+{"timestamp": "2026-02-15T15:26:17.171587", "event_type": "login", "severity": "info", "user_type": "komisar", "user_id": "1659", "name": "Jan Testovací", "role": "komisar_trat", "success": true}

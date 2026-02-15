@@ -1,0 +1,1 @@
+{"timestamp": "2026-02-15T14:37:04.611402", "event_type": "error", "severity": "error", "error_type": "ws_auth_failed", "message": "Invalid PIN attempt", "pin_code": "6811"}

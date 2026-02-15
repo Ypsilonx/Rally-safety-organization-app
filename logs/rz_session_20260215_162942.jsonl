@@ -1,0 +1,3 @@
+{"timestamp": "2026-02-15T15:31:56.585191", "event_type": "connection", "severity": "info", "pin_code": "9044", "name": "Jan Testovací", "action": "connected"}
+{"timestamp": "2026-02-15T15:31:56.593651", "event_type": "message", "severity": "info", "sender_pin": "9044", "sender_name": "Jan Testovací", "message_type": "chat", "priority": "normal", "content": "Test zpráva z WebSocket klienta", "target_roles": null}
+{"timestamp": "2026-02-15T15:31:58.606952", "event_type": "connection", "severity": "info", "pin_code": "9044", "name": "Jan Testovací", "action": "disconnected"}

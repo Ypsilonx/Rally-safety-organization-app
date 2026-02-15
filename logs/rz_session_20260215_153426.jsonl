@@ -1,0 +1,2 @@
+{"timestamp": "2026-02-15T14:35:28.033991", "event_type": "login", "severity": "info", "user_type": "komisar", "user_id": "6811", "name": "Jan Testovací", "role": "komisar_trat", "success": true}
+{"timestamp": "2026-02-15T14:35:53.207755", "event_type": "login", "severity": "info", "user_type": "komisar", "user_id": "1437", "name": "Eva Zkušební", "role": "komisar_zatacka", "success": true}

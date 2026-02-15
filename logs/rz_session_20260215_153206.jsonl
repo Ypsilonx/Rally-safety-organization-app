@@ -1,0 +1,2 @@
+{"timestamp": "2026-02-15T14:32:52.259750", "event_type": "login", "severity": "warning", "user_type": "komisar", "user_id": "5695", "name": "Unknown", "role": "unknown", "success": false}
+{"timestamp": "2026-02-15T14:33:29.208844", "event_type": "login", "severity": "warning", "user_type": "komisar", "user_id": "3044", "name": "Unknown", "role": "unknown", "success": false}

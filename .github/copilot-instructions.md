@@ -30,6 +30,20 @@
 - Clear separation: models, services, API, core
 - Follow existing project structure exactly
 
+### 5. ALWAYS Use Virtual Environment (VENV) ⚠️
+- **CRITICAL:** ALL Python commands MUST run in activated VENV
+- **NEVER** run Python commands without VENV activation
+- **Method 1 (preferred):** Use direct path to VENV Python:
+  ```powershell
+  & "D:\61_Programing\Rally safety organization app\venv\Scripts\python.exe" script.py
+  ```
+- **Method 2:** Activate VENV before command:
+  ```powershell
+  & "D:\61_Programing\Rally safety organization app\venv\Scripts\Activate.ps1"; python script.py
+  ```
+- This ensures correct dependencies and isolated environment
+- **FORBIDDEN:** Running `python` or `pip` without VENV context
+
 ---
 
 ## 📁 Project Structure Rules

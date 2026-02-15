@@ -28,56 +28,66 @@
 
 ---
 
-## 📍 Fáze 1: Backend MVP - WebSocket + Auth + Logging
+## 📍 Fáze 1: Backend MVP - WebSocket + Auth + Logging ✅
 
-**Cíl:** WebSocket server s 2-tier autentizací, event loggingem a podporou 160+ uživatelů
+**Cíl:** WebSocket server s 2-tier autentizací, event loggingem a podporou 160+ uživatelů  
+**Status:** ✅ DOKONČENO (15. února 2026)  
+**Čas:** ~4.5 hodin
 
-### Co se implementuje:
+### Co bylo implementováno:
 
-1. **FastAPI základy** (`backend/main.py`)
-   - Základní FastAPI aplikace
-   - Health check endpoint: `GET /health`
-   - WebSocket endpoint: `/ws/{pin_code}` (autentizovaný)
+1. **FastAPI základy** (`backend/main.py`) ✅
+   - [x] Základní FastAPI aplikace
+   - [x] Health check endpoint: `GET /health`
+   - [x] WebSocket endpoint: `/ws/{pin_code}` (autentizovaný)
+   - [x] Stats endpoint: `GET /api/stats`
+   - [x] Debug PIN endpoint: `GET /api/debug/pins`
 
-2. **Authentication System** (`backend/core/auth.py`, `backend/api/auth.py`)
-   - **Tier 1 (Vedení RZ):** Username + Password (bcrypt hashed)
-   - **Tier 2 (Komisaři):** PIN kódy (4místné, generované vedoucím)
-   - Session management pro vedení
-   - PIN validation pro komisaře
-   - Endpoints: `/api/auth/login-vedeni`, `/api/auth/login-komisar`
+2. **Authentication System** (`backend/core/auth.py`, `backend/api/auth.py`) ✅
+   - [x] **Tier 1 (Vedení RZ):** Username + Password (bcrypt hashed)
+   - [x] **Tier 2 (Komisaři):** PIN kódy (4místné, generované vedoucím)
+   - [x] Session management pro vedení
+   - [x] PIN validation pro komisaře
+   - [x] Endpoints: `/api/auth/login-vedeni`, `/api/auth/login-komisar`
 
-3. **User & Role Models** (`backend/models/user.py`)
-   - `UserRole` enum: 9 rolí (vedouci, zastupce, komisar_trat, casomer, parkovani, atd.)
-   - `User` model: user_id, name, role, station_id
-   - `KomisarAccess` model: PIN, name, phone, station assignment
-   - Hardcoded vedení credentials (pro MVP)
-   - In-memory PIN storage
+3. **User & Role Models** (`backend/models/user.py`) ✅
+   - [x] `UserRole` enum: 9 rolí (vedouci, zastupce, komisar_trat, casomer, parkovani, atd.)
+   - [x] `User` model: user_id, name, role, station_id
+   - [x] `KomisarAccess` model: PIN, name, phone, station assignment
+   - [x] Hardcoded vedení credentials (admin/demo123)
+   - [x] In-memory PIN storage
 
-4. **Station Models** (`backend/models/station.py`)
-   - `StationType` enum: track_point, corner, timing, parking, medical, atd.
-   - `Station` model: station_id, name, type, lat, lon, capacity
-   - Support pro více lidí na jedné stanici (capacity system)
+4. **Station Models** (`backend/models/station.py`) ✅
+   - [x] `StationType` enum: track_point, corner, timing, parking, medical, atd.
+   - [x] `Station` model: station_id, name, type, lat, lon, capacity
+   - [x] Support pro více lidí na jedné stanici (capacity system)
 
-5. **Connection Manager** (`backend/core/connection_manager.py`)
-   - Správa WebSocket spojení (160+ connections)
-   - **Selective Broadcasting:**
-     - `broadcast_to_role()` - jen určité role
-     - `broadcast_to_area()` - jen určitá oblast
+5. **Connection Manager** (`backend/core/connection_manager.py`) ✅
+   - [x] Správa WebSocket spojení (200 max connections)
+   - [x] **Selective Broadcasting:**
+     - `broadcast_to_roles()` - jen určité role
+     - `broadcast_to_station()` - jen určitá stanice
      - `broadcast_critical()` - STOP RZ všem
-   - PIN → WebSocket mapping
-   - Role tracking
+   - [x] PIN → WebSocket mapping
+   - [x] Role tracking
 
-6. **Event Logger** (`backend/core/event_logger.py`)
-   - JSONL logging všech events
-   - Log file per RZ session: `logs/rz_session_YYYYMMDD_HHMMSS.jsonl`
-   - Events: login, station_assigned, incident, broadcast, atd.
-   - Structured JSON format pro post-race analýzu
+6. **Event Logger** (`backend/core/event_logger.py`) ✅
+   - [x] JSONL logging všech events
+   - [x] Log file per RZ session: `logs/rz_session_YYYYMMDD_HHMMSS.jsonl`
+   - [x] Events: login, connection, message, broadcast, error
+   - [x] Structured JSON format pro post-race analýzu
 
-7. **Message Models** (`backend/models/message.py`)
-   - `StationMessage`: message_id, created_at, message_type, content
-   - `MessagePriority`: critical, high, normal, low
+7. **Message Models** (`backend/models/message.py`) ✅
+   - [x] `StationMessage`: message_id, created_at, message_type, content
+   - [x] `MessagePriority`: critical, high, normal, low
+   - [x] `MessageType`: chat, incident, status_update, broadcast, system
 
-### Co se NEIMPLEMENTUJE:
+8. **Testování** ✅
+   - [x] Test script pro zobrazení PINů (`backend/tests/test_pins.py`)
+   - [x] WebSocket test client (`backend/tests/test_websocket_client.py`)
+   - [x] Všechny testy úspěšné (login vedení, login komisař, WebSocket, logging)
+
+### Co se NEIMPLEMENTOVALO (dle plánu):
 - ❌ Database persistence (in-memory pro MVP)
 - ❌ Heartbeat monitoring (Fáze 3)
 - ❌ GPS tracking (Fáze 9)
@@ -85,18 +95,12 @@
 - ❌ SMS integrace (Fáze 6+)
 - ❌ Password reset/recovery
 
-### Testování:
-```bash
-# Spustit server
-uvicorn backend.main:app --reload
-
-# Test WebSocket (můžeš použít REST client nebo browser console)
-# Pošle zprávu a měl by dostat echo
-```
-
-### Výstup:
-- Fungující WebSocket server na `ws://localhost:8000/ws/TEST-01`
-- Schopnost přijmout JSON zprávu a broadcastnout ji všem klientům
+### Výsledek:
+✅ Fungující WebSocket server na `ws://localhost:8000/ws/{PIN}`  
+✅ 2-tier autentizace plně funkční  
+✅ Event logging do JSONL  
+✅ Selective broadcast podle rolí/stanic  
+✅ Support pro 200 současných spojení
 
 **Trvání:** 3-4 hodiny  
 **Kritérium úspěchu:** Dva browsery mohou spolu komunikovat přes server

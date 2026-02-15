@@ -1,20 +1,20 @@
 # Project Status & Progress Tracking
 
-**Last Updated:** 14. února 2026  
-**Current Phase:** Fáze 0 ✅ DOKONČENO  
-**Next Phase:** Fáze 1 - Backend MVP
+**Last Updated:** 15. února 2026  
+**Current Phase:** Fáze 1 ✅ DOKONČENO  
+**Next Phase:** Fáze 2 - Frontend MVP
 
 ---
 
 ## 📊 Overall Progress
 
 ```
-█████░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░ 5% (1/10 phases complete)
+██████████░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░ 20% (2/10 phases complete)
 ```
 
-**Completed Phases:** 1/10  
-**Time Invested:** ~2 hours  
-**Estimated Remaining:** 41-54 hours
+**Completed Phases:** 2/10  
+**Time Invested:** ~6.5 hours  
+**Estimated Remaining:** 37-50 hours
 
 ---
 
@@ -46,29 +46,30 @@
 
 ---
 
-## 🔄 Fáze 1: Backend MVP - WebSocket Server (DALŠÍ)
+## ✅ Fáze 1: Backend MVP - WebSocket Server (DOKONČENO)
 
-**Status:** 🔄 Ready to start  
-**Estimated Time:** 4-5 hours (rozšířeno o auth + logging)
+**Status:** ✅ Complete  
+**Completed:** 15. února 2026  
+**Time:** ~4.5 hours
 
 ### Checklist:
-- [ ] Vytvořit `backend/main.py` - FastAPI aplikace
-- [ ] Implementovat health check endpoint `GET /health`
-- [ ] Implementovat WebSocket endpoint `/ws/{pin_code}`
-- [ ] Vytvořit `backend/core/config.py` - konfigurace z .env
-- [ ] Vytvořit `backend/core/connection_manager.py` - WebSocket pool + selective broadcast
-- [ ] Vytvořit `backend/core/event_logger.py` - JSONL event logging
-- [ ] Vytvořit `backend/models/message.py` - Message Pydantic modely
-- [ ] Vytvořit `backend/models/user.py` - User, UserRole (9 rolí), KomisarAccess
-- [ ] Vytvořit `backend/models/station.py` - Station, StationType, capacity system
-- [ ] Vytvořit `backend/models/auth.py` - Login request/response modely
-- [ ] Vytvořit `backend/core/auth.py` - Password hashing (bcrypt), PIN generation
-- [ ] Implementovat `/api/auth/login-vedeni` - username + password
-- [ ] Implementovat `/api/auth/login-komisar` - PIN kód
-- [ ] Test: 2-tier login funguje
-- [ ] Test: Event logging zapisuje do JSONL
-- [ ] Test: Selective broadcast (jen určitým rolím)
-- [ ] Git commit + tag `v0.1`
+- [x] Vytvořit `backend/main.py` - FastAPI aplikace
+- [x] Implementovat health check endpoint `GET /health`
+- [x] Implementovat WebSocket endpoint `/ws/{pin_code}`
+- [x] Vytvořit `backend/core/config.py` - konfigurace z .env
+- [x] Vytvořit `backend/core/connection_manager.py` - WebSocket pool + selective broadcast
+- [x] Vytvořit `backend/core/event_logger.py` - JSONL event logging
+- [x] Vytvořit `backend/models/message.py` - Message Pydantic modely
+- [x] Vytvořit `backend/models/user.py` - User, UserRole (9 rolí), KomisarAccess
+- [x] Vytvořit `backend/models/station.py` - Station, StationType, capacity system
+- [x] Vytvořit `backend/models/auth.py` - Login request/response modely
+- [x] Vytvořit `backend/core/auth.py` - Password hashing (bcrypt), PIN generation
+- [x] Implementovat `/api/auth/login-vedeni` - username + password
+- [x] Implementovat `/api/auth/login-komisar` - PIN kód
+- [x] Test: 2-tier login funguje
+- [x] Test: Event logging zapisuje do JSONL
+- [x] Test: Selective broadcast (jen určitým rolím)
+- [x] Git commit + tag `v0.1`
 
 ### Files to Create:
 ```
@@ -89,21 +90,22 @@ backend/
 └── logs/                        (NEW - auto-created)
 ```
 
-### Success Criteria:
-✅ Server startuje bez errorů  
-✅ Health endpoint vrací 200 OK  
-✅ Vedení může login (username+password)  
-✅ Komisař může login (PIN kód)  
-✅ WebSocket přijímá zprávy podle role  
-✅ Selective broadcast funguje (jen určité role)  
-✅ Events se logují do `logs/rz_session_*.jsonl`  
-✅ Support pro 160+ současných spojení  
+### Deliverables:
+✅ FastAPI server s WebSocket podporou  
+✅ 2-tier autentizace (vedení + komisaři)  
+✅ Event logger do JSONL formátu  
+✅ Selective broadcast (role, station, critical)  
+✅ Testovací helper scripty  
+✅ Debug API endpoint pro PIN management  
+
+### Issues:
+- ✅ test_pins.py správně přepsán na API-based místo instance confusion  
 
 ---
 
-## ⏳ Fáze 2: Frontend MVP - Login + Chat UI
+## 🔄 Fáze 2: Frontend MVP - Login + Chat UI (DALŠÍ)
 
-**Status:** ⏳ Waiting  
+**Status:** 🔄 Ready to start  
 **Estimated Time:** 4-5 hours (rozšířeno o 2-tier login)
 
 ### Checklist:
@@ -157,21 +159,28 @@ _Žádné aktivní issues_
 
 ## 📝 Recent Changes
 
+### 2026-02-15
+- ✅ Fáze 1 dokončena
+- ✅ FastAPI server s WebSocket + 2-tier auth
+- ✅ Event logging do JSONL
+- ✅ Selective broadcasting implementována
+- ✅ Všechny testy úspěšné (login, WebSocket, logging)
+- 📝 Připraveno na Fázi 2
+
 ### 2026-02-14
 - ✅ Fáze 0 dokončena
 - ✅ Vyřešen problém s pydantic-core instalací (upgrade na 2.11+)
 - ✅ Vytvořena kompletní dokumentace
 - ✅ Git repository inicializován
-- 📝 Připraveno na Fázi 1
 
 ---
 
 ## 🎯 Next Actions
 
-1. **Okamžitě:** Začít Fázi 1 - vytvořit `backend/main.py`
-2. Implementovat ConnectionManager
-3. Vytvořit Pydantic modely
-4. Testovat WebSocket komunikaci
+1. **Okamžitě:** Začít Fázi 2 - vytvořit `frontend/index.html`
+2. Implementovat 2-tier login UI
+3. WebSocket klient v JavaScriptu
+4. Testovat chat mezi browsery
 
 ---
 
@@ -180,10 +189,10 @@ _Žádné aktivní issues_
 | Phase | Estimated | Actual | Variance |
 |-------|-----------|--------|----------|
 | Fáze 0 | 1-2h | ~2h | On track ✅ |
-| Fáze 1 | 3-4h | - | - |
-| Fáze 2 | 3-4h | - | - |
+| Fáze 1 | 4-5h | ~4.5h | On track ✅ |
+| Fáze 2 | 4-5h | - | - |
 
-**Total:** 2h / ~50h estimated
+**Total:** 6.5h / ~50h estimated
 
 ---
 
