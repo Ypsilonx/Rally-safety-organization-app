@@ -28,31 +28,62 @@
 
 ---
 
-## 📍 Fáze 1: Backend MVP - Basic WebSocket Server
+## 📍 Fáze 1: Backend MVP - WebSocket + Auth + Logging
 
-**Cíl:** Jednoduchý WebSocket server, který umí přijímat a broadcastovat zprávy
+**Cíl:** WebSocket server s 2-tier autentizací, event loggingem a podporou 160+ uživatelů
 
 ### Co se implementuje:
+
 1. **FastAPI základy** (`backend/main.py`)
    - Základní FastAPI aplikace
    - Health check endpoint: `GET /health`
-   - WebSocket endpoint: `/ws/{station_id}`
+   - WebSocket endpoint: `/ws/{pin_code}` (autentizovaný)
 
-2. **Connection Manager** (`backend/core/connection_manager.py`)
-   - Správa aktivních WebSocket spojení
-   - Broadcast zpráv všem připojeným klientům
-   - Ukládání station_id → WebSocket mapping
+2. **Authentication System** (`backend/core/auth.py`, `backend/api/auth.py`)
+   - **Tier 1 (Vedení RZ):** Username + Password (bcrypt hashed)
+   - **Tier 2 (Komisaři):** PIN kódy (4místné, generované vedoucím)
+   - Session management pro vedení
+   - PIN validation pro komisaře
+   - Endpoints: `/api/auth/login-vedeni`, `/api/auth/login-komisar`
 
-3. **Základní Message Model** (`backend/models/message.py`)
-   - `StationMessage` Pydantic model
-   - Pole: `message_id`, `station_id`, `created_at`, `message_type`, `content`
+3. **User & Role Models** (`backend/models/user.py`)
+   - `UserRole` enum: 9 rolí (vedouci, zastupce, komisar_trat, casomer, parkovani, atd.)
+   - `User` model: user_id, name, role, station_id
+   - `KomisarAccess` model: PIN, name, phone, station assignment
+   - Hardcoded vedení credentials (pro MVP)
+   - In-memory PIN storage
+
+4. **Station Models** (`backend/models/station.py`)
+   - `StationType` enum: track_point, corner, timing, parking, medical, atd.
+   - `Station` model: station_id, name, type, lat, lon, capacity
+   - Support pro více lidí na jedné stanici (capacity system)
+
+5. **Connection Manager** (`backend/core/connection_manager.py`)
+   - Správa WebSocket spojení (160+ connections)
+   - **Selective Broadcasting:**
+     - `broadcast_to_role()` - jen určité role
+     - `broadcast_to_area()` - jen určitá oblast
+     - `broadcast_critical()` - STOP RZ všem
+   - PIN → WebSocket mapping
+   - Role tracking
+
+6. **Event Logger** (`backend/core/event_logger.py`)
+   - JSONL logging všech events
+   - Log file per RZ session: `logs/rz_session_YYYYMMDD_HHMMSS.jsonl`
+   - Events: login, station_assigned, incident, broadcast, atd.
+   - Structured JSON format pro post-race analýzu
+
+7. **Message Models** (`backend/models/message.py`)
+   - `StationMessage`: message_id, created_at, message_type, content
+   - `MessagePriority`: critical, high, normal, low
 
 ### Co se NEIMPLEMENTUJE:
-- ❌ Autentizace/autorizace
-- ❌ Database persistence
-- ❌ Heartbeat monitoring
-- ❌ Latency detection
-- ❌ Složité validace
+- ❌ Database persistence (in-memory pro MVP)
+- ❌ Heartbeat monitoring (Fáze 3)
+- ❌ GPS tracking (Fáze 9)
+- ❌ Admin panel UI (Fáze 5)
+- ❌ SMS integrace (Fáze 6+)
+- ❌ Password reset/recovery
 
 ### Testování:
 ```bash
@@ -72,31 +103,48 @@ uvicorn backend.main:app --reload
 
 ---
 
-## 📍 Fáze 2: Frontend MVP - Připojení k serveru
+## 📍 Fáze 2: Frontend MVP - 2-Tier Login + Chat UI
 
-**Cíl:** Základní HTML stránka, která se připojí k WebSocket serveru a ukáže zprávy
+**Cíl:** Login system s rolemi + základní komunikační UI
 
 ### Co se implementuje:
-1. **HTML struktura** (`frontend/index.html`)
-   - Základní layout
-   - Text input pro zprávy
-   - Tlačítko "Odeslat"
-   - `<div>` pro zobrazení přijatých zpráv
-   - Include CSS a JS souborů
 
-2. **WebSocket klient** (`frontend/js/websocket.js`)
-   - Připojení na `ws://localhost:8000/ws/{station_id}`
+1. **HTML struktura** (`frontend/index.html`)
+   - **Login Screen:**
+     - Role selection: "Jsem vedení RZ" / "Jsem komisař"
+     - Vedení: username + password input
+     - Komisař: PIN input (4 číslice)
+   - **Main App:** (po loginu)
+     - Chat interface
+     - Role-based UI (vedení vidí více)
+     - Logout button
+
+2. **Authentication Logic** (`frontend/js/auth.js`)
+   - `loginVedeni(username, password)` → `/api/auth/login-vedeni`
+   - `loginKomisar(pin)` → `/api/auth/login-komisar`
+   - Store user data v localStorage
+   - Session persistence
+   - Auto-logout při 401
+
+3. **WebSocket klient** (`frontend/js/websocket.js`)
+   - Připojení na `ws://localhost:8000/ws/{pin_code}`
+   - Authentication v URL (PIN for komisař, session token for vedení)
    - Odeslání zprávy jako JSON
    - Příjem a zobrazení zpráv
-   - Základní reconnect logika
+   - Reconnect logika s re-auth
 
-3. **App logika** (`frontend/js/app.js`)
-   - Event listeners pro formulář
-   - Generování `message_id` (UUID nebo timestamp)
-   - Zobrazení zpráv v UI
+4. **App logika** (`frontend/js/app.js`)
+   - Role-based UI rendering:
+     - Vedení: admin controls visible
+     - Komisař: simple quick actions
+   - Event listeners
+   - Message handling podle role
+   - Notifikace systém
 
-4. **Základní CSS** (`frontend/css/styles.css`)
+5. **Základní CSS** (`frontend/css/styles.css`)
    - Mobile-first responsive design
+   - Login screen styling
+   - Role-specific UI elements
    - Velká tlačítka (min 44x44px)
    - Čitelné písmo (min 16px)
 
@@ -104,8 +152,9 @@ uvicorn backend.main:app --reload
 - ❌ Mapa (Leaflet)
 - ❌ Service Worker
 - ❌ Offline mode
-- ❌ Geolokace
-- ❌ Fancy UI/animace
+- ❌ GPS tracking
+- ❌ Admin panel pro správu komisařů (Fáze 5)
+- ❌ PIN generování UI (Fáze 5)
 
 ### Testování:
 ```bash
@@ -198,43 +247,76 @@ python -m http.server 8080 --directory frontend
 
 ---
 
-## 📍 Fáze 5: Stanice na mapě
+## 📍 Fáze 5: Admin Panel + Stanice na mapě
 
-**Cíl:** Zobrazit pozice stanic na mapě podle jejich stavu (online/offline)
+**Cíl:** Vedoucí může spravovat 160+ komisařů a vidět je na mapě
 
 ### Co se implementuje:
-1. **Station Position Model** (`backend/models/station.py`)
-   - `Station` model: `station_id`, `lat`, `lon`, `name`, `status`
-   - Storage v paměti (dict) pro rychlý přístup
 
-2. **Position Update Message** (`backend/models/message.py`)
-   - Nový `message_type`: `"position_update"`
-   - Payload: `{"lat": 50.123, "lon": 14.456}`
+1. **Admin API Endpoints** (`backend/api/admin.py`)
+   - `POST /api/admin/generate-pin` - generovat PIN pro komisaře
+   - `POST /api/admin/assign-station` - přiřadit stanici komisaři
+   - `POST /api/admin/reassign-station` - změnit přiřazení (s důvodem)
+   - `GET /api/admin/commissioners` - seznam všech komisařů
+   - `DELETE /api/admin/revoke-pin` - deaktivovat PIN
+   - Všechny vyžadují vedení role (auth check)
+
+2. **Station Registry** (`backend/core/station_registry.py`)
+   - Hardcoded definice stanic (různé typy)
+   - Track points, timing, parking, medical, atd.
+   - Capacity management (více lidí na jednu stanici)
+   - Assignment tracking
 
 3. **Station API** (`backend/api/stations.py`)
-   - `GET /api/stations` → vrátí všechny stanice s pozicemi a statusy
+   - `GET /api/stations` → všechny stanice + obsazenost
+   - `GET /api/stations/{station_id}/users` → kdo je přiřazen
 
-4. **Frontend: Station markers** (`frontend/js/map.js`)
-   - Fetch seznam stanic z API
-   - Vykreslit marker pro každou stanici
-   - Barva podle statusu:
-     - 🟢 Zelená = online
-     - 🔴 Červená = offline
+4. **Frontend: Admin Dashboard** (`frontend/js/admin.js`)
+   - **Commissioner Management:**
+     - Tabulka všech komisařů (virtual scrolling pro 160+)
+     - Filtry: role, status (online/offline), přiřazení
+     - Search by name
+     - Hromadné akce (bulk reassign)
+   - **PIN Generation:**
+     - Přidat komisaře: jméno + telefon → vygeneruje PIN
+     - Zobrazit PIN (pro SMS nebo QR kód)
+   - **Station Assignment:**
+     - Drag & drop komisařů na stanice
+     - Capacity warnings (stanice plná)
+     - Real-time reassignment s notifikací
 
-5. **Real-time marker updates** (`frontend/js/app.js`)
-   - Když přijde WebSocket zpráva o změně statusu → aktualizuj marker
+5. **Frontend: Station markers** (`frontend/js/map.js`)
+   - Různé ikony podle typu (track, timing, parking)
+   - Marker tooltip: obsazenost, jména komisařů
+   - Barva podle statusu: online/offline
+   - Click → detail stanice
+
+6. **WebSocket Notifications**
+   - Komisař dostane notifikaci při přiřazení/změně
+   - Auto-update mapy při změně
+   - Potvrzení od komisaře (optional)
+
+7. **Optimizations**
+   - Virtual scrolling v admin tabulce (jen 20 řádků renderováno)
+   - Debounced search
+   - Lazy loading markers (jen viditelné)
 
 ### Testování:
 ```bash
-# Přidat 3-5 fiktivních stanic
-# Připojit/odpojit klienty → markery by měly měnit barvu
+# Vygenerovat 50+ PIN kódů
+# Přiřadit komisaře na různé stanice
+# Změnit přiřazení během "závodu"
+# Ověřit notifikace komisařům
+# Test capacity limits
 ```
 
 ### Výstup:
-- Dynamická mapa se stanicemi, která reaguje na jejich status v reálném čase
+- Funkční admin panel pro správu velkého počtu komisařů
+- Dynamická mapa s různými typy stanic
+- Real-time updates při změnách
 
-**Trvání:** 4-5 hodin  
-**Kritérium úspěchu:** Markery správně reagují na online/offline změny
+**Trvání:** 6-8 hodin (rozšířeno o admin funkcionalitu)  
+**Kritérium úspěchu:** Vedoucí může spravovat 160 komisařů efektivně
 
 ---
 

@@ -15,12 +15,16 @@
 Rally Safety App zajišťuje real-time přehled o situaci na trati, poloze a stavu jednotlivých stanovišť traťových komisařů během rally soutěží. Aplikace funguje i offline díky PWA technologii.
 
 ### Klíčové funkce:
+- � **2-tier authentication** (vedení: heslo, komisaři: PIN kód)
+- 👥 **Správa 160+ komisařů** s různými rolemi
 - 🗺️ **Live mapa** s pozicemi všech stanovišť
-- 📡 **Real-time komunikace** přes WebSockets
-- 🔴 **Rychlé incident reporting** (nehoda, diváci v nebezpečí)
+- 📡 **Real-time komunikace** přes WebSockets (selective broadcast)
+- 🔄 **Dynamické přeřazování** postů během závodu
+- 🔴 **Rychlé incident reporting** s prioritizací
 - 📴 **Offline mode** s automatickou synchronizací
 - ⏱️ **Heartbeat monitoring** (detekce offline stanic)
 - 📍 **GPS tracking** komisařů v reálném čase
+- 📊 **Event logging** pro post-race analýzu
 
 ---
 
@@ -93,18 +97,18 @@ rally-safety-app/
 | Fáze | Popis | Status | Čas |
 |------|-------|--------|-----|
 | 0 | Příprava projektu | ✅ Hotovo | 1-2h |
-| 1 | Backend MVP (WebSocket) | 🔄 Další | 3-4h |
-| 2 | Frontend MVP (Chat) | ⏳ Čeká | 3-4h |
+| 1 | Backend MVP (WS + Auth + Logging) | 🔄 Další | 4-5h |
+| 2 | Frontend (2-tier Login + Chat) | ⏳ Čeká | 4-5h |
 | 3 | Heartbeat monitoring | ⏳ Čeká | 4-5h |
 | 4 | Mapa s Leaflet | ⏳ Čeká | 3-4h |
-| 5 | Stanice na mapě | ⏳ Čeká | 4-5h |
+| 5 | Admin Panel + Stanice | ⏳ Čeká | 6-8h |
 | 6 | Incident reporting | ⏳ Čeká | 4-5h |
 | 7 | PWA & Offline mode | ⏳ Čeká | 6-8h |
-| 8 | Latency detection | ⏳ Čeká | 3-4h |
+| 8 | Latency detection + GPS batching | ⏳ Čeká | 4-5h |
 | 9 | GPS tracking | ⏳ Čeká | 4-5h |
 | 10 | Production polish | ⏳ Čeká | 6-8h |
 
-**Celkový odhad:** 41-54 hodin čistého kódování
+**Celkový odhad:** 47-62 hodin čistého kódování
 
 ---
 
@@ -129,13 +133,21 @@ pytest backend/tests/ -v
 - **FastAPI** 0.116+ - Modern async web framework
 - **Uvicorn** - ASGI server
 - **Pydantic** 2.11+ - Data validation
-- **WebSockets** - Real-time communication
+- **WebSockets** - Real-time communication (selective broadcast)
+- **bcrypt** - Password hashing for vedení
+- **JSONL** - Structured event logging
 
 ### Frontend
 - **Vanilla JavaScript** (ES6+) - No frameworks
 - **Leaflet.js** - Interactive maps
 - **Service Workers** - Offline support
 - **IndexedDB** - Local data persistence
+
+### Architecture
+- **Auth:** 2-tier (password hash + PIN codes)
+- **Scalability:** 160+ concurrent connections
+- **Storage:** In-memory (MVP phase)
+- **No database** until production phase
 
 ---
 

@@ -49,49 +49,86 @@
 ## 🔄 Fáze 1: Backend MVP - WebSocket Server (DALŠÍ)
 
 **Status:** 🔄 Ready to start  
-**Estimated Time:** 3-4 hours
+**Estimated Time:** 4-5 hours (rozšířeno o auth + logging)
 
 ### Checklist:
 - [ ] Vytvořit `backend/main.py` - FastAPI aplikace
 - [ ] Implementovat health check endpoint `GET /health`
-- [ ] Implementovat WebSocket endpoint `/ws/{station_id}`
+- [ ] Implementovat WebSocket endpoint `/ws/{pin_code}`
 - [ ] Vytvořit `backend/core/config.py` - konfigurace z .env
-- [ ] Vytvořit `backend/core/connection_manager.py` - WebSocket pool
-- [ ] Vytvořit `backend/models/message.py` - Pydantic modely
-- [ ] Test: Dva klienti mohou komunikovat přes server
+- [ ] Vytvořit `backend/core/connection_manager.py` - WebSocket pool + selective broadcast
+- [ ] Vytvořit `backend/core/event_logger.py` - JSONL event logging
+- [ ] Vytvořit `backend/models/message.py` - Message Pydantic modely
+- [ ] Vytvořit `backend/models/user.py` - User, UserRole (9 rolí), KomisarAccess
+- [ ] Vytvořit `backend/models/station.py` - Station, StationType, capacity system
+- [ ] Vytvořit `backend/models/auth.py` - Login request/response modely
+- [ ] Vytvořit `backend/core/auth.py` - Password hashing (bcrypt), PIN generation
+- [ ] Implementovat `/api/auth/login-vedeni` - username + password
+- [ ] Implementovat `/api/auth/login-komisar` - PIN kód
+- [ ] Test: 2-tier login funguje
+- [ ] Test: Event logging zapisuje do JSONL
+- [ ] Test: Selective broadcast (jen určitým rolím)
 - [ ] Git commit + tag `v0.1`
 
 ### Files to Create:
 ```
 backend/
 ├── main.py                      (NEW)
+├── api/
+│   └── auth.py                  (NEW)
 ├── core/
 │   ├── config.py                (NEW)
-│   └── connection_manager.py    (NEW)
-└── models/
-    └── message.py               (NEW)
+│   ├── connection_manager.py    (NEW - s selective broadcast)
+│   ├── event_logger.py          (NEW)
+│   └── auth.py                  (NEW - bcrypt, sessions)
+├── models/
+│   ├── message.py               (NEW)
+│   ├── user.py                  (NEW - 9 roles)
+│   ├── station.py               (NEW)
+│   └── auth.py                  (NEW)
+└── logs/                        (NEW - auto-created)
 ```
 
 ### Success Criteria:
 ✅ Server startuje bez errorů  
 ✅ Health endpoint vrací 200 OK  
-✅ WebSocket přijímá a broadcastuje zprávy  
-✅ Dva browsery komunikují v real-time  
+✅ Vedení může login (username+password)  
+✅ Komisař může login (PIN kód)  
+✅ WebSocket přijímá zprávy podle role  
+✅ Selective broadcast funguje (jen určité role)  
+✅ Events se logují do `logs/rz_session_*.jsonl`  
+✅ Support pro 160+ současných spojení  
 
 ---
 
-## ⏳ Fáze 2: Frontend MVP - Chat UI
+## ⏳ Fáze 2: Frontend MVP - Login + Chat UI
 
 **Status:** ⏳ Waiting  
-**Estimated Time:** 3-4 hours
+**Estimated Time:** 4-5 hours (rozšířeno o 2-tier login)
 
 ### Checklist:
-- [ ] Vytvořit `frontend/index.html` - základní layout
+- [ ] Vytvořit `frontend/index.html` - login screen + main app
+- [ ] Vytvořit `frontend/js/auth.js` - 2-tier login logic
 - [ ] Vytvořit `frontend/js/websocket.js` - WS client
-- [ ] Vytvořit `frontend/js/app.js` - app logic
+- [ ] Vytvořit `frontend/js/app.js` - app logic + role-based UI
 - [ ] Vytvořit `frontend/css/styles.css` - mobile-first CSS
+- [ ] Test: Vedení login (username+password) funguje
+- [ ] Test: Komisař login (PIN) funguje
+- [ ] Test: Role-based UI (vedení vidí admin panel)
 - [ ] Test: Chat funguje mezi browsery
 - [ ] Git commit + tag `v0.2`
+
+### Files to Create:
+```
+frontend/
+├── index.html           (NEW - s login screen)
+├── js/
+│   ├── auth.js         (NEW)
+│   ├── websocket.js    (NEW)
+│   └── app.js          (NEW)
+└── css/
+    └── styles.css      (NEW)
+```
 
 ---
 
