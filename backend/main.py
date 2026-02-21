@@ -87,39 +87,67 @@ async def health_check():
     }
 
 
-@app.websocket("/ws/{pin_code}")
-async def websocket_endpoint(websocket: WebSocket, pin_code: str):
+@app.websocket("/ws/{auth_identifier}")
+async def websocket_endpoint(websocket: WebSocket, auth_identifier: str):
     """WebSocket endpoint for real-time communication.
+    
+    Supports two authentication methods:
+    1. PIN code (4 digits) - for komisaři
+    2. Session token (64 hex chars) - for vedení
     
     Args:
         websocket: WebSocket connection
-        pin_code: 4-digit PIN code for authentication
+        auth_identifier: PIN code or session token
     """
-    # Verify PIN before accepting connection
-    komisar = auth_manager.verify_pin(pin_code)
+    user_data = None
+    is_vedeni = False
     
-    if not komisar:
-        await websocket.close(code=1008, reason="Invalid PIN code")
+    # Try PIN authentication first (komisař)
+    komisar = auth_manager.verify_pin(auth_identifier)
+    
+    if komisar:
+        # Komisař authenticated via PIN
+        user_data = {
+            "name": komisar.name,
+            "role": komisar.role.value,
+            "station_id": komisar.station_id,
+            "auth_id": auth_identifier
+        }
+    else:
+        # Try session token (vedení)
+        session_data = auth_manager.verify_session(auth_identifier)
+        if session_data:
+            is_vedeni = True
+            user_data = {
+                "name": session_data["name"],
+                "role": session_data["role"].value,
+                "station_id": None,
+                "auth_id": auth_identifier
+            }
+    
+    # Reject if neither authentication method worked
+    if not user_data:
+        await websocket.close(code=1008, reason="Invalid authentication")
         event_logger.log_error(
             "ws_auth_failed",
-            "Invalid PIN attempt",
-            {"pin_code": pin_code}
+            "Invalid auth identifier",
+            {"auth_identifier": auth_identifier[:10] + "..."}
         )
         return
     
     # Accept connection and register
     await connection_manager.connect(
         websocket=websocket,
-        pin_code=pin_code,
-        name=komisar.name,
-        role=komisar.role.value,
-        station_id=komisar.station_id
+        pin_code=user_data["auth_id"],
+        name=user_data["name"],
+        role=user_data["role"],
+        station_id=user_data["station_id"]
     )
     
     # Send welcome message
     welcome_msg = {
         "type": "system",
-        "message": f"Vítejte, {komisar.name}! Připojeno.",
+        "message": f"Vítejte, {user_data['name']}! Připojeno.",
         "timestamp": datetime.utcnow().isoformat(),
         "active_users": connection_manager.get_active_count()
     }
@@ -136,8 +164,8 @@ async def websocket_endpoint(websocket: WebSocket, pin_code: str):
                 # Create StationMessage
                 station_message = StationMessage(
                     message_id=f"msg_{datetime.utcnow().timestamp()}",
-                    sender_pin=pin_code,
-                    sender_name=komisar.name,
+                    sender_pin=user_data["auth_id"],
+                    sender_name=user_data["name"],
                     message_type=message_data.get("message_type", "chat"),
                     priority=message_data.get("priority", "normal"),
                     content=message_data.get("content", ""),
@@ -146,8 +174,8 @@ async def websocket_endpoint(websocket: WebSocket, pin_code: str):
                 
                 # Log the message
                 event_logger.log_message(
-                    sender_pin=pin_code,
-                    sender_name=komisar.name,
+                    sender_pin=user_data["auth_id"],
+                    sender_name=user_data["name"],
                     message_type=station_message.message_type.value,
                     priority=station_message.priority.value,
                     content=station_message.content,
@@ -158,32 +186,36 @@ async def websocket_endpoint(websocket: WebSocket, pin_code: str):
                 broadcast_data = {
                     "message_id": station_message.message_id,
                     "timestamp": station_message.created_at.isoformat(),
-                    "sender_pin": station_message.sender_pin,
-                    "sender_name": station_message.sender_name,
+                    "sender": {
+                        "user_id": user_data["auth_id"],
+                        "name": user_data["name"],
+                        "role": user_data["role"]
+                    },
                     "message_type": station_message.message_type.value,
                     "priority": station_message.priority.value,
-                    "content": station_message.content
+                    "content": station_message.content,
+                    "created_at": station_message.created_at.isoformat()
                 }
                 broadcast_json = json.dumps(broadcast_data, ensure_ascii=False)
                 
                 # Selective broadcast based on target_roles and priority
                 if station_message.priority == MessagePriority.CRITICAL:
-                    # Critical messages go to everyone
-                    await connection_manager.broadcast_critical(broadcast_json)
+                    # Critical messages go to everyone (except sender - they see it via optimistic update)
+                    await connection_manager.broadcast_critical(broadcast_json, exclude_pin=user_data["auth_id"])
                 
                 elif station_message.target_roles:
                     # Send to specific roles only
                     await connection_manager.broadcast_to_roles(
                         broadcast_json,
                         station_message.target_roles,
-                        exclude_pin=pin_code
+                        exclude_pin=user_data["auth_id"]
                     )
                 
                 else:
                     # Normal broadcast to all
                     await connection_manager.broadcast_to_all(
                         broadcast_json,
-                        exclude_pin=pin_code
+                        exclude_pin=user_data["auth_id"]
                     )
             
             except json.JSONDecodeError:
@@ -198,7 +230,7 @@ async def websocket_endpoint(websocket: WebSocket, pin_code: str):
                 event_logger.log_error(
                     "ws_message_error",
                     str(e),
-                    {"pin_code": pin_code}
+                    {"auth_id": user_data["auth_id"][:10] + "..."}
                 )
                 error_msg = {
                     "type": "error",
@@ -208,7 +240,7 @@ async def websocket_endpoint(websocket: WebSocket, pin_code: str):
                 await websocket.send_text(json.dumps(error_msg, ensure_ascii=False))
     
     except WebSocketDisconnect:
-        connection_manager.disconnect(pin_code)
+        connection_manager.disconnect(user_data["auth_id"])
 
 
 @app.get("/api/stats")

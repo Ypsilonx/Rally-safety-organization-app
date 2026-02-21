@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="mobile-web-app-capable" content="yes">
+    <title>Rally Safety - Komunikační systém</title>
+    <link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+    <!-- ========================================
+         LOGIN SCREEN
+         ======================================== -->
+    <div id="login-screen" class="screen active">
+        <div class="login-container">
+            <div class="logo">
+                <h1>Rally Safety</h1>
+                <p class="subtitle">Komunikační systém</p>
+            </div>
+
+            <!-- Role Selection -->
+            <div id="role-selection" class="role-selection">
+                <h2>Jak se přihlašujete?</h2>
+                <div class="role-buttons">
+                    <button class="role-btn" data-role="vedeni" id="btn-vedeni">
+                        <span class="role-icon">👔</span>
+                        <span class="role-text">Jsem vedení RZ</span>
+                    </button>
+                    <button class="role-btn" data-role="komisar" id="btn-komisar">
+                        <span class="role-icon">🚩</span>
+                        <span class="role-text">Jsem komisař</span>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Vedení Login Form -->
+            <div id="vedeni-login" class="login-form hidden">
+                <button class="back-btn" id="back-from-vedeni">← Zpět</button>
+                <h2>Přihlášení vedení</h2>
+                <form id="vedeni-form">
+                    <div class="form-group">
+                        <label for="username">Uživatelské jméno</label>
+                        <input type="text" id="username" name="username" 
+                               autocomplete="username" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="password">Heslo</label>
+                        <input type="password" id="password" name="password" 
+                               autocomplete="current-password" required>
+                    </div>
+                    <button type="submit" class="btn btn-primary">Přihlásit se</button>
+                </form>
+                <div id="vedeni-error" class="error-message hidden"></div>
+            </div>
+
+            <!-- Komisař Login Form -->
+            <div id="komisar-login" class="login-form hidden">
+                <button class="back-btn" id="back-from-komisar">← Zpět</button>
+                <h2>Přihlášení komisaře</h2>
+                <form id="komisar-form">
+                    <div class="form-group">
+                        <label for="pin">PIN kód (4 číslice)</label>
+                        <input type="tel" id="pin" name="pin" 
+                               pattern="[0-9]{4}" maxlength="4" 
+                               inputmode="numeric" required
+                               placeholder="1234">
+                        <small>Zadejte 4místný PIN, který jste obdrželi</small>
+                    </div>
+                    <button type="submit" class="btn btn-primary">Přihlásit se</button>
+                </form>
+                <div id="komisar-error" class="error-message hidden"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ========================================
+         MAIN APP SCREEN
+         ======================================== -->
+    <div id="app-screen" class="screen hidden">
+        <!-- Header -->
+        <header class="app-header">
+            <div class="header-left">
+                <span id="user-role-badge" class="role-badge"></span>
+                <span id="user-name" class="user-name"></span>
+            </div>
+            <div class="header-right">
+                <span id="connection-status" class="status-indicator offline" title="Odpojeno">●</span>
+                <button id="logout-btn" class="btn-icon" title="Odhlásit se">
+                    <span>⚙️</span>
+                </button>
+            </div>
+        </header>
+
+        <!-- Main Content Area -->
+        <main class="app-main">
+            <!-- Admin Panel (pouze pro vedení) -->
+            <div id="admin-panel" class="admin-panel hidden">
+                <div class="panel-header">
+                    <h3>Admin Panel</h3>
+                    <button id="toggle-admin" class="btn-collapse">▼</button>
+                </div>
+                <div class="panel-content">
+                    <div class="admin-stats">
+                        <div class="stat-card">
+                            <span class="stat-label">Online stanic:</span>
+                            <span id="stat-online" class="stat-value">-</span>
+                        </div>
+                        <div class="stat-card">
+                            <span class="stat-label">Zpráv celkem:</span>
+                            <span id="stat-messages" class="stat-value">-</span>
+                        </div>
+                    </div>
+                    <div class="admin-actions">
+                        <button id="btn-broadcast" class="btn btn-secondary">
+                            📢 Hromadná zpráva
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Chat Container -->
+            <div class="chat-container">
+                <!-- Messages Area -->
+                <div id="messages" class="messages-area">
+                    <div class="welcome-message">
+                        <p>Připraveno k příjmu zpráv...</p>
+                    </div>
+                </div>
+
+                <!-- Message Input -->
+                <div class="message-input-container">
+                    <form id="message-form">
+                        <input type="text" id="message-input" 
+                               placeholder="Napište zprávu..." 
+                               autocomplete="off" required>
+                        <button type="submit" class="btn btn-send">
+                            <span>➤</span>
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </main>
+
+        <!-- Quick Actions (pro komisaře) -->
+        <div id="quick-actions" class="quick-actions hidden">
+            <button class="btn-quick" data-action="ready">✅ Připraven</button>
+            <button class="btn-quick" data-action="issue">⚠️ Problém</button>
+        </div>
+    </div>
+
+    <!-- Loading Overlay -->
+    <div id="loading-overlay" class="loading-overlay hidden">
+        <div class="spinner"></div>
+        <p>Připojování...</p>
+    </div>
+
+    <!-- Toast Notifications -->
+    <div id="toast-container" class="toast-container"></div>
+
+    <!-- Scripts -->
+    <script src="js/auth.js"></script>
+    <script src="js/websocket.js"></script>
+    <script src="js/app.js"></script>
+</body>
+</html>

@@ -175,16 +175,17 @@ class ConnectionManager:
         
         return sent_count
     
-    async def broadcast_critical(self, message: str) -> int:
+    async def broadcast_critical(self, message: str, exclude_pin: Optional[str] = None) -> int:
         """Broadcast critical message (STOP RZ) to ALL users.
         
         Args:
             message: JSON message string (should have priority=critical)
+            exclude_pin: Optional PIN to exclude from broadcast
             
         Returns:
             Number of users who received the message
         """
-        sent_count = await self.broadcast_to_all(message)
+        sent_count = await self.broadcast_to_all(message, exclude_pin=exclude_pin)
         event_logger.log_broadcast("system", "critical_broadcast", None, sent_count)
         return sent_count
     

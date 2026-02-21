@@ -1,20 +1,20 @@
 # Project Status & Progress Tracking
 
-**Last Updated:** 15. února 2026  
-**Current Phase:** Fáze 1 ✅ DOKONČENO  
-**Next Phase:** Fáze 2 - Frontend MVP
+**Last Updated:** 21. února 2026  
+**Current Phase:** Fáze 2 ✅ DOKONČENO  
+**Next Phase:** Fáze 3 - Heartbeat & Connection Monitoring
 
 ---
 
 ## 📊 Overall Progress
 
 ```
-██████████░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░ 20% (2/10 phases complete)
+███████████████░░░░░░░░░░░░░░░░░░░░░░░░░░░ 30% (3/10 phases complete)
 ```
 
-**Completed Phases:** 2/10  
-**Time Invested:** ~6.5 hours  
-**Estimated Remaining:** 37-50 hours
+**Completed Phases:** 3/10  
+**Time Invested:** ~10.5 hours  
+**Estimated Remaining:** 34-46 hours
 
 ---
 
@@ -111,34 +111,54 @@ backend/
 
 ---
 
-## 🔄 Fáze 2: Frontend MVP - Login + Chat UI (DALŠÍ)
+## ✅ Fáze 2: Frontend MVP - Login + Chat UI (DOKONČENO)
 
-**Status:** 🔄 Ready to start  
-**Estimated Time:** 4-5 hours (rozšířeno o 2-tier login)
+**Status:** ✅ Complete  
+**Completed:** 21. února 2026  
+**Time:** ~4 hours
 
 ### Checklist:
-- [ ] Vytvořit `frontend/index.html` - login screen + main app
-- [ ] Vytvořit `frontend/js/auth.js` - 2-tier login logic
-- [ ] Vytvořit `frontend/js/websocket.js` - WS client
-- [ ] Vytvořit `frontend/js/app.js` - app logic + role-based UI
-- [ ] Vytvořit `frontend/css/styles.css` - mobile-first CSS
-- [ ] Test: Vedení login (username+password) funguje
-- [ ] Test: Komisař login (PIN) funguje
-- [ ] Test: Role-based UI (vedení vidí admin panel)
-- [ ] Test: Chat funguje mezi browsery
-- [ ] Git commit + tag `v0.2`
+- [x] Vytvořit `frontend/index.html` - login screen + main app
+- [x] Vytvořit `frontend/js/auth.js` - 2-tier login logic
+- [x] Vytvořit `frontend/js/websocket.js` - WS client
+- [x] Vytvořit `frontend/js/app.js` - app logic + role-based UI
+- [x] Vytvořit `frontend/css/styles.css` - mobile-first CSS
+- [x] Test: Vedení login (username+password) funguje
+- [x] Test: Komisař login (PIN) funguje
+- [x] Test: Role-based UI (vedení vidí admin panel)
+- [x] Test: Chat funguje mezi browsery
+- [x] Backend: Podpora session tokenů na WebSocket endpointu
+- [x] Frontend: Optimistic update pro vlastní zprávy
+- [x] Frontend: Hromadná zpráva s count online stanic
+- [x] Git commit + tag `v0.2`
 
-### Files to Create:
+### Deliverables:
+✅ Kompletní frontend aplikace (HTML/CSS/JS)  
+✅ 2-tier login system (vedení + komisaři)  
+✅ WebSocket real-time komunikace  
+✅ Role-based UI (admin panel vs quick actions)  
+✅ Mobile-first responsive design  
+✅ Optimistic updates pro vlastní zprávy  
+✅ Broadcast s count online stanic  
+✅ Session persistence (localStorage)  
+✅ Auto-reconnect při výpadku spojení
+
+### Files Created:
 ```
 frontend/
-├── index.html           (NEW - s login screen)
+├── index.html           ✅
 ├── js/
-│   ├── auth.js         (NEW)
-│   ├── websocket.js    (NEW)
-│   └── app.js          (NEW)
+│   ├── auth.js         ✅
+│   ├── websocket.js    ✅
+│   └── app.js          ✅
 └── css/
-    └── styles.css      (NEW)
+    └── styles.css      ✅
 ```
+
+### Backend Updates:
+- ✅ WebSocket endpoint podporuje PIN i session token
+- ✅ `broadcast_critical()` s exclude_pin parametrem
+- ✅ Správné sender info v broadcast zprávách
 
 ---
 
@@ -152,7 +172,7 @@ _Details in [ROADMAP.md](ROADMAP.md)_
 
 | Milestone | Phase | Target | Status |
 |-----------|-------|--------|--------|
-| **M1: Working Chat** | Po Fázi 2 | TBD | ⏳ Pending |
+| **M1: Working Chat** | Po Fázi 2 | 21.2.2026 | ✅ Complete |
 | **M2: Incident System** | Po Fázi 6 | TBD | ⏳ Pending |
 | **M3: PWA Ready** | Po Fázi 7 | TBD | ⏳ Pending |
 | **M4: Production** | Po Fázi 10 | TBD | ⏳ Pending |
@@ -166,6 +186,19 @@ _Žádné aktivní issues_
 ---
 
 ## 📝 Recent Changes
+
+### 2026-02-21
+- ✅ **Fáze 2 dokončena** - Frontend MVP plně funkční!
+- ✅ Login UI s role selection (vedení vs komisař)
+- ✅ WebSocket real-time chat mezi browsery
+- ✅ Role-based UI (admin panel pro vedení, quick actions pro komisaře)
+- ✅ Mobile-first responsive design
+- ✅ Backend: Session token support na WebSocket (/ws/{auth_identifier})
+- ✅ Frontend: Optimistic update - vlastní zprávy viditelné okamžitě
+- ✅ Broadcast zprávy s count online stanic
+- ✅ Auto-reconnect při výpadku spojení
+- ✅ Testováno: Chat funguje mezi incognito a normálním tabem
+- 🎯 **Milestone 1 dosažen:** Working real-time chat!
 
 ### 2026-02-15
 - ✅ Fáze 1 dokončena
@@ -188,10 +221,10 @@ _Žádné aktivní issues_
 
 ## 🎯 Next Actions
 
-1. **Okamžitě:** Začít Fázi 2 - vytvořit `frontend/index.html`
-2. Implementovat 2-tier login UI
-3. WebSocket klient v JavaScriptu
-4. Testovat chat mezi browsery
+1. **Okamžitě:** Začít Fázi 3 - Heartbeat monitoring
+2. Implementovat vitality tracking na backendu
+3. Frontend: Automatický heartbeat každých 30s
+4. Status endpoint pro offline detection
 
 ---
 
@@ -201,9 +234,10 @@ _Žádné aktivní issues_
 |-------|-----------|--------|----------|
 | Fáze 0 | 1-2h | ~2h | On track ✅ |
 | Fáze 1 | 4-5h | ~4.5h | On track ✅ |
-| Fáze 2 | 4-5h | - | - |
+| Fáze 2 | 3-4h | ~4h | On track ✅ |
+| Fáze 3 | 4-5h | - | - |
 
-**Total:** 6.5h / ~50h estimated
+**Total:** 10.5h / ~50h estimated
 
 ---
 

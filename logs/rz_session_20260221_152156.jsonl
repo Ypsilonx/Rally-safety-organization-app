@@ -1,0 +1,20 @@
+{"timestamp": "2026-02-21T14:21:59.252783", "event_type": "connection", "severity": "info", "pin_code": "1234", "name": "Jan Testovací", "action": "connected"}
+{"timestamp": "2026-02-21T14:21:59.472713", "event_type": "error", "severity": "error", "error_type": "ws_auth_failed", "message": "Invalid auth identifier", "auth_identifier": "ba190e3e36..."}
+{"timestamp": "2026-02-21T14:22:03.462286", "event_type": "error", "severity": "error", "error_type": "ws_auth_failed", "message": "Invalid auth identifier", "auth_identifier": "ba190e3e36..."}
+{"timestamp": "2026-02-21T14:22:07.484232", "event_type": "error", "severity": "error", "error_type": "ws_auth_failed", "message": "Invalid auth identifier", "auth_identifier": "ba190e3e36..."}
+{"timestamp": "2026-02-21T14:22:10.826967", "event_type": "error", "severity": "error", "error_type": "ws_auth_failed", "message": "Invalid auth identifier", "auth_identifier": "ba190e3e36..."}
+{"timestamp": "2026-02-21T14:22:14.222979", "event_type": "error", "severity": "error", "error_type": "ws_auth_failed", "message": "Invalid auth identifier", "auth_identifier": "ba190e3e36..."}
+{"timestamp": "2026-02-21T14:22:17.638936", "event_type": "error", "severity": "error", "error_type": "ws_auth_failed", "message": "Invalid auth identifier", "auth_identifier": "ba190e3e36..."}
+{"timestamp": "2026-02-21T14:22:21.118274", "event_type": "error", "severity": "error", "error_type": "ws_auth_failed", "message": "Invalid auth identifier", "auth_identifier": "ba190e3e36..."}
+{"timestamp": "2026-02-21T14:22:24.570267", "event_type": "error", "severity": "error", "error_type": "ws_auth_failed", "message": "Invalid auth identifier", "auth_identifier": "ba190e3e36..."}
+{"timestamp": "2026-02-21T14:22:28.216254", "event_type": "error", "severity": "error", "error_type": "ws_auth_failed", "message": "Invalid auth identifier", "auth_identifier": "ba190e3e36..."}
+{"timestamp": "2026-02-21T14:22:39.717807", "event_type": "login", "severity": "info", "user_type": "vedeni", "user_id": "admin", "name": "Vedoucí RZ", "role": "vedouci", "success": true}
+{"timestamp": "2026-02-21T14:22:40.114263", "event_type": "connection", "severity": "info", "pin_code": "490fe79b7d3f960b708fb42bc87092ff1ee17e5180085a33e4ac42f2c021c67e", "name": "Vedoucí RZ", "action": "connected"}
+{"timestamp": "2026-02-21T14:22:45.165443", "event_type": "connection", "severity": "info", "pin_code": "1234", "name": "Jan Testovací", "action": "disconnected"}
+{"timestamp": "2026-02-21T14:22:45.489034", "event_type": "connection", "severity": "info", "pin_code": "1234", "name": "Jan Testovací", "action": "connected"}
+{"timestamp": "2026-02-21T14:22:49.591985", "event_type": "message", "severity": "info", "sender_pin": "1234", "sender_name": "Jan Testovací", "message_type": "chat", "priority": "normal", "content": "ddddd", "target_roles": null}
+{"timestamp": "2026-02-21T14:22:51.279960", "event_type": "message", "severity": "info", "sender_pin": "490fe79b7d3f960b708fb42bc87092ff1ee17e5180085a33e4ac42f2c021c67e", "sender_name": "Vedoucí RZ", "message_type": "chat", "priority": "normal", "content": "asdasdsa", "target_roles": null}
+{"timestamp": "2026-02-21T14:22:53.893548", "event_type": "message", "severity": "info", "sender_pin": "490fe79b7d3f960b708fb42bc87092ff1ee17e5180085a33e4ac42f2c021c67e", "sender_name": "Vedoucí RZ", "message_type": "broadcast", "priority": "critical", "content": "asdadasd", "target_roles": null}
+{"timestamp": "2026-02-21T14:22:53.894250", "event_type": "broadcast", "severity": "info", "sender": "system", "message_type": "critical_broadcast", "target_roles": null, "recipient_count": 1}
+{"timestamp": "2026-02-21T14:23:07.271952", "event_type": "connection", "severity": "info", "pin_code": "490fe79b7d3f960b708fb42bc87092ff1ee17e5180085a33e4ac42f2c021c67e", "name": "Vedoucí RZ", "action": "disconnected"}
+{"timestamp": "2026-02-21T14:23:10.216021", "event_type": "connection", "severity": "info", "pin_code": "1234", "name": "Jan Testovací", "action": "disconnected"}
