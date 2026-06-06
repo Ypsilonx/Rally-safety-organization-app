@@ -266,8 +266,8 @@ chore: update dependencies
 ```bash
 # Vytvořit virtual environment
 python -m venv venv
-.\venv\Scripts\activate  # Windows
-source venv/bin/activate  # Linux/Mac
+.\.venv\Scripts\activate  # Windows
+source .venv/bin/activate  # Linux/Mac
 
 # Install dependencies
 pip install -r requirements.txt

@@ -31,17 +31,31 @@ Rally Safety App zajišťuje real-time přehled o situaci na trati, poloze a sta
 ## 🚀 Quick Start
 
 ### Prerequisites
-- Python 3.11+ (aktuálně testováno s 3.13)
+- Python 3.13+
+- [UV](https://docs.astral.sh/uv/getting-started/installation/) (doporučeno) nebo pip
 - Git
 - Moderní browser (Chrome/Edge/Firefox)
 
-### Backend Setup
+### Backend Setup – UV (doporučeno)
 ```powershell
-# 1. Aktivuj virtual environment
-.\venv\Scripts\activate
+# 1. Nainstaluj UV (pokud ještě nemáš)
+powershell -ExecutionPolicy ByPass -c "irm https://astral.sh/uv/install.ps1 | iex"
 
-# 2. (První setup) Instaluj dependencies
-pip install -r backend/requirements.txt
+# 2. Vytvoř prostředí a instaluj závislosti
+uv sync
+
+# 3. Spusť server
+uv run uvicorn backend.main:app --reload --host 0.0.0.0 --port 8000
+```
+
+### Backend Setup – pip (alternativa)
+```powershell
+# 1. Vytvoř a aktivuj virtual environment
+python -m venv .venv
+.\.venv\Scripts\activate
+
+# 2. Instaluj závislosti
+pip install -r requirements.txt
 
 # 3. Spusť server
 uvicorn backend.main:app --reload --host 0.0.0.0 --port 8000
@@ -116,7 +130,10 @@ rally-safety-app/
 
 ### Backend Testing
 ```powershell
-# Spusť pytest
+# UV (doporučeno)
+uv run pytest
+
+# pip alternativa
 pytest backend/tests/ -v
 ```
 

@@ -121,49 +121,47 @@ git add .
 git commit -m "chore: initial project structure"
 ```
 
-### Krok 3: Setup Python Virtual Environment
+### Krok 3: Setup Python prostředí
+
+#### Varianta A – UV (doporučeno)
+
+```powershell
+# Nainstaluj UV (pokud ještě nemáš)
+powershell -ExecutionPolicy ByPass -c "irm https://astral.sh/uv/install.ps1 | iex"
+
+# Vytvoř .venv a instaluj všechny závislosti z uv.lock
+uv sync
+
+# V VS Code: Ctrl+Shift+P → Python: Select Interpreter → .venv\Scripts\python.exe
+```
+
+#### Varianta B – pip (alternativa)
 
 ```powershell
 # Vytvoř virtual environment
-python -m venv venv
+python -m venv .venv
 
 # Aktivuj virtual environment
-.\venv\Scripts\activate
+.\.venv\Scripts\activate
 
-# Měl by se změnit prompt na: (venv) PS D:\61_Programing\Rally safety organization app>
+# Měl by se změnit prompt na: (.venv) PS D:\61_Programing\Rally safety organization app>
+
+# Instaluj závislosti
+pip install -r requirements.txt
 ```
 
-### Krok 4: Vytvoř requirements.txt
+### Krok 4: Závislosti
 
+Závislosti projektu jsou definovány v `pyproject.toml` a uzamčeny v `uv.lock`.
+Soubor `requirements.txt` v kořeni projektu je exportovaný artefakt pro pip uživatele – **neupravuj ho ručně**.
+
+Po každé změně závislostí (UV workflow):
 ```powershell
-# Vytvoř requirements.txt soubor
-@"
-# FastAPI and server
-fastapi==0.109.2
-uvicorn[standard]==0.27.1
-websockets==12.0
+# Přidej závislost
+uv add nazev-balicku
 
-# Data validation
-pydantic==2.6.1
-pydantic-settings==2.1.0
-
-# Environment
-python-dotenv==1.0.1
-
-# Utilities
-python-dateutil==2.8.2
-
-# Testing
-pytest==8.0.0
-pytest-asyncio==0.23.5
-httpx==0.26.0
-
-# Development
-ruff==0.2.2
-"@ | Out-File -FilePath backend/requirements.txt -Encoding utf8
-
-# Instaluj dependencies
-pip install -r backend/requirements.txt
+# Exportuj aktualizovaný requirements.txt
+uv export --format requirements-txt --no-hashes --no-dev -o requirements.txt
 ```
 
 ### Krok 5: Vytvoř .env.example
