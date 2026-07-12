@@ -153,6 +153,7 @@ rally-safety-app/
 
 ### Pro vývojáře:
 - **[DEVELOPMENT.md](DEVELOPMENT.md)** - Coding standards a best practices
+- **[CONTRIBUTING.md](CONTRIBUTING.md)** - PR workflow, commity a checklist pro příspěvky
 - **[ROADMAP.md](ROADMAP.md)** - Fázovaný development plán (10 fází)
 - **[SETUP.md](SETUP.md)** - Detailní setup guide
 - **[STATUS.md](STATUS.md)** - Aktuální pokrok a checklist
@@ -263,35 +264,7 @@ Invoke-RestMethod http://localhost:8000/api/stations/readiness
 
 ---
 
-## 📝 Git Workflow
-
-### Conventional Commits
-```bash
-feat: add WebSocket connection manager
-fix: resolve heartbeat timeout issue
-docs: update API documentation
-test: add message validation tests
-```
-
-### Tagging
-Každá dokončená fáze = nový tag:
-```bash
-git tag v0.1  # Po Fázi 1
-git tag v0.2  # Po Fázi 2
-# atd.
-```
-
----
-
-## 🤝 Coding Principles
-
-- ✅ **KISS** - Keep It Simple, Stupid
-- ✅ **YAGNI** - You Aren't Gonna Need It
-- ✅ **DRY** - Don't Repeat Yourself
-- ✅ Dělej pouze to, co je **TEĎ** potřeba
-- ✅ Testuj každou změnu před commitem
-
-Detaily v [DEVELOPMENT.md](DEVELOPMENT.md)
+Vývojové zásady, pravidla pro commity a contributor workflow jsou v [DEVELOPMENT.md](DEVELOPMENT.md) a [CONTRIBUTING.md](CONTRIBUTING.md).
 
 ---
 

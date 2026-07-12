@@ -45,7 +45,7 @@ Minimalni sada pred PR:
 
 ## Commity
 
-V tomto projektu se pouzivaji Conventional Commits (viz `README.md`):
+V tomto projektu se pouzivaji Conventional Commits:
 
 - `feat: ...`
 - `fix: ...`

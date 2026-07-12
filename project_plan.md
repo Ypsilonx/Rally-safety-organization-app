@@ -2,21 +2,11 @@
 
 **Verze:** 0.5.1-dev  
 **Datum:** 12. července 2026  
-**Status:** 🚧 Ve vývoji (Fáze 4 aktivní, Fáze 6 částečně dodaná)
+**Status:** Technická specifikace produktu a cílové architektury
 
 ---
 
-## 🧾 Snapshot implementace (12.7.2026)
-
-- ✅ 2-tier autentizace (vedení přes heslo, komisaři přes PIN)
-- ✅ WebSocket komunikace + selective broadcast
-- ✅ Heartbeat monitoring + endpointy stavu stanic
-- ✅ Mapa s tratí, markery stanic, popup detail, role ikony
-- ✅ Incident quick actions + readiness gate pro `RZ resume`
-- ✅ Lokální perzistence chat/info/varování po odhlášení
-- 🔄 UX stabilizace desktop/mobil (dolaďování podle field feedbacku)
-- ⏳ PWA offline queue + background sync
-- ⏳ GPS tracking
+Tento dokument neudržuje průběžný stav implementace. Aktuální dodané části sleduj v `STATUS.md`, fázování v `ROADMAP.md`.
 
 ---
 
@@ -28,9 +18,8 @@
 4. [Architektura systému](#-architektura-systému)
 5. [Autentizace a bezpečnost](#-autentizace-a-bezpečnost)
 6. [Vitality monitoring](#-vitality-monitoring)
-7. [Struktura projektu](#-struktura-projektu)
-8. [UI/UX koncept](#-uiux-koncept)
-9. [Budoucí rozšíření](#-budoucí-rozšíření)
+7. [UI/UX koncept](#-uiux-koncept)
+8. [Budoucí rozšíření](#-budoucí-rozšíření)
 
 ---
 
@@ -264,73 +253,6 @@ if (received_at - created_at) > 60s:
 
 ---
 
-## 📁 Struktura projektu
-
-### Adresářová struktura
-
-```
-rally-safety-app/
-├── backend/                      # 🐍 FastAPI aplikace
-│   ├── main.py                   # Vstupní bod serveru
-│   ├── api/                      # REST a WebSocket endpointy
-│   │   ├── __init__.py
-│   │   ├── auth.py               # Login endpointy (vedení + komisař)
-│   │   └── stations.py           # (Fáze 5) Station management
-│   ├── core/                     # Jádro aplikace
-│   │   ├── __init__.py
-│   │   ├── config.py             # Konfigurace z .env
-│   │   ├── auth.py               # Auth manager + PIN persistence
-│   │   ├── connection_manager.py # WebSocket pool + broadcast
-│   │   └── event_logger.py       # JSONL event logging
-│   ├── models/                   # Pydantic schémata
-│   │   ├── __init__.py
-│   │   ├── auth.py               # Login request/response
-│   │   ├── message.py            # StationMessage, Priority
-│   │   ├── station.py            # Station, StationType
-│   │   └── user.py               # User, UserRole, KomisarAccess
-│   ├── services/                 # Business logika
-│   │   ├── __init__.py
-│   │   └── vitality.py           # (Fáze 3) Heartbeat monitoring
-│   ├── tests/                    # Testy
-│   │   ├── __init__.py
-│   │   ├── test_pins.py          # Helper pro zobrazení PINů
-│   │   └── test_websocket_client.py
-│   └── requirements.txt          # Python dependencies
-│
-├── frontend/                     # 📱 PWA (Static files)
-│   ├── index.html                # Hlavní HTML + login screen
-│   ├── manifest.json             # PWA manifest
-│   ├── js/                       # JavaScript moduly
-│   │   ├── app.js                # Main app orchestration
-│   │   ├── auth.js               # (Fáze 2) Login logika
-│   │   ├── websocket.js          # (Fáze 2) WS client
-│   │   ├── map.js                # (Fáze 4) Leaflet integrace
-│   │   ├── offline.js            # (Fáze 7) Offline queue
-│   │   └── admin.js              # (Fáze 5) Admin panel
-│   ├── css/
-│   │   └── styles.css            # Responzivní mobile-first CSS
-│   └── service-worker.js         # (Fáze 7) PWA caching & sync
-│
-├── data/                         # 📊 Data files
-│   ├── pins.json                 # Perzistentní PIN storage
-│   └── example-track.geojson     # (Fáze 4) Sample trať
-│
-├── logs/                         # 📝 JSONL event logs
-│   └── rz_session_*.jsonl        # Auto-generated per session
-│
-├── docs/                         # 📚 Dokumentace
-├── .env                          # Environment variables
-├── .env.example                  # Example env file
-├── .gitignore
-├── README.md
-├── ROADMAP.md                    # Development roadmap (10 fází)
-├── STATUS.md                     # Current progress tracking
-├── DEVELOPMENT.md                # Coding standards
-└── project_plan.md               # Tento dokument
-```
-
----
-
 ## 🎨 UI/UX koncept
 
 ### Mobile-First design
@@ -424,5 +346,4 @@ rally-safety-app/
 ---
 
 **Verze dokumentu:** 1.1  
-**Poslední aktualizace:** 12. července 2026  
-**Status:** ✅ Fáze 0-3 dokončeny, 🔄 Fáze 4 aktivní, 🔄 část Fáze 6 dodána
+**Poslední aktualizace:** 12. července 2026

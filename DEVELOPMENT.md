@@ -1,11 +1,6 @@
 # Development Guidelines - Rally Safety App
 
-## 📌 Aktuální kontext (12.7.2026)
-
-- Fáze 0-3 jsou dokončené.
-- Fáze 4 je ve stabilizaci UX (desktop + mobil).
-- Část Fáze 6 je již implementovaná (incident quick actions + readiness gate).
-- Před zahájením nové práce vždy zkontroluj `STATUS.md` a `ROADMAP.md`.
+Tento dokument popisuje vývojářské standardy. Aktuální stav projektu sleduj v `STATUS.md`, rozsah fází v `ROADMAP.md`.
 
 ## 🧭 Pravidlo dokumentace
 
@@ -13,73 +8,6 @@ Po každé změně chování aplikace aktualizuj minimálně:
 - `README.md` (uživatelské a provozní chování)
 - `STATUS.md` (co je hotovo / co je další krok)
 - `ROADMAP.md` (stav fází a částečně dodané položky)
-
-## 🎯 Základní principy
-
-### 1. KISS (Keep It Simple, Stupid)
-- Dělej pouze to, co je **teď** potřeba
-- Žádné "co kdyby" funkce
-- Jednoduchá řešení před komplexními
-
-### 2. YAGNI (You Aren't Gonna Need It)
-- Neimplementuj funkce dopředu
-- Každá funkce musí mít jasný use case **TEĎ**
-
-### 3. DRY (Don't Repeat Yourself)
-- Zduplikovaný kód = technický dluh
-- Pokud kopíruješ, vytvoř funkci/komponentu
-
-## 📁 Struktura projektu
-
-```
-rally-safety-app/
-├── backend/
-│   ├── main.py                 # FastAPI entry point
-│   ├── api/
-│   │   ├── __init__.py
-│   │   ├── auth.py            # Login endpointy
-│   │   └── status.py          # Status + readiness endpointy
-│   ├── core/
-│   │   ├── __init__.py
-│   │   ├── config.py          # Configuration management
-│   │   ├── connection_manager.py  # WebSocket connection pool
-│   │   ├── event_logger.py    # JSONL event logging
-│   │   └── auth.py            # Auth manager
-│   ├── models/
-│   │   ├── __init__.py
-│   │   ├── auth.py            # Auth request/response models
-│   │   ├── message.py         # Message schemas
-│   │   ├── station.py         # Station schemas
-│   │   └── user.py            # User schemas
-│   ├── services/
-│   │   ├── __init__.py
-│   │   ├── vitality.py        # Heartbeat monitoring
-│   │   └── operations_state.py # Incident readiness gate
-│   └── tests/
-│       ├── __init__.py
-│       ├── test_auth_manager.py
-│       ├── test_operations_state.py
-│       └── test_vitality.py
-├── frontend/
-│   ├── index.html             # Main entry point
-│   ├── css/
-│   │   └── styles.css         # Mobile-first styles
-│   ├── js/
-│   │   ├── app.js            # Main app logic
-│   │   ├── auth.js           # Login logika
-│   │   ├── websocket.js      # WebSocket client
-│   │   ├── map.js            # Map initialization & handling
-│   │   └── offline.js        # (planned) Offline queue management
-│   └── service-worker.js      # (planned) PWA offline support
-├── data/
-│   ├── pins.json              # Perzistentní PIN data
-│   └── example-track.geojson  # Sample track data
-├── docs/
-│   └──                        # Projektové doplňkové dokumenty
-├── pyproject.toml             # UV/Python metadata
-├── requirements.txt           # Export pro pip uživatele
-└── README.md
-```
 
 ## 🔧 Coding Standards
 

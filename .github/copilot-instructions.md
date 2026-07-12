@@ -14,7 +14,11 @@
 - Build exactly what's needed for current phase, nothing more
 - If user doesn't ask for it → don't add it
 
-### 3. Follow the Plan (ROADMAP.md)
+### 3. DRY - Don't Repeat Yourself
+- Avoid duplicating logic when a small shared function or module is enough
+- If similar code appears twice, check whether the duplication is real or just accidental noise
+
+### 4. Follow the Plan (ROADMAP.md)
 - Current phase is defined in STATUS.md
 - Complete current phase fully before moving to next
 - Do not skip steps or combine phases
@@ -24,13 +28,13 @@
   - Mark phases as complete with ✅ emoji in ROADMAP.md headings
   - Keep both files synchronized at all times
 
-### 4. Modular Architecture
+### 5. Modular Architecture
 - Keep modules small and focused (single responsibility)
 - One file = one concern
 - Clear separation: models, services, API, core
 - Follow existing project structure exactly
 
-### 5. ALWAYS Use Virtual Environment (VENV) ⚠️
+### 6. ALWAYS Use Virtual Environment (VENV) ⚠️
 - **CRITICAL:** ALL Python commands MUST run in activated VENV
 - **NEVER** run Python commands without VENV activation
 - **Method 1 (preferred):** Use direct path to VENV Python:

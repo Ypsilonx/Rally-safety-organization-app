@@ -4,11 +4,7 @@
 
 **Pravidlo:** Dokončit a otestovat každou fázi před přechodem na další.
 
-**Aktuální stav k 12.7.2026:**
-- ✅ Fáze 0-3 dokončeny
-- 🔄 Fáze 4 rozpracovaná (vysoká míra dokončení, probíhá stabilizace UX + QA)
-- 🔄 Fáze 6 částečně implementována (incident quick actions + readiness gate)
-- 🎯 Další rozhodnutí: upřesnit MVP řez Fáze 5 pro správu mapových podkladů a seznamu komisařů
+Aktuální průběžný stav drž v `STATUS.md`. Tento dokument je plán a backlog po fázích.
 
 ---
 
