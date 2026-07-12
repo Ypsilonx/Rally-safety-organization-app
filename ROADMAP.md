@@ -4,6 +4,12 @@
 
 **Pravidlo:** Dokončit a otestovat každou fázi před přechodem na další.
 
+**Aktuální stav k 12.7.2026:**
+- ✅ Fáze 0-3 dokončeny
+- 🔄 Fáze 4 rozpracovaná (vysoká míra dokončení, probíhá stabilizace UX + QA)
+- 🔄 Fáze 6 částečně implementována (incident quick actions + readiness gate)
+- 🎯 Další rozhodnutí: upřesnit MVP řez Fáze 5 pro správu mapových podkladů a seznamu komisařů
+
 ---
 
 ## 📍 Fáze 0: Příprava projektu ✅
@@ -186,7 +192,9 @@
 
 ---
 
-## 📍 Fáze 3: Heartbeat & Connection Monitoring
+## 📍 Fáze 3: Heartbeat & Connection Monitoring ✅
+
+**Status:** ✅ DOKONČENO (12. července 2026)
 
 **Cíl:** Server detekuje offline stanice pomocí heartbeat mechanismu
 
@@ -222,29 +230,41 @@
 
 ---
 
-## 📍 Fáze 4: Základní mapa s Leaflet
+## 📍 Fáze 4: Základní mapa s Leaflet 🔄
+
+**Status:** 🔄 IN PROGRESS (iterace 1 hotová)
 
 **Cíl:** Zobrazit mapu a vykreslit jednoduchou trať
 
 ### Co se implementuje:
 1. **Leaflet integrace** (`frontend/js/map.js`)
-   - Inicializace Leaflet mapy
-   - Použití OpenStreetMap tiles (online)
-   - Vykreslení sample GeoJSON tratě
+   - [x] Inicializace Leaflet mapy
+   - [x] Použití OpenStreetMap tiles (online)
+   - [x] Vykreslení sample GeoJSON tratě
 
 2. **Sample data** (`data/example-track.geojson`)
-   - Jednoduchá GeoJSON linestring trať (fiktivní nebo reálná)
-   - 5-10 bodů, aby to vypadalo jako trať
+   - [x] Jednoduchá GeoJSON linestring trať (fiktivní nebo reálná)
+   - [x] 5-10 bodů, aby to vypadalo jako trať
 
 3. **UI adjustments** (`frontend/index.html`, `frontend/css/styles.css`)
-   - Mapa zabírá 80% výšky obrazovky
-   - Chat/controls v dolní části (20%)
+   - [x] Mapa-first layout pro desktop i mobil
+   - [x] Chat/controls jako desktop sidebar + mobilní vysouvací panel
+
+4. **Status napojení mapy** (`frontend/js/map.js`)
+   - [x] Načítání `/api/stations/status`
+   - [x] Auto-refresh markerů online/offline
+   - [x] Tooltip a popup detail stanice
 
 ### Co se NEIMPLEMENTUJE:
 - ❌ Offline map tiles
 - ❌ Geolokace uživatele
-- ❌ Markery pro stanice
 - ❌ Interakce s mapou (kromě zoom/pan)
+
+### Otevřené body do dokončení Fáze 4:
+- ✅ Typové ikony markerů podle role/type
+- ✅ Absolutní timestamp poslední aktivity v popupu
+- ✅ Manuální test checklist pro mapový modul
+- ⏳ Finální manuální průchod desktop + mobil a zápis výsledků
 
 ### Testování:
 ```bash
@@ -260,6 +280,8 @@
 ---
 
 ## 📍 Fáze 5: Admin Panel + Stanice na mapě
+
+**Status:** ⏳ ČEKÁ (příprava scope po uzavření Fáze 4)
 
 **Cíl:** Vedoucí může spravovat 160+ komisařů a vidět je na mapě
 
@@ -400,6 +422,13 @@ PIN 1234 → Stanice TK-01 "Zatáčka u lesa"
 ---
 
 ## 📍 Fáze 6: Incident Reporting (Quick Actions)
+
+**Status:** 🔄 ČÁSTEČNĚ DODÁNO (12. července 2026)
+
+Již implementováno mimo plný scope fáze:
+- ✅ Quick action incident tlačítka (včetně akutního režimu)
+- ✅ Readiness gate: `RZ resume` je blokováno bez READY potvrzení
+- ✅ Dashboard vedení: stav gate + seznam chybějících READY stanic
 
 **Cíl:** Komisař může rychle nahlásit incident pomocí velkých tlačítek
 
@@ -607,13 +636,13 @@ PIN 1234 → Stanice TK-01 "Zatáčka u lesa"
 | 2 | Frontend MVP | 3-4h |
 | 3 | Heartbeat monitoring | 4-5h |
 | 4 | Mapa s tratí | 3-4h |
-| 5 | Stanice na mapě | 4-5h |
+| 5 | Admin panel + stanice | 8-10h |
 | 6 | Incident reporting | 4-5h |
 | 7 | PWA & Offline | 6-8h |
 | 8 | Latency detection | 3-4h |
 | 9 | GPS tracking | 4-5h |
 | 10 | Production polish | 6-8h |
-| **CELKEM** | | **41-54 hodin** |
+| **CELKEM** | | **45-59 hodin** |
 
 ## 🎯 Milestones
 
@@ -631,4 +660,5 @@ PIN 1234 → Stanice TK-01 "Zatáčka u lesa"
 3. **Testuj na mobilu** - Od Fáze 2 testuj i na skutečném mobilu
 4. **Dokumentuj problémy** - Když něco nefunguje, zapiš do ISSUES.md
 
-**Začínáme od Fáze 0. Ready?**
+**Aktuální priorita:** zavřít Fázi 4 (manuální checklist + E2E gate scénář),
+poté rozjet Fázi 5 v minimálním řezu (správa mapových podkladů + seznam komisařů).

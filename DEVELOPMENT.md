@@ -1,5 +1,19 @@
 # Development Guidelines - Rally Safety App
 
+## 📌 Aktuální kontext (12.7.2026)
+
+- Fáze 0-3 jsou dokončené.
+- Fáze 4 je ve stabilizaci UX (desktop + mobil).
+- Část Fáze 6 je již implementovaná (incident quick actions + readiness gate).
+- Před zahájením nové práce vždy zkontroluj `STATUS.md` a `ROADMAP.md`.
+
+## 🧭 Pravidlo dokumentace
+
+Po každé změně chování aplikace aktualizuj minimálně:
+- `README.md` (uživatelské a provozní chování)
+- `STATUS.md` (co je hotovo / co je další krok)
+- `ROADMAP.md` (stav fází a částečně dodané položky)
+
 ## 🎯 Základní principy
 
 ### 1. KISS (Keep It Simple, Stupid)
@@ -21,39 +35,49 @@
 rally-safety-app/
 ├── backend/
 │   ├── main.py                 # FastAPI entry point
-│   ├── requirements.txt        # Python dependencies
-│   ├── .env.example           # Environment variables template
 │   ├── api/
 │   │   ├── __init__.py
-│   │   ├── websocket.py       # WebSocket handlers
-│   │   └── health.py          # Health check endpoints
+│   │   ├── auth.py            # Login endpointy
+│   │   └── status.py          # Status + readiness endpointy
 │   ├── core/
 │   │   ├── __init__.py
 │   │   ├── config.py          # Configuration management
-│   │   └── connection_manager.py  # WebSocket connection pool
+│   │   ├── connection_manager.py  # WebSocket connection pool
+│   │   ├── event_logger.py    # JSONL event logging
+│   │   └── auth.py            # Auth manager
 │   ├── models/
 │   │   ├── __init__.py
+│   │   ├── auth.py            # Auth request/response models
 │   │   ├── message.py         # Message schemas
-│   │   └── station.py         # Station/User schemas
+│   │   ├── station.py         # Station schemas
+│   │   └── user.py            # User schemas
+│   ├── services/
+│   │   ├── __init__.py
+│   │   ├── vitality.py        # Heartbeat monitoring
+│   │   └── operations_state.py # Incident readiness gate
 │   └── tests/
 │       ├── __init__.py
-│       └── test_websocket.py
+│       ├── test_auth_manager.py
+│       ├── test_operations_state.py
+│       └── test_vitality.py
 ├── frontend/
 │   ├── index.html             # Main entry point
-│   ├── manifest.json          # PWA manifest
 │   ├── css/
 │   │   └── styles.css         # Mobile-first styles
 │   ├── js/
 │   │   ├── app.js            # Main app logic
-│   │   ├── map.js            # Map initialization & handling
+│   │   ├── auth.js           # Login logika
 │   │   ├── websocket.js      # WebSocket client
-│   │   └── offline.js        # Offline queue management
-│   └── service-worker.js      # PWA offline support
+│   │   ├── map.js            # Map initialization & handling
+│   │   └── offline.js        # (planned) Offline queue management
+│   └── service-worker.js      # (planned) PWA offline support
 ├── data/
+│   ├── pins.json              # Perzistentní PIN data
 │   └── example-track.geojson  # Sample track data
 ├── docs/
-│   ├── API.md                 # API documentation
-│   └── ARCHITECTURE.md        # Architecture decisions
+│   └──                        # Projektové doplňkové dokumenty
+├── pyproject.toml             # UV/Python metadata
+├── requirements.txt           # Export pro pip uživatele
 └── README.md
 ```
 
@@ -264,17 +288,14 @@ chore: update dependencies
 
 ### Backend (Python)
 ```bash
-# Vytvořit virtual environment
-python -m venv venv
-.\.venv\Scripts\activate  # Windows
-source .venv/bin/activate  # Linux/Mac
+# Doporučený workflow (UV)
+uv sync
 
-# Install dependencies
-pip install -r requirements.txt
+# Přidání závislosti
+uv add package-name
 
-# Add new dependency
-pip install package-name
-pip freeze > requirements.txt
+# Export requirements.txt pro pip uživatele
+uv export --format requirements-txt --no-hashes --no-dev -o requirements.txt
 ```
 
 ### Základní dependencies

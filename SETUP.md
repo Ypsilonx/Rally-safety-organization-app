@@ -1,19 +1,43 @@
 # Rally Safety App - Setup Guide
 
+> ⚠️ Poznámka k 12.7.2026:
+> Tento dokument obsahuje i historické kroky z Fáze 0 (zakládání projektu od nuly).
+> Pro běžnou práci na existujícím repozitáři používej primárně README (Quick Start) + STATUS + ROADMAP.
+
 ## 🚀 Jak začít - Krok za krokem
 
 Tento dokument tě provede kompletním setupem projektu od nuly.
+
+### Rychlý setup pro současný stav projektu
+
+```powershell
+# 1) V kořeni projektu
+uv sync
+
+# 2) Spusť backend
+uv run uvicorn backend.main:app --reload --host 0.0.0.0 --port 8000
+
+# 3) V druhém terminálu spusť frontend
+python -m http.server 8080 --directory frontend
+```
+
+Poznámka: v tomto režimu může frontend logovat 404 pro `/data/example-track.geojson`.
+Jde o neblokující fallback (mapa použije interní vzorovou trať).
+Pokud chceš čistý log bez 404, spusť server nad kořenem repozitáře a otevři
+`http://127.0.0.1:8080/frontend/index.html`.
+
+Alternativa ve VS Code: `Tasks: Run Task` -> `UV: Start App`.
 
 ---
 
 ## 📋 Prerequisites (Co potřebuješ mít nainstalované)
 
-### 1. Python 3.11+
+### 1. Python 3.13+
 ```powershell
 # Zkontroluj verzi
 python --version
 
-# Mělo by být: Python 3.11.x nebo vyšší
+# Mělo by být: Python 3.13.x nebo vyšší
 ```
 
 Pokud nemáš: [Python Download](https://www.python.org/downloads/)

@@ -1,8 +1,22 @@
 # Rally Safety App - Technická Specifikace
 
-**Verze:** 0.1.0  
-**Datum:** 15. února 2026  
-**Status:** 🚧 Ve vývoji
+**Verze:** 0.5.1-dev  
+**Datum:** 12. července 2026  
+**Status:** 🚧 Ve vývoji (Fáze 4 aktivní, Fáze 6 částečně dodaná)
+
+---
+
+## 🧾 Snapshot implementace (12.7.2026)
+
+- ✅ 2-tier autentizace (vedení přes heslo, komisaři přes PIN)
+- ✅ WebSocket komunikace + selective broadcast
+- ✅ Heartbeat monitoring + endpointy stavu stanic
+- ✅ Mapa s tratí, markery stanic, popup detail, role ikony
+- ✅ Incident quick actions + readiness gate pro `RZ resume`
+- ✅ Lokální perzistence chat/info/varování po odhlášení
+- 🔄 UX stabilizace desktop/mobil (dolaďování podle field feedbacku)
+- ⏳ PWA offline queue + background sync
+- ⏳ GPS tracking
 
 ---
 
@@ -104,10 +118,10 @@ Zajistit **v reálném čase** přehled o situaci na trati, poloze a stavu jedno
 | **Storage** | IndexedDB | Fronta zpráv pro offline messaging |
 | **Sync** | Background Sync API | Automatické odeslání dat při obnovení signálu |
 
-**Offline resilience:**
-- ✅ Service Workers zajišťují dostupnost mapy i bez internetu
-- ✅ IndexedDB (Outbox) ukládá zprávy do fronty při výpadku
-- ✅ Background Sync odesílá zprávy automaticky po obnovení signálu
+**Offline resilience (plán):**
+- ⏳ Service Workers pro dostupnost mapy i bez internetu
+- ⏳ IndexedDB (Outbox) pro frontu zpráv při výpadku
+- ⏳ Background Sync pro automatické odeslání po obnovení signálu
 
 ### Backend (Python)
 
@@ -409,6 +423,6 @@ rally-safety-app/
 
 ---
 
-**Verze dokumentu:** 1.0  
-**Poslední aktualizace:** 15. února 2026  
-**Status:** ✅ Fáze 0-1 dokončeny, Fáze 2 připravena
+**Verze dokumentu:** 1.1  
+**Poslední aktualizace:** 12. července 2026  
+**Status:** ✅ Fáze 0-3 dokončeny, 🔄 Fáze 4 aktivní, 🔄 část Fáze 6 dodána

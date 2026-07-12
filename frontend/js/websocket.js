@@ -6,6 +6,7 @@
 const WS_BASE_URL = 'ws://localhost:8000';
 const RECONNECT_DELAY = 3000; // 3 seconds
 const MAX_RECONNECT_ATTEMPTS = 5;
+const HEARTBEAT_INTERVAL_MS = 30000; // 30 seconds
 
 /**
  * WebSocket Client Manager
@@ -16,6 +17,7 @@ class WebSocketClient {
         this.isConnected = false;
         this.reconnectAttempts = 0;
         this.reconnectTimer = null;
+        this.heartbeatTimer = null;
         this.messageQueue = [];
         this.eventHandlers = {
             onMessage: [],
@@ -62,6 +64,7 @@ class WebSocketClient {
         }
         this.isConnected = false;
         this.clearReconnectTimer();
+        this.stopHeartbeat();
     }
 
     /**
@@ -134,6 +137,9 @@ class WebSocketClient {
         
         // Update status indicator
         this.notifyStatusChange('online');
+
+        // Keep station presence alive on server.
+        this.startHeartbeat();
         
         // Send queued messages
         this.flushMessageQueue();
@@ -187,6 +193,13 @@ class WebSocketClient {
         console.log('WebSocket closed:', event.code, event.reason);
         this.isConnected = false;
         this.ws = null;
+        this.stopHeartbeat();
+
+        // Authentication failures require fresh login (e.g., server restart invalidated session).
+        if (event.code === 1008) {
+            this.notifyStatusChange('auth_failed');
+            return;
+        }
         
         // Update status
         this.notifyStatusChange('offline');
@@ -227,6 +240,42 @@ class WebSocketClient {
             clearTimeout(this.reconnectTimer);
             this.reconnectTimer = null;
         }
+    }
+
+    /**
+     * Start periodic heartbeat sending.
+     */
+    startHeartbeat() {
+        this.stopHeartbeat();
+        this.sendHeartbeat();
+        this.heartbeatTimer = setInterval(() => {
+            this.sendHeartbeat();
+        }, HEARTBEAT_INTERVAL_MS);
+    }
+
+    /**
+     * Stop periodic heartbeat sending.
+     */
+    stopHeartbeat() {
+        if (this.heartbeatTimer) {
+            clearInterval(this.heartbeatTimer);
+            this.heartbeatTimer = null;
+        }
+    }
+
+    /**
+     * Send one heartbeat ping to backend.
+     */
+    sendHeartbeat() {
+        if (!this.isConnected || !this.ws) {
+            return;
+        }
+
+        this.sendMessage({
+            message_type: 'heartbeat',
+            content: '',
+            created_at: new Date().toISOString(),
+        });
     }
 
     /**

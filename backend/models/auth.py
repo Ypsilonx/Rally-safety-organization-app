@@ -25,6 +25,7 @@ class LoginVedeniResponse(BaseModel):
     user_id: str
     name: str
     role: str
+    phone: Optional[str] = None
     message: str = "Login successful"
 
 
@@ -43,10 +44,13 @@ class LoginKomisarRequest(BaseModel):
 class LoginKomisarResponse(BaseModel):
     """Response after successful komisař login."""
     success: bool
+    user_id: str
     pin_code: str
     name: str
     role: str
     station_id: Optional[str] = None
+    vedeni_name: Optional[str] = None
+    vedeni_phone: Optional[str] = None
     message: str = "Login successful"
 
 

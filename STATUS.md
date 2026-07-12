@@ -1,20 +1,29 @@
 # Project Status & Progress Tracking
 
-**Last Updated:** 21. února 2026  
-**Current Phase:** Fáze 2 ✅ DOKONČENO  
-**Next Phase:** Fáze 3 - Heartbeat & Connection Monitoring
+**Last Updated:** 12. července 2026  
+**Current Phase:** Fáze 4 🔄 IN PROGRESS  
+**Next Phase:** Dokončení Fáze 4 + definice MVP řezu Fáze 5 (admin panel, map podklady, seznam komisařů)
+
+> Tento soubor je hlavní zdroj pravdy pro aktuální stav implementace.
+
+## 📌 Executive Summary
+
+- ✅ Dokončeno: Fáze 0-3
+- 🔄 Aktivně rozpracováno: Fáze 4 (UI/UX stabilizace desktop + mobil)
+- 🔄 Částečně dodáno z Fáze 6: incident reporting + readiness gate
+- ⏳ Další priorita: formální E2E průchod gate scénáře + uzavření Fáze 4 test checklistu
 
 ---
 
 ## 📊 Overall Progress
 
 ```
-███████████████░░░░░░░░░░░░░░░░░░░░░░░░░░░ 30% (3/10 phases complete)
+████████████████████████░░░░░░░░░░░░░░░░░░ 50% (5/10 phases complete)
 ```
 
-**Completed Phases:** 3/10  
-**Time Invested:** ~10.5 hours  
-**Estimated Remaining:** 34-46 hours
+**Completed Phases:** 5/10  
+**Time Invested:** ~14.5 hours  
+**Estimated Remaining:** 31-45 hours
 
 ---
 
@@ -162,7 +171,20 @@ frontend/
 
 ---
 
-## ⏳ Fáze 3-10: Pending
+## ✅ Fáze 3: Heartbeat & Connection Monitoring (DOKONČENO)
+
+**Status:** ✅ Complete  
+**Completed:** 12. července 2026
+
+### Deliverables:
+✅ Backend vitality service + timeout kontrola  
+✅ `GET /api/stations/status` endpoint  
+✅ Frontend heartbeat každých 30s  
+✅ Unit testy vitality (passing)
+
+---
+
+## ⏳ Fáze 4-10: Pending / In Progress
 
 _Details in [ROADMAP.md](ROADMAP.md)_
 
@@ -173,6 +195,7 @@ _Details in [ROADMAP.md](ROADMAP.md)_
 | Milestone | Phase | Target | Status |
 |-----------|-------|--------|--------|
 | **M1: Working Chat** | Po Fázi 2 | 21.2.2026 | ✅ Complete |
+| **M1.5: Heartbeat Online/Offline** | Po Fázi 3 | 12.7.2026 | ✅ Complete |
 | **M2: Incident System** | Po Fázi 6 | TBD | ⏳ Pending |
 | **M3: PWA Ready** | Po Fázi 7 | TBD | ⏳ Pending |
 | **M4: Production** | Po Fázi 10 | TBD | ⏳ Pending |
@@ -181,11 +204,65 @@ _Details in [ROADMAP.md](ROADMAP.md)_
 
 ## 🐛 Active Issues
 
-_Žádné aktivní issues_
+- ℹ️ Neurgentní: při frontend serveru nad `frontend/` se může objevit 404 pro `/data/example-track.geojson`.
+    Aplikace používá fallback trať, funkčnost mapy tím není blokovaná.
 
 ---
 
 ## 📝 Recent Changes
+
+### 2026-07-12 (Fáze 4 - iterace 1)
+- 🔄 Zahájena Fáze 4: Leaflet mapa integrovaná do hlavního UI
+- ✅ Frontend: přidán `frontend/js/map.js` (inicializace mapy + načtení trati)
+- ✅ Frontend: layout upraven na map-first (mapa + chat)
+- ✅ Data: přidán `data/example-track.geojson` se vzorovou tratí
+- ✅ Frontend: mapa se inicializuje po loginu a reaguje na změnu layoutu
+- ✅ Frontend: markery stanic s online/offline barvou a popup detailem
+- ✅ Frontend: mapa napojena na `/api/stations/status` s auto-refresh
+- ✅ Frontend: komunikační panel přeuspořádán (desktop sidebar + mobilní slide panel)
+- ✅ Frontend: obnoven oddělený info kanál pro systémové/problémové zprávy
+- ✅ Dashboard: odstraněn počet zpráv, metrika stanic je online/total
+- ✅ Dashboard vedení: přidána předdefinovaná krizová tlačítka pro RZ stav
+- ✅ Incident flow: komisař zadává detail problému, vedení dostává varování + kontakt
+- ✅ Kontakty: komisař vidí telefon na vedoucího, vedení vidí telefon odesílatele incidentu
+- ✅ Chat: přidán tagging `@jmeno` a `#stanice` s našeptávačem a zvýrazněním tagů
+- ✅ Chat refinement: validní zvýraznění jen pro existující tagy + klik na `#stanice` fokusuje mapu
+- ✅ Mapa: marker ikony podle role/type (S/F/T/C/P/B/Z/V/+)
+- ✅ Mapa: popup obsahuje i absolutní timestamp poslední aktivity
+- ✅ Dokumentace: dopsán manuální map checklist pro Fázi 4
+- ✅ Incident gate: backend readiness state + blokace `RZ resume` bez READY potvrzení
+- ✅ Dashboard vedení: zobrazení stavu gate (`otevřeno` / `čeká READY X/Y`)
+- ✅ Dashboard vedení: seznam konkrétních stanic, kterým chybí READY
+- ✅ Desktop UX: komunikační panel je fixně vpravo přes celou výšku, admin panel má menší footprint
+- ✅ Hotfix: obnovena viditelnost admin panelu pro vedoucí role po desktop layout změně
+- ✅ Vedeni desktop: admin panel převeden na 3 sloupce (status, akce, varování)
+- ✅ Hotfix 2: admin panel opět renderuje sloupce vedle sebe (odstraněn inline display override)
+- ✅ Komisař: spodní quick panel je fixní a nepřekrývá ho chat panel
+- ✅ Hotfix 2: komisař quick panel stabilizován (bez pravého zarovnání a bez překrytí mapy)
+- ✅ Komisař: přidáno `🆘 Akutní` tlačítko bez potřeby textového vstupu
+- ✅ UX: odstraněny prázdné systémové zprávy v chatu
+- ✅ UX: horní lišta zobrazuje živý stav RZ + mapa mění warning border dle stavu
+- ✅ UX hotfix: warning border mapy je overlay nad Leafletem (už se neschová pod mapu)
+- ✅ Mapa: incident stanice aktivuje alert marker (červený pulz + vlaječka `!`)
+- ✅ UX: toast notifikace přesunuty doprostřed nad mapu
+- ✅ Incident feed: nejnovější varování je připnuté nahoře, historie je scroll pod ním
+- ✅ Perzistence UI: chat/info/varování se obnoví po odhlášení a znovupřihlášení
+
+## 💡 Backlog nápadů
+
+1. Ready gate pro restart RZ: po incidentu automaticky přepnout stanice na `not_ready`.
+2. RZ lze obnovit až po potvrzení `ready` ze všech klíčových pozic.
+3. Dashboard vedení: samostatný seznam pozic, které nepotvrdily připravenost.
+4. Dashboard vedení: rozšířené workflow pro incident -> potvrzení řešení -> návrat do provozu.
+
+### 2026-07-12
+- 🔄 **Fáze 3 zahájena** - Heartbeat & vitality monitoring implementován
+- ✅ Backend: nový vitality service `backend/services/vitality.py`
+- ✅ Backend: nový endpoint `GET /api/stations/status`
+- ✅ Backend: WebSocket zpracování `message_type=heartbeat` bez broadcastu
+- ✅ Frontend: automatický heartbeat každých 30s ve WebSocket klientovi
+- ✅ Testy: přidány unit testy vitality monitoru (`backend/tests/test_vitality.py`)
+- ✅ Testy: celkem 4/4 passing (`pytest backend/tests -v`)
 
 ### 2026-02-21
 - ✅ **Fáze 2 dokončena** - Frontend MVP plně funkční!
@@ -221,10 +298,21 @@ _Žádné aktivní issues_
 
 ## 🎯 Next Actions
 
-1. **Okamžitě:** Začít Fázi 3 - Heartbeat monitoring
-2. Implementovat vitality tracking na backendu
-3. Frontend: Automatický heartbeat každých 30s
-4. Status endpoint pro offline detection
+1. Zavřít Fázi 4 manuálním test průchodem desktop + mobil a zapsat výsledky
+2. Ověřit E2E scénář gate (incident -> READY potvrzení -> resume)
+3. Specifikovat minimální scope Fáze 5: správa mapových podkladů + seznam komisařů
+4. Rozsekat Fázi 5 na API-first inkrementy (import mapy, CRUD komisařů, přiřazení ke stanici)
+
+---
+
+## 🚦 Go-Live Minimum Checklist
+
+1. Dokumentace konzistentní: ROADMAP, STATUS, README mají stejný stav fází.
+2. Mapa: role/type ikony, absolutní poslední aktivita, otestováno desktop + mobil.
+3. Incident workflow: definovaný postup `incident -> not_ready -> ready potvrzení -> resume`.
+4. Reconnect/auth: ověřen scénář restartu backendu a nuceného reloginu.
+5. Security baseline: CORS, rate limit zpráv, vstupní sanitizace.
+6. Testy: unit + základní integrační scénáře před každou rally.
 
 ---
 
@@ -235,9 +323,9 @@ _Žádné aktivní issues_
 | Fáze 0 | 1-2h | ~2h | On track ✅ |
 | Fáze 1 | 4-5h | ~4.5h | On track ✅ |
 | Fáze 2 | 3-4h | ~4h | On track ✅ |
-| Fáze 3 | 4-5h | - | - |
+| Fáze 3 | 4-5h | ~4h | On track ✅ |
 
-**Total:** 10.5h / ~50h estimated
+**Total:** 14.5h / ~50h estimated
 
 ---
 

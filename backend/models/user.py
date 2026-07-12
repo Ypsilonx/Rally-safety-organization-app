@@ -2,7 +2,7 @@
 
 from enum import Enum
 from typing import Optional
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, ConfigDict, Field
 
 
 class UserRole(str, Enum):
@@ -27,8 +27,8 @@ class User(BaseModel):
     pin_code: Optional[str] = Field(None, description="4-digit PIN for komisaři")
     phone: Optional[str] = Field(None, description="Phone number (optional)")
     
-    class Config:
-        json_schema_extra = {
+    model_config = ConfigDict(
+        json_schema_extra={
             "example": {
                 "user_id": "user_001",
                 "name": "Jan Novák",
@@ -38,6 +38,7 @@ class User(BaseModel):
                 "phone": "+420123456789"
             }
         }
+    )
 
 
 class KomisarAccess(BaseModel):
@@ -49,8 +50,8 @@ class KomisarAccess(BaseModel):
     station_id: Optional[str] = None
     created_at: Optional[str] = None
     
-    class Config:
-        json_schema_extra = {
+    model_config = ConfigDict(
+        json_schema_extra={
             "example": {
                 "pin_code": "1234",
                 "name": "Jan Novák",
@@ -59,6 +60,7 @@ class KomisarAccess(BaseModel):
                 "station_id": "TK-01"
             }
         }
+    )
 
 
 # Hardcoded vedení credentials for MVP (in real app, this would be in database)
@@ -66,6 +68,7 @@ VEDENI_CREDENTIALS = {
     "admin": {
         "password_hash": "$2b$12$/Hja06MPyPq3bnBF64VusuQ5OdzvYzduaqUCXWCXfqe1wGQkIwby6",  # "demo123"
         "name": "Vedoucí RZ",
-        "role": UserRole.VEDOUCI
+        "role": UserRole.VEDOUCI,
+        "phone": "+420777123456",
     }
 }

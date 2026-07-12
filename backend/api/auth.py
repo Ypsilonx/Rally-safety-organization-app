@@ -48,7 +48,8 @@ async def login_vedeni(request: LoginVedeniRequest):
     session_token = auth_manager.create_session(
         username=request.username,
         name=user_data["name"],
-        role=user_data["role"]
+        role=user_data["role"],
+        phone=user_data.get("phone"),
     )
     
     event_logger.log_login(
@@ -65,6 +66,7 @@ async def login_vedeni(request: LoginVedeniRequest):
         user_id=request.username,
         name=user_data["name"],
         role=user_data["role"].value,
+        phone=user_data.get("phone"),
         message="Login successful"
     )
 
@@ -108,10 +110,13 @@ async def login_komisar(request: LoginKomisarRequest):
     
     return LoginKomisarResponse(
         success=True,
+        user_id=request.pin_code,
         pin_code=request.pin_code,
         name=komisar.name,
         role=komisar.role.value,
         station_id=komisar.station_id,
+        vedeni_name="Vedoucí RZ",
+        vedeni_phone="+420777123456",
         message="Login successful"
     )
 

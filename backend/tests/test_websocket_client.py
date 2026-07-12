@@ -6,8 +6,8 @@ import sys
 import websockets
 
 
-async def test_websocket_connection(pin_code: str):
-    """Test WebSocket connection and messaging.
+async def run_websocket_connection_test(pin_code: str):
+    """Run manual WebSocket connection and messaging check.
     
     Args:
         pin_code: 4-digit PIN code for authentication
@@ -63,4 +63,4 @@ if __name__ == "__main__":
     print("=" * 60)
     print(f"PIN: {pin}")
     print("=" * 60)
-    asyncio.run(test_websocket_connection(pin))
+    asyncio.run(run_websocket_connection_test(pin))

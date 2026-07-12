@@ -2,7 +2,7 @@
 
 import json
 import secrets
-from datetime import datetime, timedelta
+from datetime import UTC, datetime, timedelta
 from pathlib import Path
 from typing import Optional
 
@@ -94,11 +94,12 @@ class AuthManager:
             return {
                 "username": username,
                 "name": user_data["name"],
-                "role": user_data["role"]
+                "role": user_data["role"],
+                "phone": user_data.get("phone"),
             }
         return None
     
-    def create_session(self, username: str, name: str, role: UserRole) -> str:
+    def create_session(self, username: str, name: str, role: UserRole, phone: Optional[str] = None) -> str:
         """Create session token for vedení user.
         
         Args:
@@ -114,7 +115,8 @@ class AuthManager:
             "username": username,
             "name": name,
             "role": role,
-            "created_at": datetime.utcnow()
+            "phone": phone,
+            "created_at": datetime.now(UTC)
         }
         return session_token
     
@@ -133,7 +135,7 @@ class AuthManager:
         session_data = self.active_sessions[session_token]
         # Check if session expired (8 hours default)
         created_at = session_data["created_at"]
-        if datetime.utcnow() - created_at > timedelta(hours=8):
+        if datetime.now(UTC) - created_at > timedelta(hours=8):
             del self.active_sessions[session_token]
             return None
         
@@ -175,7 +177,7 @@ class AuthManager:
             role=role,
             phone=phone,
             station_id=station_id,
-            created_at=datetime.utcnow().isoformat()
+            created_at=datetime.now(UTC).isoformat()
         )
         
         self.komisar_pins[pin_code] = komisar

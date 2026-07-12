@@ -81,6 +81,7 @@ const Auth = {
                 user_id: data.user_id,
                 name: data.name,
                 role: data.role,
+                phone: data.phone || null,
                 session_token: data.session_token,
                 login_type: 'vedeni',
                 logged_in_at: new Date().toISOString(),
@@ -120,10 +121,12 @@ const Auth = {
             
             // Save user to localStorage
             const user = {
-                user_id: data.user_id,
+                user_id: data.user_id || pin,
                 name: data.name,
                 role: data.role,
                 station_id: data.station_id,
+                vedeni_name: data.vedeni_name || 'Vedoucí RZ',
+                vedeni_phone: data.vedeni_phone || '+420777123456',
                 pin_code: pin,
                 login_type: 'komisar',
                 logged_in_at: new Date().toISOString(),

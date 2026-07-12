@@ -8,12 +8,15 @@ from fastapi import FastAPI, WebSocket, WebSocketDisconnect, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 
 from backend.api.auth import router as auth_router
+from backend.api.status import router as status_router
 from backend.core.auth import auth_manager
 from backend.core.config import get_settings
 from backend.core.connection_manager import connection_manager
 from backend.core.event_logger import event_logger
 from backend.models.message import StationMessage, MessagePriority
-from backend.models.user import UserRole
+from backend.models.message import MessageType
+from backend.services.operations_state import operations_state
+from backend.services.vitality import vitality_monitor
 
 # Initialize FastAPI app
 settings = get_settings()
@@ -34,11 +37,14 @@ app.add_middleware(
 
 # Include authentication routes
 app.include_router(auth_router)
+app.include_router(status_router)
 
 
 @app.on_event("startup")
 async def startup_event():
     """Load existing PINs and display credentials on server startup."""
+    await vitality_monitor.start()
+
     # Load existing PINs from data/pins.json (persistent storage)
     all_pins = auth_manager.list_all_pins()
     
@@ -63,6 +69,12 @@ async def startup_event():
     print(f"✅ Server běží na http://{settings.HOST}:{settings.PORT}")
     print(f"📊 Načteno PINů: {len(all_pins)}")
     print("=" * 60)
+
+
+@app.on_event("shutdown")
+async def shutdown_event():
+    """Gracefully stop background services."""
+    await vitality_monitor.stop()
 
 
 @app.get("/")
@@ -111,7 +123,8 @@ async def websocket_endpoint(websocket: WebSocket, auth_identifier: str):
             "name": komisar.name,
             "role": komisar.role.value,
             "station_id": komisar.station_id,
-            "auth_id": auth_identifier
+            "auth_id": auth_identifier,
+            "phone": komisar.phone,
         }
     else:
         # Try session token (vedení)
@@ -122,7 +135,8 @@ async def websocket_endpoint(websocket: WebSocket, auth_identifier: str):
                 "name": session_data["name"],
                 "role": session_data["role"].value,
                 "station_id": None,
-                "auth_id": auth_identifier
+                "auth_id": auth_identifier,
+                "phone": session_data.get("phone"),
             }
     
     # Reject if neither authentication method worked
@@ -143,6 +157,14 @@ async def websocket_endpoint(websocket: WebSocket, auth_identifier: str):
         role=user_data["role"],
         station_id=user_data["station_id"]
     )
+
+    await vitality_monitor.mark_seen(
+        connection_id=user_data["auth_id"],
+        station_id=user_data["station_id"],
+        name=user_data["name"],
+        role=user_data["role"],
+    )
+    await operations_state.ensure_station(user_data["station_id"], user_data["name"])
     
     # Send welcome message
     welcome_msg = {
@@ -169,8 +191,71 @@ async def websocket_endpoint(websocket: WebSocket, auth_identifier: str):
                     message_type=message_data.get("message_type", "chat"),
                     priority=message_data.get("priority", "normal"),
                     content=message_data.get("content", ""),
-                    target_roles=message_data.get("target_roles")
+                    target_roles=message_data.get("target_roles"),
+                    operation_command=message_data.get("operation_command"),
+                    readiness_state=message_data.get("readiness_state"),
                 )
+
+                await vitality_monitor.mark_seen(
+                    connection_id=user_data["auth_id"],
+                    station_id=user_data["station_id"],
+                    name=user_data["name"],
+                    role=user_data["role"],
+                )
+                await operations_state.ensure_station(user_data["station_id"], user_data["name"])
+
+                if station_message.readiness_state == "ready":
+                    await operations_state.set_station_ready(user_data["station_id"], user_data["name"])
+                elif station_message.readiness_state == "not_ready":
+                    await operations_state.set_station_not_ready(user_data["station_id"], user_data["name"])
+
+                if station_message.message_type == MessageType.INCIDENT:
+                    await operations_state.activate_incident_mode()
+
+                if station_message.operation_command in {"rz_stop", "rz_hold"}:
+                    await operations_state.activate_incident_mode()
+
+                if station_message.operation_command == "rz_resume":
+                    can_resume, missing_stations = await operations_state.can_resume()
+                    if not can_resume:
+                        blocked_payload = {
+                            "type": "error",
+                            "message": "RZ nelze obnovit: chybí READY potvrzení.",
+                            "details": {
+                                "missing_stations": missing_stations,
+                            },
+                            "timestamp": datetime.utcnow().isoformat(),
+                        }
+                        await websocket.send_text(json.dumps(blocked_payload, ensure_ascii=False))
+
+                        gate_notice = {
+                            "message_id": f"gate_{datetime.utcnow().timestamp()}",
+                            "timestamp": datetime.utcnow().isoformat(),
+                            "sender": {
+                                "user_id": "system",
+                                "name": "Systém",
+                                "role": "system",
+                                "phone": None,
+                            },
+                            "message_type": MessageType.SYSTEM.value,
+                            "priority": MessagePriority.HIGH.value,
+                            "content": (
+                                "⛔ RZ nelze obnovit. Chybí READY potvrzení: "
+                                f"{', '.join(missing_stations) if missing_stations else 'N/A'}"
+                            ),
+                            "created_at": datetime.utcnow().isoformat(),
+                        }
+                        await connection_manager.broadcast_to_roles(
+                            json.dumps(gate_notice, ensure_ascii=False),
+                            ["vedouci", "zastupce"],
+                        )
+                        continue
+
+                    await operations_state.resolve_incident_mode()
+
+                if station_message.message_type == MessageType.HEARTBEAT:
+                    # Heartbeats update liveness state only and are not broadcast.
+                    continue
                 
                 # Log the message
                 event_logger.log_message(
@@ -189,12 +274,16 @@ async def websocket_endpoint(websocket: WebSocket, auth_identifier: str):
                     "sender": {
                         "user_id": user_data["auth_id"],
                         "name": user_data["name"],
-                        "role": user_data["role"]
+                        "role": user_data["role"],
+                        "station_id": user_data["station_id"],
+                        "phone": user_data.get("phone"),
                     },
                     "message_type": station_message.message_type.value,
                     "priority": station_message.priority.value,
                     "content": station_message.content,
-                    "created_at": station_message.created_at.isoformat()
+                    "created_at": station_message.created_at.isoformat(),
+                    "operation_command": station_message.operation_command,
+                    "readiness_state": station_message.readiness_state,
                 }
                 broadcast_json = json.dumps(broadcast_data, ensure_ascii=False)
                 
@@ -241,6 +330,7 @@ async def websocket_endpoint(websocket: WebSocket, auth_identifier: str):
     
     except WebSocketDisconnect:
         connection_manager.disconnect(user_data["auth_id"])
+        await vitality_monitor.mark_disconnected(user_data["auth_id"])
 
 
 @app.get("/api/stats")

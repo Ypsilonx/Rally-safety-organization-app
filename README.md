@@ -4,27 +4,34 @@
 
 ## 📊 Current Status
 
-**Aktuální fáze:** ✅ Fáze 0 - DOKONČENO  
-**Další fáze:** Fáze 1 - Backend MVP (WebSocket Server)  
-**Celkový pokrok:** 5% (1/10 fází)
+**Aktuální fáze:** 🔄 Fáze 4 - IN PROGRESS (UX stabilizace + manuální testy)  
+**Další fáze:** Uzavření Fáze 4 + upřesnění MVP řezu Fáze 5 (admin panel, map podklady, seznam komisařů)  
+**Celkový pokrok:** 50% (5/10 fází dokončeno)
+
+### Stav implementace k 12.7.2026
+
+- ✅ Hotovo: Fáze 0, 1, 2, 3
+- 🔄 Rozpracováno: Fáze 4 (mapa + desktop/mobile UX refinements)
+- 🔄 Částečně dodáno z Fáze 6: incident quick actions + gate READY/NOT_READY
+- ⏳ Čeká: Fáze 5, 7, 8, 9, 10
 
 ---
 
 ## 🎯 O projektu
 
-Rally Safety App zajišťuje real-time přehled o situaci na trati, poloze a stavu jednotlivých stanovišť traťových komisařů během rally soutěží. Aplikace funguje i offline díky PWA technologii.
+Rally Safety App zajišťuje real-time přehled o situaci na trati a stavu jednotlivých stanovišť traťových komisařů během rally soutěží.
 
 ### Klíčové funkce:
-- � **2-tier authentication** (vedení: heslo, komisaři: PIN kód)
+- ✅ **2-tier authentication** (vedení: heslo, komisaři: PIN kód)
 - 👥 **Správa 160+ komisařů** s různými rolemi
-- 🗺️ **Live mapa** s pozicemi všech stanovišť
-- 📡 **Real-time komunikace** přes WebSockets (selective broadcast)
-- 🔄 **Dynamické přeřazování** postů během závodu
-- 🔴 **Rychlé incident reporting** s prioritizací
-- 📴 **Offline mode** s automatickou synchronizací
-- ⏱️ **Heartbeat monitoring** (detekce offline stanic)
-- 📍 **GPS tracking** komisařů v reálném čase
-- 📊 **Event logging** pro post-race analýzu
+- ✅ **Live mapa** s tratí + stavem stanic
+- ✅ **Real-time komunikace** přes WebSockets (selective broadcast)
+- ✅ **Incident gate** (`RZ resume` až po READY potvrzeních)
+- ✅ **Heartbeat monitoring** (detekce offline stanic)
+- ✅ **Event logging** pro post-race analýzu
+- ⏳ **Offline mode (PWA queue + sync)**
+- ⏳ **GPS tracking** komisařů v reálném čase
+- ⏳ **Plná správa stanic a přiřazení osob** (Fáze 5)
 
 ---
 
@@ -71,6 +78,28 @@ python -m http.server 8080 --directory frontend
 
 Frontend běží na: `http://localhost:8080`
 
+Poznámka: při tomto režimu může log frontendu obsahovat 404 pro `/data/example-track.geojson`.
+Je to neblokující fallback (mapa použije interní vzorovou trať). Pokud chceš čistý log bez 404,
+spouštěj server z kořene repozitáře a frontend otevři přes `/frontend/index.html`.
+
+### VS Code - One Click Start (UV)
+Pro rychlé spuštění bez ručního otevírání více terminálů použij tasky ve VS Code:
+
+1. Otevři Command Palette (`Ctrl+Shift+P`)
+2. Zvol `Tasks: Run Task`
+3. Spusť `UV: Start App`
+
+To současně spustí:
+- backend na `http://127.0.0.1:8000`
+- frontend na `http://127.0.0.1:8080`
+
+Další tasky:
+- `UV: Backend` (jen backend)
+- `UV: Frontend` (jen frontend)
+- `UV: Tests` (backend testy)
+
+Stop: `Ctrl+Shift+P` → `Tasks: Terminate Task` (nebo `Terminate All Tasks`).
+
 ---
 
 ## 📁 Struktura projektu
@@ -111,18 +140,18 @@ rally-safety-app/
 | Fáze | Popis | Status | Čas |
 |------|-------|--------|-----|
 | 0 | Příprava projektu | ✅ Hotovo | 1-2h |
-| 1 | Backend MVP (WS + Auth + Logging) | 🔄 Další | 4-5h |
-| 2 | Frontend (2-tier Login + Chat) | ⏳ Čeká | 4-5h |
-| 3 | Heartbeat monitoring | ⏳ Čeká | 4-5h |
-| 4 | Mapa s Leaflet | ⏳ Čeká | 3-4h |
-| 5 | Admin Panel + Stanice | ⏳ Čeká | 6-8h |
-| 6 | Incident reporting | ⏳ Čeká | 4-5h |
+| 1 | Backend MVP (WS + Auth + Logging) | ✅ Hotovo | 4-5h |
+| 2 | Frontend (2-tier Login + Chat) | ✅ Hotovo | 4-5h |
+| 3 | Heartbeat monitoring | ✅ Hotovo | 4-5h |
+| 4 | Mapa s Leaflet | 🔄 Probíhá | 3-4h |
+| 5 | Admin Panel + Stanice | ⏳ Čeká | 8-10h |
+| 6 | Incident reporting | 🔄 Částečně hotovo | 4-5h |
 | 7 | PWA & Offline mode | ⏳ Čeká | 6-8h |
 | 8 | Latency detection + GPS batching | ⏳ Čeká | 4-5h |
 | 9 | GPS tracking | ⏳ Čeká | 4-5h |
 | 10 | Production polish | ⏳ Čeká | 6-8h |
 
-**Celkový odhad:** 47-62 hodin čistého kódování
+**Celkový odhad:** 45-59 hodin čistého kódování
 
 ---
 
@@ -137,10 +166,49 @@ uv run pytest
 pytest backend/tests/ -v
 ```
 
+### Station Status API (heartbeat monitoring)
+```powershell
+# Přehled online/offline stavů stanic
+Invoke-RestMethod http://localhost:8000/api/stations/status
+
+# Incident gate readiness snapshot
+Invoke-RestMethod http://localhost:8000/api/stations/readiness
+```
+
 ### Frontend Testing
 - Chrome DevTools → Device Emulation
 - Network tab → Offline mode testing
 - Real device testing (Android/iOS)
+- Ověř mapu: po loginu se zobrazí Leaflet mapa s červeně vykreslenou tratí
+- Ověř markery: mapa načte stav ze `/api/stations/status` a markery mění barvu online/offline
+- Incident na stanici: marker přepne do alert režimu (červený pulz + vlaječka `!`)
+- Klik na marker zobrazí detail stanice (ID, role, počet připojení, poslední aktivita)
+- Desktop: komunikační panel je stabilně vpravo vedle mapy
+- Desktop: komunikační panel je po celé výšce od hlavičky dolů, admin/map část je zúžená
+- Desktop vedeni: admin panel je kompaktní 3-sloupcový layout (status | akce | varování)
+- Mobil: komunikační panel se otevírá tlačítkem 💬 jako vysouvací panel z pravé strany
+- Info kanál: systémové/problémové zprávy jsou oddělené od běžného chatu v záložce "Info kanál"
+- Dashboard vedení: metrika je online/total stanic (např. 12/18), ne počet zpráv
+- Dashboard vedení: předdefinované krizové akce (`RZ zastavena`, `Pozor problém`, `RZ pozastavena`, `RZ opět v provozu`)
+- `RZ opět v provozu` je blokováno, pokud incident gate nemá READY potvrzení ze stanic
+- Dashboard vedení: incident gate ukazuje i konkrétní seznam stanic, kterým chybí READY
+- Horní lišta aplikace zobrazuje stav RZ (`V provozu`, `Pozastavena`, `Zastavena`)
+- Při stavu `Pozastavena`/`Zastavena` má mapa červený warning border
+- Warning border mapy je renderovaný jako overlay nad Leafletem (nesmí se schovat pod mapové vrstvy)
+- Komisař: při hlášení problému musí doplnit detail incidentu
+- Komisař: má i tlačítko `🆘 Akutní` (odeslání kritického incidentu bez vstupu)
+- Komisař: na dashboardu má kontakt na vedoucího RZ (tel link)
+- Chat tagging: napiš `@Jmeno` nebo `#Stanice` a použij našeptávač pro rychlé označení
+- Tagy se zvýrazní jen pokud odpovídají známému uživateli/stanici; klik na `#Stanice` vycentruje mapu na marker
+- Chat, info kanál a varování vedení se ukládají lokálně pro přihlášeného uživatele a po odhlášení/znovupřihlášení se obnoví
+- Toast notifikace se zobrazují na středu nad mapou (ne v pravém horním rohu)
+
+### Map Module - Manual Checklist (Fáze 4)
+- Na mapě jsou vidět markery stanic se symbolem role (S/F/T/C/P/B/Z/V/+)
+- Markery mění barvu podle stavu (online zelená, offline červená)
+- Popup stanice obsahuje relativní i absolutní čas poslední aktivity
+- Klik na `#Stanice` v chatu otevře popup příslušného markeru
+- Mobilní zobrazení: mapa + vysouvací komunikace bez posunu mimo viewport
 
 ---
 
@@ -202,7 +270,9 @@ Detaily v [DEVELOPMENT.md](DEVELOPMENT.md)
 
 ## ⚠️ Known Issues
 
-_(Prázdné - projekt v počáteční fázi)_
+- Desktop/mobile layout je aktivně dolaďován podle field feedbacku (Fáze 4).
+- PWA offline queue a background sync zatím nejsou implementované.
+- Pokud frontend server běží jen nad složkou `frontend`, může se v logu objevit 404 pro `/data/example-track.geojson` (neblokující fallback).
 
 ---
 
@@ -212,5 +282,5 @@ This project is for internal use.
 
 ---
 
-**Poslední aktualizace:** 14. února 2026  
-**Verze:** v0.0 (Setup complete)
+**Poslední aktualizace:** 12. července 2026  
+**Verze dokumentace:** v0.5-dev (Fáze 4 in progress)

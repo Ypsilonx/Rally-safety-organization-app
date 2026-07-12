@@ -1,0 +1,24 @@
+{
+  "type": "FeatureCollection",
+  "features": [
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "RZ Sample Track"
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [16.5766, 49.2093],
+          [16.5842, 49.2071],
+          [16.5928, 49.2045],
+          [16.6018, 49.2013],
+          [16.6125, 49.1978],
+          [16.6239, 49.1934],
+          [16.6339, 49.1882],
+          [16.6451, 49.1846]
+        ]
+      }
+    }
+  ]
+}
