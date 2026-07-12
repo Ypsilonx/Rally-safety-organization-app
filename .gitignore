@@ -31,6 +31,7 @@ htmlcov/
 
 # Logs
 *.log
+logs/rz_session_*.jsonl
 
 # Frontend
 node_modules/
