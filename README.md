@@ -276,9 +276,30 @@ Detaily v [DEVELOPMENT.md](DEVELOPMENT.md)
 
 ---
 
+## 🤝 Contributing & Issues
+
+Projekt je připravený na externí příspěvky přes GitHub Pull Request workflow.
+
+### Jak přispět
+
+1. Přečti si [CONTRIBUTING.md](CONTRIBUTING.md)
+2. Vytvoř issue (bug/feature/question) přes připravené šablony
+3. Otevři PR podle [PR šablony](.github/pull_request_template.md)
+
+### Community Health soubory
+
+- [CONTRIBUTING.md](CONTRIBUTING.md)
+- [CODE_OF_CONDUCT.md](CODE_OF_CONDUCT.md)
+- [SECURITY.md](SECURITY.md)
+- [Issue templates](.github/ISSUE_TEMPLATE)
+
+Poznámka: před plně veřejným open-source režimem doporučujeme finálně potvrdit licenci projektu.
+
+---
+
 ## 📄 License
 
-This project is for internal use.
+MIT License. Viz [LICENSE](LICENSE).
 
 ---
 
