@@ -33,6 +33,33 @@ Rally Safety App zajišťuje real-time přehled o situaci na trati a stavu jedno
 - ⏳ **GPS tracking** komisařů v reálném čase
 - ⏳ **Plná správa stanic a přiřazení osob** (Fáze 5)
 
+## 🖼️ Ukázky rozhraní
+
+### Přihlášení podle role
+Úvodní obrazovka nabízí rychlou volbu režimu přihlášení pro vedení RZ nebo traťového komisaře.
+
+![Přihlašovací obrazovka](media/login%20screen.png)
+
+### Marker stanice na mapě
+Každá stanice je na mapě reprezentována markerem se symbolem role; barva markeru odpovídá aktuálnímu stavu připojení.
+
+![Marker stanice na mapě](media/mapovy%20marker%20pozice%20komisare.png)
+
+### Detail stanice a varování
+Po kliknutí na marker se otevře detail stanice s identifikací, rolí a časem poslední aktivity. Při incidentu se marker zvýrazní v alert režimu.
+
+![Detail markeru stanice](media/marker%20s%20varovanim.png)
+
+### Dashboard vedoucího RZ
+Pohled pro vedení kombinuje admin panel, mapu trati a komunikační panel s odděleným info kanálem.
+
+![Dashboard vedoucího RZ](media/vedouci%20RZ%20dashboard.png)
+
+### Dashboard traťového komisaře
+Pohled komisaře je zjednodušený na mapu, chat/info kanál a rychlé akce (Připraven, Problém, Akutní).
+
+![Dashboard traťového komisaře](media/tratovy%20komisar%20dashboard.png)
+
 ---
 
 ## 🚀 Quick Start
