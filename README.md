@@ -1,3 +1,9 @@
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg?style=for-the-badge)](LICENSE)
+![Python](https://img.shields.io/badge/Python-3776AB?style=for-the-badge&logo=python&logoColor=white)
+![JavaScript](https://img.shields.io/badge/JavaScript-323330?style=for-the-badge&logo=javascript&logoColor=F7DF1E)
+![Vibecoding](https://img.shields.io/badge/Vibecoding-8A2BE2?style=for-the-badge&logo=githubcopilot&logoColor=white)
+![AI Powered](https://img.shields.io/badge/AI_Powered-412991?style=for-the-badge&logo=openai&logoColor=white)
+
 # Rally Safety App
 
 🔶 **Celá aplikace a kód jsou vyvinuta pomocí AI pod přísným dohledem člověka, veškerá architektura je vymyšlená autorem a AI vyplnilo pouze kódem a dokumentací.** 🔶
