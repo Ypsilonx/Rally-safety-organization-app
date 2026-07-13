@@ -1,5 +1,7 @@
 # Rally Safety App
 
+🔶 **Celá aplikace a kód jsou vyvinuta pomocí AI pod přísným dohledem člověka, veškerá architektura je vymyšlená autorem a AI vyplnilo pouze kódem a dokumentací.** 🔶
+
 > Progresivní webová aplikace pro koordinaci traťových komisařů během rally soutěží
 
 ## 📊 Current Status
