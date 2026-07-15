@@ -8,6 +8,7 @@ from fastapi import FastAPI, WebSocket, WebSocketDisconnect, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 
 from backend.api.auth import router as auth_router
+from backend.api.admin import router as admin_router
 from backend.api.status import router as status_router
 from backend.core.auth import auth_manager
 from backend.core.config import get_settings
@@ -37,6 +38,7 @@ app.add_middleware(
 
 # Include authentication routes
 app.include_router(auth_router)
+app.include_router(admin_router)
 app.include_router(status_router)
 
 

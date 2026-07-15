@@ -1,8 +1,10 @@
-"""Station models for Rally Safety App."""
+"""Station and station-access models for Rally Safety App."""
 
 from enum import Enum
 from typing import Optional
 from pydantic import BaseModel, Field, field_validator
+
+from backend.models.user import UserRole
 
 
 class StationType(str, Enum):
@@ -51,3 +53,93 @@ class Station(BaseModel):
                 "description": "Ostrá pravá zatáčka"
             }
         }
+
+
+class AssignedUser(BaseModel):
+    """One person assigned to a station-bound PIN.
+
+    Attributes:
+        name: Assigned person name.
+        role: Assigned role.
+        phone: Optional contact phone.
+        assigned_at: Assignment start timestamp.
+        assigned_until: Assignment end timestamp if reassigned.
+        is_active: Whether the assignment is active now.
+        note: Optional operator note for the assignment change.
+    """
+
+    name: str = Field(..., min_length=1, max_length=100)
+    role: UserRole
+    phone: Optional[str] = None
+    assigned_at: str
+    assigned_until: Optional[str] = None
+    is_active: bool = True
+    note: Optional[str] = Field(None, max_length=200)
+
+
+class StationAccess(BaseModel):
+    """Station-centric view of one persistent PIN.
+
+    Attributes:
+        pin_code: Stable 4-digit station PIN.
+        station_id: Station identifier.
+        station_name: Human-readable station label.
+        station_type: Station type classification.
+        capacity: Maximum headcount for this station.
+        description: Optional station note.
+        current_user: Currently assigned person, if any.
+        assigned_users: Full assignment history for the station PIN.
+        created_at: Timestamp when the PIN was created.
+    """
+
+    pin_code: str = Field(..., min_length=4, max_length=4, pattern=r"^\d{4}$")
+    station_id: str = Field(..., min_length=1, max_length=50)
+    station_name: str = Field(..., min_length=1, max_length=100)
+    station_type: StationType
+    capacity: int = Field(default=1, ge=1, le=10)
+    description: Optional[str] = Field(None, max_length=500)
+    current_user: Optional[AssignedUser] = None
+    assigned_users: list[AssignedUser] = Field(default_factory=list)
+    created_at: Optional[str] = None
+
+
+class StationAssignmentRequest(BaseModel):
+    """Payload for assigning or reassigning a person to a station.
+
+    Attributes:
+        name: Person name.
+        role: Person role.
+        phone: Optional phone number.
+        note: Optional note explaining the change.
+    """
+
+    name: str = Field(..., min_length=1, max_length=100)
+    role: UserRole
+    phone: Optional[str] = None
+    note: Optional[str] = Field(None, max_length=200)
+
+
+class StationCreateRequest(BaseModel):
+    """Payload for creating a new station-bound PIN.
+
+    Attributes:
+        station_id: New station identifier.
+        station_name: Human-readable station name.
+        station_type: Station type classification.
+        capacity: Maximum allowed headcount for the station.
+        description: Optional station note.
+        name: Initially assigned person name.
+        role: Initially assigned person role.
+        phone: Optional phone number for the initial assignee.
+        note: Optional operator note for initial assignment.
+    """
+
+    station_id: str = Field(..., min_length=1, max_length=50)
+    station_name: str = Field(..., min_length=1, max_length=100)
+    station_type: StationType
+    capacity: int = Field(default=1, ge=1, le=10)
+    description: Optional[str] = Field(None, max_length=500)
+    name: str = Field(..., min_length=1, max_length=100)
+    role: UserRole
+    phone: Optional[str] = None
+    note: Optional[str] = Field(None, max_length=200)

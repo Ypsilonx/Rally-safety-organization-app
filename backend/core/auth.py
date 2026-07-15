@@ -8,7 +8,7 @@ from typing import Optional
 
 import bcrypt
 
-from backend.models.user import KomisarAccess, VEDENI_CREDENTIALS, UserRole
+from backend.models.user import AssignmentHistoryEntry, KomisarAccess, VEDENI_CREDENTIALS, UserRole
 
 
 class AuthManager:
@@ -26,6 +26,69 @@ class AuthManager:
         # Load existing PINs from file or initialize empty
         self.komisar_pins: dict[str, KomisarAccess] = self._load_pins()
         self.active_sessions: dict[str, dict] = {}  # session_token -> user_data
+
+    def _create_history_entry(
+        self,
+        name: str,
+        role: UserRole,
+        phone: Optional[str],
+        assigned_at: str,
+        note: Optional[str] = None,
+    ) -> AssignmentHistoryEntry:
+        """Build one assignment history record.
+
+        Args:
+            name: Assigned person name.
+            role: Assigned role.
+            phone: Optional phone number.
+            assigned_at: Assignment start timestamp.
+            note: Optional reassignment note.
+
+        Returns:
+            Assignment history record.
+        """
+        return AssignmentHistoryEntry(
+            name=name,
+            role=role,
+            phone=phone,
+            assigned_at=assigned_at,
+            assigned_until=None,
+            is_active=True,
+            note=note,
+        )
+
+    def _generate_unique_pin_code(self) -> str:
+        """Generate unique 4-digit PIN code.
+
+        Returns:
+            Unique 4-digit PIN string.
+        """
+        while True:
+            pin_code = str(secrets.randbelow(10000)).zfill(4)
+            if pin_code not in self.komisar_pins:
+                return pin_code
+
+    def _default_history_from_legacy(self, pin_data: dict) -> list[AssignmentHistoryEntry]:
+        """Migrate legacy pin payload without explicit history.
+
+        Args:
+            pin_data: Raw JSON payload for one PIN.
+
+        Returns:
+            Synthetic history with the current active assignment.
+        """
+        name = pin_data.get("name")
+        role = pin_data.get("role")
+        if not name or not role:
+            return []
+        return [
+            self._create_history_entry(
+                name=name,
+                role=UserRole(role),
+                phone=pin_data.get("phone"),
+                assigned_at=pin_data.get("created_at") or datetime.now(UTC).isoformat(),
+            )
+        ]
     
     def _load_pins(self) -> dict[str, KomisarAccess]:
         """Load PINs from JSON file.
@@ -40,16 +103,25 @@ class AuthManager:
             with open(self.pins_file, 'r', encoding='utf-8') as f:
                 data = json.load(f)
             
-            # Convert JSON to KomisarAccess objects
             pins = {}
             for pin_code, pin_data in data.items():
+                history_payload = pin_data.get("assignment_history")
+                if history_payload is None:
+                    history = self._default_history_from_legacy(pin_data)
+                else:
+                    history = [AssignmentHistoryEntry(**item) for item in history_payload]
                 pins[pin_code] = KomisarAccess(
                     pin_code=pin_code,
                     name=pin_data["name"],
                     role=UserRole(pin_data["role"]),
                     phone=pin_data.get("phone"),
                     station_id=pin_data.get("station_id"),
-                    created_at=pin_data.get("created_at")
+                    station_name=pin_data.get("station_name"),
+                    station_type=pin_data.get("station_type"),
+                    station_capacity=pin_data.get("station_capacity", 1),
+                    station_description=pin_data.get("station_description"),
+                    created_at=pin_data.get("created_at"),
+                    assignment_history=history,
                 )
             return pins
         except Exception as e:
@@ -66,13 +138,32 @@ class AuthManager:
                     "role": komisar.role.value,
                     "phone": komisar.phone,
                     "station_id": komisar.station_id,
-                    "created_at": komisar.created_at
+                    "station_name": komisar.station_name,
+                    "station_type": komisar.station_type,
+                    "station_capacity": komisar.station_capacity,
+                    "station_description": komisar.station_description,
+                    "created_at": komisar.created_at,
+                    "assignment_history": [
+                        entry.model_dump(mode="json")
+                        for entry in komisar.assignment_history
+                    ],
                 }
             
             with open(self.pins_file, 'w', encoding='utf-8') as f:
                 json.dump(data, f, ensure_ascii=False, indent=2)
         except Exception as e:
             print(f"❌ Error: Failed to save PINs to {self.pins_file}: {e}")
+
+    def _has_active_assignment(self, access: KomisarAccess) -> bool:
+        """Check whether station PIN has active assigned person.
+
+        Args:
+            access: Persisted station-bound PIN record.
+
+        Returns:
+            True when at least one history record is active.
+        """
+        return any(history_entry.is_active for history_entry in access.assignment_history)
     
     def verify_password(self, username: str, password: str) -> Optional[dict]:
         """Verify vedení username + password.
@@ -150,7 +241,12 @@ class AuthManager:
         Returns:
             KomisarAccess object if valid, None otherwise
         """
-        return self.komisar_pins.get(pin_code)
+        access = self.komisar_pins.get(pin_code)
+        if access is None:
+            return None
+        if not self._has_active_assignment(access):
+            return None
+        return access
     
     def generate_pin(self, name: str, role: UserRole, phone: Optional[str] = None, 
                      station_id: Optional[str] = None) -> KomisarAccess:
@@ -165,11 +261,7 @@ class AuthManager:
         Returns:
             KomisarAccess object with generated PIN
         """
-        # Generate unique 4-digit PIN
-        while True:
-            pin_code = str(secrets.randbelow(10000)).zfill(4)
-            if pin_code not in self.komisar_pins:
-                break
+        pin_code = self._generate_unique_pin_code()
         
         komisar = KomisarAccess(
             pin_code=pin_code,
@@ -177,11 +269,81 @@ class AuthManager:
             role=role,
             phone=phone,
             station_id=station_id,
-            created_at=datetime.now(UTC).isoformat()
+            station_name=station_id,
+            created_at=datetime.now(UTC).isoformat(),
+            assignment_history=[
+                self._create_history_entry(
+                    name=name,
+                    role=role,
+                    phone=phone,
+                    assigned_at=datetime.now(UTC).isoformat(),
+                )
+            ],
         )
         
         self.komisar_pins[pin_code] = komisar
         self._save_pins()  # Persist to file
+        return komisar
+
+    def create_station_pin(
+        self,
+        station_id: str,
+        station_name: str,
+        station_type: str,
+        capacity: int,
+        description: Optional[str],
+        assignee_name: str,
+        assignee_role: UserRole,
+        assignee_phone: Optional[str] = None,
+        note: Optional[str] = None,
+    ) -> KomisarAccess:
+        """Create a new station-bound PIN with initial assignment.
+
+        Args:
+            station_id: New station identifier.
+            station_name: Human-readable station label.
+            station_type: Station type value.
+            capacity: Maximum allowed headcount.
+            description: Optional station note.
+            assignee_name: Initial assignee name.
+            assignee_role: Initial assignee role.
+            assignee_phone: Optional assignee phone.
+            note: Optional operator note for initial assignment.
+
+        Returns:
+            Persisted station-bound PIN record.
+
+        Raises:
+            ValueError: If the station already exists.
+        """
+        if self.find_pin_by_station_id(station_id) is not None:
+            raise ValueError(f"Station '{station_id}' already exists")
+
+        now = datetime.now(UTC).isoformat()
+        pin_code = self._generate_unique_pin_code()
+        komisar = KomisarAccess(
+            pin_code=pin_code,
+            name=assignee_name,
+            role=assignee_role,
+            phone=assignee_phone,
+            station_id=station_id,
+            station_name=station_name,
+            station_type=station_type,
+            station_capacity=capacity,
+            station_description=description,
+            created_at=now,
+            assignment_history=[
+                self._create_history_entry(
+                    name=assignee_name,
+                    role=assignee_role,
+                    phone=assignee_phone,
+                    assigned_at=now,
+                    note=note,
+                )
+            ],
+        )
+        self.komisar_pins[pin_code] = komisar
+        self._save_pins()
         return komisar
     
     def remove_pin(self, pin_code: str) -> bool:
@@ -198,6 +360,26 @@ class AuthManager:
             self._save_pins()  # Persist to file
             return True
         return False
+
+    def remove_station_pin(self, station_id: str) -> KomisarAccess:
+        """Delete station-bound PIN by station identifier.
+
+        Args:
+            station_id: Station identifier to remove.
+
+        Returns:
+            Removed PIN record.
+
+        Raises:
+            KeyError: If the station does not exist.
+        """
+        access = self.find_pin_by_station_id(station_id)
+        if access is None:
+            raise KeyError(f"Unknown station '{station_id}'")
+
+        del self.komisar_pins[access.pin_code]
+        self._save_pins()
+        return access
     
     def list_all_pins(self) -> list[KomisarAccess]:
         """List all active komisař PINs.
@@ -206,6 +388,104 @@ class AuthManager:
             List of all KomisarAccess objects
         """
         return list(self.komisar_pins.values())
+
+    def find_pin_by_station_id(self, station_id: str) -> Optional[KomisarAccess]:
+        """Find stored PIN record bound to a station.
+
+        Args:
+            station_id: Station identifier.
+
+        Returns:
+            Matching PIN record or None.
+        """
+        for access in self.komisar_pins.values():
+            if access.station_id == station_id:
+                return access
+        return None
+
+    def assign_user_to_station(
+        self,
+        station_id: str,
+        name: str,
+        role: UserRole,
+        phone: Optional[str] = None,
+        note: Optional[str] = None,
+    ) -> KomisarAccess:
+        """Assign or reassign a person to an existing station-bound PIN.
+
+        Args:
+            station_id: Station identifier to update.
+            name: New current assignee.
+            role: New current assignee role.
+            phone: Optional current phone number.
+            note: Optional operator note explaining the change.
+
+        Returns:
+            Updated persisted PIN record.
+
+        Raises:
+            KeyError: If no station PIN exists for the given station.
+        """
+        access = self.find_pin_by_station_id(station_id)
+        if access is None:
+            raise KeyError(f"Unknown station '{station_id}'")
+
+        now = datetime.now(UTC).isoformat()
+        for history_entry in access.assignment_history:
+            if history_entry.is_active:
+                history_entry.is_active = False
+                history_entry.assigned_until = now
+                if note:
+                    history_entry.note = note
+
+        access.name = name
+        access.role = role
+        access.phone = phone
+        access.assignment_history.append(
+            self._create_history_entry(
+                name=name,
+                role=role,
+                phone=phone,
+                assigned_at=now,
+                note=note,
+            )
+        )
+        self._save_pins()
+        return access
+
+    def release_user_from_station(self, station_id: str, note: Optional[str] = None) -> KomisarAccess:
+        """Release current assignee from station-bound PIN.
+
+        Args:
+            station_id: Station identifier to update.
+            note: Optional operator note for the release.
+
+        Returns:
+            Updated persisted PIN record.
+
+        Raises:
+            KeyError: If no station PIN exists for the given station.
+            ValueError: If no active assignee exists on the station.
+        """
+        access = self.find_pin_by_station_id(station_id)
+        if access is None:
+            raise KeyError(f"Unknown station '{station_id}'")
+
+        now = datetime.now(UTC).isoformat()
+        released = False
+        for history_entry in access.assignment_history:
+            if history_entry.is_active:
+                history_entry.is_active = False
+                history_entry.assigned_until = now
+                if note:
+                    history_entry.note = note
+                released = True
+
+        if not released:
+            raise ValueError(f"Station '{station_id}' has no active assignment")
+
+        self._save_pins()
+        return access
 
 
 def hash_password(password: str) -> str:
