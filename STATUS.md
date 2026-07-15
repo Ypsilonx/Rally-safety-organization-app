@@ -1,8 +1,8 @@
 # Project Status & Progress Tracking
 
-**Last Updated:** 12. července 2026  
-**Current Phase:** Fáze 4 🔄 IN PROGRESS  
-**Next Phase:** Dokončení Fáze 4 + definice MVP řezu Fáze 5 (admin panel, map podklady, seznam komisařů)
+**Last Updated:** 15. července 2026  
+**Current Phase:** Fáze 4 + Fáze 5 backend slice 🔄 IN PROGRESS  
+**Next Phase:** Dokončení station-first backend API + napojení admin UI
 
 > Tento soubor je hlavní zdroj pravdy pro aktuální stav implementace.
 
@@ -10,8 +10,9 @@
 
 - ✅ Dokončeno: Fáze 0-3
 - 🔄 Aktivně rozpracováno: Fáze 4 (UI/UX stabilizace desktop + mobil)
+- 🔄 Zahájeno z Fáze 5: backend station registry + assign/reassign API
 - 🔄 Částečně dodáno z Fáze 6: incident reporting + readiness gate
-- ⏳ Další priorita: formální E2E průchod gate scénáře + uzavření Fáze 4 test checklistu
+- ⏳ Další priorita: doplnit zbývající Fázi 5 endpointy a napojit admin dashboard
 
 ---
 
@@ -211,6 +212,52 @@ _Details in [ROADMAP.md](ROADMAP.md)_
 
 ## 📝 Recent Changes
 
+### 2026-07-15 (Fáze 5 - frontend iterace 2)
+- ✅ Frontend: setup formulář má dropdown `Katalog osob` napojený na `GET /api/admin/people`
+- ✅ Frontend: výběr osoby předvyplní jméno, roli a telefon pro přiřazení na pozici
+- ✅ Frontend: přidáno ruční obnovení people katalogu přímo na setup obrazovce
+- ✅ Validace: frontend syntax check + editor diagnostika bez chyb
+
+### 2026-07-15 (Fáze 5 - backend iterace 2)
+- ✅ Backend: přidán perzistentní people katalog (`data/people_catalog.json`)
+- ✅ Backend: nový endpoint `POST /api/admin/people/import-csv` pro import osob z CSV textu
+- ✅ Backend: nový endpoint `GET /api/admin/people` pro setup dropdown data
+- ✅ Validace: nový test set pro katalog + admin API, backend suite 14/14 passing
+
+### 2026-07-15 (Fáze 4 - frontend modularizace iterace 2)
+- ✅ Frontend: `app-operations.js` rozdělen na `app-operations-rz.js` a `app-operations-incidents.js`
+- ✅ Frontend: `map.js` rozdělen na `map-track.js` a `map-stations.js`
+- ✅ Frontend: `index.html` načítá nové moduly ve stabilním pořadí
+- ✅ Validace: `node --check` + browser smoke (login vedení, dashboard/setup přepínání, mapa)
+
+### 2026-07-15 (Fáze 5 - backend iterace 1)
+- 🔄 Zahájen station-first backend slice nad perzistentními PINy
+- ✅ Backend: `KomisarAccess` rozšířen o historii přiřazení a metadata stanice
+- ✅ Backend: přidán `backend/core/station_registry.py`
+- ✅ Backend: nový endpoint `GET /api/stations` pro station directory
+- ✅ Backend: nový endpoint `GET /api/stations/{station_id}` pro detail stanice
+- ✅ Backend: nový endpoint `GET /api/stations/{station_id}/users` pro seznam aktuálních i historických přiřazení
+- ✅ Backend: nový endpoint `GET /api/admin/stations` s auth přes `X-Session-Token`
+- ✅ Backend: nový endpoint `POST /api/admin/station/create-pin`
+- ✅ Backend: nové endpointy `POST /api/admin/station/{station_id}/assign-user` a `/reassign-user`
+- ✅ Backend: nový endpoint `GET /api/admin/station/{station_id}/history`
+- ✅ Backend: nový endpoint `POST /api/admin/station/{station_id}/release-user`
+- ✅ Backend: nový endpoint `DELETE /api/admin/station/{station_id}/pin`
+- ✅ Login: released stanice dočasně odmítá PIN login, dokud nepřijde nové přiřazení
+- ✅ Testy: přidány persist testy pro assign/reassign, release a create/delete historii v `backend/tests/test_auth_manager.py`
+- ✅ Validace: backend test suite 9/9 passing
+- ✅ Smoke: create-pin -> login -> delete-pin ověřeno nad běžícím serverem
+
+### 2026-07-15 (Fáze 5 - frontend iterace 1)
+- ✅ Frontend: správa pozic přesunuta z live dashboardu do samostatné setup obrazovky
+- ✅ Frontend: setup obrazovka načítá seznam pozic z `GET /api/admin/stations`
+- ✅ Frontend: detail vybrané pozice zobrazuje PIN, typ, kapacitu a aktuálně přiřazenou osobu
+- ✅ Frontend: historie pozice se renderuje na setup obrazovce
+- ✅ Frontend: formulář umí přiřadit nebo přepsat osobu na vybrané pozici
+- ✅ Frontend: akce `Uvolnit pozici` volá release endpoint a obnoví stav setup obrazovky
+- ✅ Frontend: připraven samostatný prostor pro budoucí konfiguraci mapy a pozic
+- ✅ Smoke: přihlášení vedení + čistý dashboard + přechod na setup obrazovku ověřeny v browseru
+
 ### 2026-07-12 (Fáze 4 - iterace 1)
 - 🔄 Zahájena Fáze 4: Leaflet mapa integrovaná do hlavního UI
 - ✅ Frontend: přidán `frontend/js/map.js` (inicializace mapy + načtení trati)
@@ -298,10 +345,10 @@ _Details in [ROADMAP.md](ROADMAP.md)_
 
 ## 🎯 Next Actions
 
-1. Zavřít Fázi 4 manuálním test průchodem desktop + mobil a zapsat výsledky
-2. Ověřit E2E scénář gate (incident -> READY potvrzení -> resume)
-3. Specifikovat minimální scope Fáze 5: správa mapových podkladů + seznam komisařů
-4. Rozsekat Fázi 5 na API-first inkrementy (import mapy, CRUD komisařů, přiřazení ke stanici)
+1. Doplnit na setup obrazovce create/delete pozice a pohodlnější přesun osoby mezi dvěma pozicemi
+2. Navrhnout a implementovat konfiguraci mapy a předdefinovaných pozic na stejné setup obrazovce
+3. Rozhodnout, zda držet plně dynamický station registry v `pins.json`, nebo zavést samostatný katalog stanic
+4. Vrátit se k formálnímu desktop/mobile průchodu Fáze 4 před širším field testem
 
 ---
 

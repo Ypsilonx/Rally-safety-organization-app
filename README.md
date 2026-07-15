@@ -12,16 +12,17 @@
 
 ## 📊 Current Status
 
-**Aktuální fáze:** 🔄 Fáze 4 - IN PROGRESS (UX stabilizace + manuální testy)  
-**Další fáze:** Uzavření Fáze 4 + upřesnění MVP řezu Fáze 5 (admin panel, map podklady, seznam komisařů)  
+**Aktuální fáze:** 🔄 Fáze 4 + Fáze 5 backend slice - IN PROGRESS  
+**Další fáze:** Dokončení backendového station-first API a napojení admin UI  
 **Celkový pokrok:** 50% (5/10 fází dokončeno)
 
-### Stav implementace k 12.7.2026
+### Stav implementace k 15.7.2026
 
 - ✅ Hotovo: Fáze 0, 1, 2, 3
 - 🔄 Rozpracováno: Fáze 4 (mapa + desktop/mobile UX refinements)
+- 🔄 Zahájeno z Fáze 5: station-first backend API a historie přiřazení na stanici
 - 🔄 Částečně dodáno z Fáze 6: incident quick actions + gate READY/NOT_READY
-- ⏳ Čeká: Fáze 5, 7, 8, 9, 10
+- ⏳ Čeká: zbytek Fáze 5, 7, 8, 9, 10
 
 ---
 
@@ -39,7 +40,11 @@ Rally Safety App zajišťuje real-time přehled o situaci na trati a stavu jedno
 - ✅ **Event logging** pro post-race analýzu
 - ⏳ **Offline mode (PWA queue + sync)**
 - ⏳ **GPS tracking** komisařů v reálném čase
-- ⏳ **Plná správa stanic a přiřazení osob** (Fáze 5)
+- ✅ **Station-first backend API** (`/api/stations`, `/api/admin/stations`, create/delete, history, release, assign/reassign)
+- 🔄 **Samostatná setup obrazovka pro správu pozic** (seznam, detail, historie, release, assign/reassign)
+- ✅ **Frontend modularizace (iterace 2)**: rozdělení operations/map logiky do menších JS modulů
+- ✅ **Setup assignment dropdown**: výběr osoby z people katalogu s předvyplněním role/telefonu
+- ⏳ **Rozšířená setup obrazovka** (create/delete pozice, pohodlnější přesun osoby, nastavení mapy a podkladů)
 
 ## 🖼️ Ukázky rozhraní
 
@@ -209,6 +214,63 @@ Invoke-RestMethod http://localhost:8000/api/stations/status
 
 # Incident gate readiness snapshot
 Invoke-RestMethod http://localhost:8000/api/stations/readiness
+
+# Station-first directory z perzistentních PINů
+Invoke-RestMethod http://localhost:8000/api/stations
+```
+
+### Admin Station API
+```powershell
+# Přihlášení vedení a získání session tokenu
+$login = Invoke-RestMethod -Method Post http://localhost:8000/api/auth/login-vedeni `
+	-ContentType 'application/json' `
+	-Body '{"username":"admin","password":"demo123"}'
+
+# Seznam stanic pro admin správu
+Invoke-RestMethod http://localhost:8000/api/admin/stations `
+	-Headers @{ 'X-Session-Token' = $login.session_token }
+
+# Vytvoření nové stanice s PINem a počátečním osazením
+Invoke-RestMethod -Method Post http://localhost:8000/api/admin/station/create-pin `
+	-Headers @{ 'X-Session-Token' = $login.session_token } `
+	-ContentType 'application/json' `
+	-Body '{"station_id":"PK-10","station_name":"Parkoviště 10","station_type":"parking","capacity":2,"description":"Příjezdové parkoviště","name":"Alena Testovací","role":"parkovani","phone":"+420555444333","note":"První osazení"}'
+
+# Historie obsazení stanice
+Invoke-RestMethod http://localhost:8000/api/admin/station/TK-01/history `
+	-Headers @{ 'X-Session-Token' = $login.session_token }
+
+# Uvolnění stanice zneplatní PIN pro login, dokud nepřijde nové přiřazení
+Invoke-RestMethod -Method Post http://localhost:8000/api/admin/station/TK-01/release-user `
+	-Headers @{ 'X-Session-Token' = $login.session_token } `
+	-ContentType 'application/json' `
+	-Body '{"note":"Konec směny"}'
+
+# Přeřazení osoby na stanici se zachováním PINu
+Invoke-RestMethod -Method Post http://localhost:8000/api/admin/station/TK-01/reassign-user `
+	-Headers @{ 'X-Session-Token' = $login.session_token } `
+	-ContentType 'application/json' `
+	-Body '{"name":"Petr Nový","role":"komisar_trat","phone":"+420111222333","note":"Střídání směny"}'
+
+# Smazání PINu stanice
+Invoke-RestMethod -Method Delete http://localhost:8000/api/admin/station/PK-10/pin `
+	-Headers @{ 'X-Session-Token' = $login.session_token }
+
+# Import katalogu lidí z CSV textu (name/jmeno, phone/telefon)
+$csv = @"
+jmeno;telefon
+Jan Novák;+420111222333
+Eva Testovací;+420444555666
+"@
+
+Invoke-RestMethod -Method Post http://localhost:8000/api/admin/people/import-csv `
+	-Headers @{ 'X-Session-Token' = $login.session_token } `
+	-ContentType 'application/json' `
+	-Body (@{ csv_content = $csv; replace_existing = $false } | ConvertTo-Json)
+
+# Seznam katalogu lidí pro setup dropdown
+Invoke-RestMethod http://localhost:8000/api/admin/people `
+	-Headers @{ 'X-Session-Token' = $login.session_token }
 ```
 
 ### Frontend Testing

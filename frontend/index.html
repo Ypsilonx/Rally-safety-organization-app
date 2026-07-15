@@ -90,6 +90,9 @@
                 <span id="rz-live-status" class="rz-status-badge running">RZ: V provozu</span>
             </div>
             <div class="header-right">
+                <button id="open-setup-btn" class="btn-icon hidden" title="Správa pozic a mapy">
+                    <span>🗂️</span>
+                </button>
                 <button id="open-comms-btn" class="btn-icon" title="Komunikace">
                     <span>💬</span>
                 </button>
@@ -220,6 +223,105 @@
         </div>
     </div>
 
+    <div id="setup-screen" class="screen hidden">
+        <header class="app-header setup-header">
+            <div class="header-left setup-header-left">
+                <button id="back-to-dashboard-btn" class="btn-icon" title="Zpět na dashboard">
+                    <span>←</span>
+                </button>
+                <div>
+                    <div class="setup-title">Správa pozic a mapy</div>
+                    <div class="setup-subtitle">Předstartovní konfigurace osazení a podkladů</div>
+                </div>
+            </div>
+            <div class="header-right">
+                <button id="logout-setup-btn" class="btn-icon" title="Odhlásit se">
+                    <span>⚙️</span>
+                </button>
+            </div>
+        </header>
+        <main class="setup-main">
+            <section class="setup-placeholder-card" aria-label="Konfigurace mapy a pozic">
+                <h3>Konfigurace mapy a pozic</h3>
+                <p>
+                    Tato obrazovka je vyhrazená pro předstartovní nastavení pozic, lidí a později i mapových podkladů.
+                    Live dashboard zůstává oddělený pro provoz během RZ.
+                </p>
+            </section>
+
+            <section class="station-admin-board station-admin-screen" aria-label="Správa pozic a osob">
+                <div class="station-admin-header">
+                    <h4>Pozice a obsazení</h4>
+                    <button id="btn-refresh-stations" class="btn btn-secondary station-refresh-btn">
+                        Obnovit seznam
+                    </button>
+                </div>
+                <div class="station-admin-layout">
+                    <div class="station-admin-list-wrap">
+                        <div id="station-admin-list" class="station-admin-list">
+                            <p class="station-admin-empty">Načítám seznam pozic...</p>
+                        </div>
+                    </div>
+                    <div class="station-admin-detail">
+                        <div id="station-admin-detail" class="station-detail-card">
+                            <p class="station-admin-empty">Vyber pozici pro detail.</p>
+                        </div>
+                        <form id="station-admin-form" class="station-admin-form hidden">
+                            <h5>Přiřadit nebo přesunout osobu</h5>
+                            <input type="hidden" id="admin-station-id" name="station_id">
+                            <div class="form-group">
+                                <label for="admin-person-catalog">Katalog osob</label>
+                                <div class="station-admin-actions">
+                                    <select id="admin-person-catalog" name="catalog_person">
+                                        <option value="">Ruční zadání</option>
+                                    </select>
+                                    <button type="button" id="btn-refresh-people" class="btn btn-secondary">
+                                        Obnovit katalog
+                                    </button>
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label for="admin-person-name">Jméno</label>
+                                <input type="text" id="admin-person-name" name="name" maxlength="100" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="admin-person-role">Role</label>
+                                <select id="admin-person-role" name="role" required>
+                                    <option value="komisar_trat">Komisař tratě</option>
+                                    <option value="komisar_zatacka">Komisař zatáčky</option>
+                                    <option value="casomer">Časomíra</option>
+                                    <option value="parkovani">Parkování</option>
+                                    <option value="zdravotnik">Zdravotník</option>
+                                    <option value="technik">Technik</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label for="admin-person-phone">Telefon</label>
+                                <input type="tel" id="admin-person-phone" name="phone" maxlength="30" placeholder="+420...">
+                            </div>
+                            <div class="form-group">
+                                <label for="admin-person-note">Poznámka</label>
+                                <input type="text" id="admin-person-note" name="note" maxlength="200" placeholder="Např. přesun z jiné pozice">
+                            </div>
+                            <div class="station-admin-actions">
+                                <button type="submit" class="btn btn-primary">Uložit přiřazení</button>
+                                <button type="button" id="btn-release-station" class="btn btn-alert station-release-btn">
+                                    Uvolnit pozici
+                                </button>
+                            </div>
+                        </form>
+                        <div class="station-history-card">
+                            <h5>Historie pozice</h5>
+                            <div id="station-admin-history" class="station-history-list">
+                                <p class="station-admin-empty">Historie se zobrazí po výběru pozice.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </main>
+    </div>
+
     <!-- Loading Overlay -->
     <div id="loading-overlay" class="loading-overlay hidden">
         <div class="spinner"></div>
@@ -237,7 +339,16 @@
             integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
     <script src="js/auth.js"></script>
     <script src="js/websocket.js"></script>
+    <script src="js/map-track.js"></script>
+    <script src="js/map-stations.js"></script>
     <script src="js/map.js"></script>
+    <script src="js/setup-admin.js"></script>
+    <script src="js/app-ui-common.js"></script>
+    <script src="js/app-tagging.js"></script>
+    <script src="js/app-messaging.js"></script>
+    <script src="js/app-operations-rz.js"></script>
+    <script src="js/app-operations-incidents.js"></script>
+    <script src="js/app-operations.js"></script>
     <script src="js/app.js"></script>
 </body>
 </html>

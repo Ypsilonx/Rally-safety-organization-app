@@ -259,6 +259,7 @@ Aktuální průběžný stav drž v `STATUS.md`. Tento dokument je plán a backl
 ### Otevřené body do dokončení Fáze 4:
 - ✅ Typové ikony markerů podle role/type
 - ✅ Absolutní timestamp poslední aktivity v popupu
+- ✅ Modularizace frontend logiky: operations/map rozděleny do menších modulů
 - ✅ Manuální test checklist pro mapový modul
 - ⏳ Finální manuální průchod desktop + mobil a zápis výsledků
 
@@ -277,7 +278,7 @@ Aktuální průběžný stav drž v `STATUS.md`. Tento dokument je plán a backl
 
 ## 📍 Fáze 5: Admin Panel + Stanice na mapě
 
-**Status:** ⏳ ČEKÁ (příprava scope po uzavření Fáze 4)
+**Status:** 🔄 IN PROGRESS (backend iterace 1 hotová)
 
 **Cíl:** Vedoucí může spravovat 160+ komisařů a vidět je na mapě
 
@@ -306,7 +307,7 @@ PIN 1234 → Stanice TK-01 "Zatáčka u lesa"
 ### Co se implementuje:
 
 1. **Přepracování PIN systému** (`backend/models/station.py`, `backend/core/auth.py`)
-   - **BREAKING CHANGE:** Refaktor `KomisarAccess` → `StationAccess`
+   - 🔄 Refaktor probíhá neinvazivně: `KomisarAccess` zůstává pro login, přibyl station-first view `StationAccess`
    - Model:
      ```python
      StationAccess:
@@ -326,41 +327,48 @@ PIN 1234 → Stanice TK-01 "Zatáčka u lesa"
        assigned_until: datetime | None
        is_active: bool
      ```
-   - Migrace z `data/pins.json` (osoba → stanice)
-   - Perzistence zajištěna (už implementováno v Fázi 1)
+   - [x] Migrace z legacy `data/pins.json` do station-first historie při loadu
+   - [x] Perzistence historie při assign/reassign zachována v `data/pins.json`
 
 2. **Admin API Endpoints** (`backend/api/admin.py`)
-   - `POST /api/admin/station/create-pin` - vytvořit PIN pro novou stanici
-   - `POST /api/admin/station/{station_id}/assign-user` - přiřadit člověka na stanici (PIN zůstává)
-   - `POST /api/admin/station/{station_id}/reassign-user` - změnit člověka (s důvodem)
-   - `POST /api/admin/station/{station_id}/release-user` - uvolnit stanici
-   - `GET /api/admin/stations` - seznam všech stanic + obsazenost
-   - `GET /api/admin/station/{station_id}/history` - historie změn obsazení
-   - `DELETE /api/admin/station/{station_id}/pin` - smazat PIN stanice (admin only)
+   - [x] `POST /api/admin/station/create-pin` - vytvořit PIN pro novou stanici
+   - [x] `POST /api/admin/station/{station_id}/assign-user` - přiřadit člověka na stanici (PIN zůstává)
+   - [x] `POST /api/admin/station/{station_id}/reassign-user` - změnit člověka (s důvodem)
+   - [x] `POST /api/admin/station/{station_id}/release-user` - uvolnit stanici
+   - [x] `GET /api/admin/stations` - seznam všech stanic + obsazenost
+   - [x] `GET /api/admin/station/{station_id}/history` - historie změn obsazení
+   - [x] `DELETE /api/admin/station/{station_id}/pin` - smazat PIN stanice (admin only)
    - Všechny vyžadují vedení role (auth check)
 
 3. **Station Registry** (`backend/core/station_registry.py`)
-   - Hardcoded definice stanic (různé typy)
-   - Track points, timing, parking, medical, atd.
-   - Capacity management (více lidí na jednu stanici)
-   - Assignment tracking s historií
+   - [x] Assignment tracking s historií nad perzistentními PINy
+   - [x] Best-effort infer typů stanice z ID prefixu
+   - [ ] Hardcoded nebo importovaný katalog stanic
+   - [ ] Capacity management pro více lidí na jednu stanici
 
 4. **Station API** (`backend/api/stations.py`)
-   - `GET /api/stations` → všechny stanice + obsazenost + current user
-   - `GET /api/stations/{station_id}` → detail stanice + historie
-   - `GET /api/stations/{station_id}/users` → kdo je/byl přiřazen
+   - [x] `GET /api/stations` → všechny stanice + obsazenost + current user
+   - [x] `GET /api/stations/{station_id}` → detail stanice + historie
+   - [x] `GET /api/stations/{station_id}/users` → kdo je/byl přiřazen
 
 5. **Frontend: Admin Dashboard** (`frontend/js/admin.js`)
    - **Station Management:**
-     - Tabulka všech stanic (virtual scrolling pro 160+)
-     - Filtry: typ, status (obsazená/volná/offline), role
-     - Search by station ID nebo název
+   - [x] Samostatná setup obrazovka oddělená od live dashboardu
+   - [x] Základní seznam všech stanic na setup obrazovce
+   - [x] Detail vybrané stanice + historie obsazení
+   - [x] Přiřadit/přepsat osobu na vybrané pozici
+   - [x] Uvolnit pozici
+   - [ ] Tabulka / virtual scrolling pro 160+
+   - [ ] Filtry: typ, status (obsazená/volná/offline), role
+   - [ ] Search by station ID nebo název
    - **PIN Generation:**
      - Vytvořit novou stanici → auto-generuje PIN
      - Zobrazit PIN (pro SMS nebo QR kód)
      - Export do CSV/Excel (stanice + PIN + aktuální obsazení)
    - **User Assignment:**
-     - Přiřadit člověka na stanici: jméno + telefon + role
+       - [x] Import lidí do katalogu z CSV (Excel-friendly) přes admin API
+       - [x] Endpoint pro seznam katalogu lidí pro setup dropdown
+       - [x] Přiřadit člověka na stanici: výběr z katalogu + jméno/telefon/role
      - Změnit člověka (modal s potvrzením)
      - Uvolnit stanici
      - Důvod změny (optional, pro historii)

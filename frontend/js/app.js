@@ -31,6 +31,10 @@ const App = {
     },
     incidentGateActive: false,
     rzState: 'running',
+    adminStations: [],
+    adminPeople: [],
+    selectedAdminStationId: null,
+    currentScreen: 'dashboard',
 
     /**
      * Initialize application
@@ -119,6 +123,10 @@ const App = {
         if (isVedeni) {
             adminPanel.classList.remove('hidden');
             quickActions.classList.add('hidden');
+            const setupButton = document.getElementById('open-setup-btn');
+            if (setupButton) {
+                setupButton.classList.remove('hidden');
+            }
 
             const panelHeader = adminPanel.querySelector('.panel-header');
             const panelContent = adminPanel.querySelector('.panel-content');
@@ -131,6 +139,10 @@ const App = {
         } else {
             adminPanel.classList.add('hidden');
             quickActions.classList.remove('hidden');
+            const setupButton = document.getElementById('open-setup-btn');
+            if (setupButton) {
+                setupButton.classList.add('hidden');
+            }
         }
 
         this.updateVedeniContact();
@@ -197,6 +209,20 @@ const App = {
             openCommsBtn.addEventListener('click', () => this.openCommsPanel());
         }
 
+        const openSetupBtn = document.getElementById('open-setup-btn');
+        if (openSetupBtn) {
+            openSetupBtn.addEventListener('click', () => {
+                this.openSetupScreen();
+            });
+        }
+
+        const backToDashboardBtn = document.getElementById('back-to-dashboard-btn');
+        if (backToDashboardBtn) {
+            backToDashboardBtn.addEventListener('click', () => {
+                this.openDashboardScreen();
+            });
+        }
+
         const closeCommsBtn = document.getElementById('close-comms-btn');
         if (closeCommsBtn) {
             closeCommsBtn.addEventListener('click', () => this.closeCommsPanel());
@@ -229,11 +255,60 @@ const App = {
             });
         }
 
+        const refreshStationsBtn = document.getElementById('btn-refresh-stations');
+        if (refreshStationsBtn) {
+            refreshStationsBtn.addEventListener('click', () => {
+                this.loadAdminStations(true).catch((error) => {
+                    console.error('Admin station refresh failed:', error);
+                    this.showToast('Seznam pozic se nepodařilo obnovit', 'error');
+                });
+            });
+        }
+
+        const refreshPeopleBtn = document.getElementById('btn-refresh-people');
+        if (refreshPeopleBtn) {
+            refreshPeopleBtn.addEventListener('click', () => {
+                this.loadAdminPeople(true).catch((error) => {
+                    console.error('Admin people refresh failed:', error);
+                    this.showToast('Katalog osob se nepodařilo načíst', 'error');
+                });
+            });
+        }
+
+        const peopleSelect = document.getElementById('admin-person-catalog');
+        if (peopleSelect) {
+            peopleSelect.addEventListener('change', () => {
+                this.applySelectedCatalogPerson();
+            });
+        }
+
+        const stationForm = document.getElementById('station-admin-form');
+        if (stationForm) {
+            stationForm.addEventListener('submit', (event) => {
+                event.preventDefault();
+                this.submitAdminStationAssignment();
+            });
+        }
+
+        const releaseBtn = document.getElementById('btn-release-station');
+        if (releaseBtn) {
+            releaseBtn.addEventListener('click', () => {
+                this.releaseAdminStation();
+            });
+        }
+
         document.querySelectorAll('.btn-alert').forEach((btn) => {
             btn.addEventListener('click', () => {
                 this.sendAlertPreset(btn.dataset.alert);
             });
         });
+
+        const setupLogoutBtn = document.getElementById('logout-setup-btn');
+        if (setupLogoutBtn) {
+            setupLogoutBtn.addEventListener('click', () => {
+                this.handleLogout();
+            });
+        }
 
         // Quick action buttons
         document.querySelectorAll('.btn-quick').forEach(btn => {
@@ -272,35 +347,7 @@ const App = {
      * Send chat message
      */
     sendChatMessage() {
-        const input = document.getElementById('message-input');
-        const content = input.value.trim();
-        
-        if (!content) return;
-        
-        // Optimistic update - show own message immediately
-        const ownMessage = {
-            message_id: `temp_${Date.now()}`,
-            sender: {
-                user_id: this.user.user_id,
-                name: this.user.name,
-                role: this.user.role,
-                station_id: this.user.station_id || null,
-            },
-            message_type: 'chat',
-            content: content,
-            created_at: new Date().toISOString()
-        };
-        
-        // Display immediately (as own message)
-        this.displayMessage(ownMessage);
-        
-        // Send via WebSocket
-        window.wsClient.sendChatMessage(content);
-        
-        // Clear input
-        input.value = '';
-        this.hideTagSuggestions();
-        input.focus();
+        return window.AppMessagingModule.sendChatMessage(this);
     },
 
     /**
@@ -308,42 +355,7 @@ const App = {
      * @param {Object} message
      */
     handleMessage(message) {
-        console.log('Handling message:', message);
-
-        const normalized = this.normalizeIncomingMessage(message);
-
-        if (!normalized) {
-            return;
-        }
-
-        if (normalized?.type === 'error') {
-            const missing = Array.isArray(normalized?.details?.missing_stations)
-                ? normalized.details.missing_stations.join(', ')
-                : '';
-            const detailText = missing ? ` Chybí: ${missing}` : '';
-            this.showToast(`${normalized.message || 'Chyba komunikace'}${detailText}`, 'error');
-            return;
-        }
-
-        this.applyRzStateFromMessage(normalized);
-        this.applyMarkerAlertFromMessage(normalized);
-        this.registerSenderForTagging(normalized);
-        
-        // Display message in communication channels
-        this.displayMessage(normalized);
-
-        if (this.isInfoChannelMessage(normalized)) {
-            this.displayInfoMessage(normalized);
-        }
-
-        if (this.isVedeniUser() && this.isIncidentForDashboard(normalized)) {
-            this.addIncidentWarning(normalized);
-        }
-        
-        // Show notification for certain message types
-        if (normalized.message_type === 'incident' || normalized.message_type === 'broadcast') {
-            this.showToast(normalized.content, 'error');
-        }
+        return window.AppMessagingModule.handleMessage(this, message);
     },
 
     /**
@@ -351,30 +363,7 @@ const App = {
      * @param {Object} message
      */
     applyMarkerAlertFromMessage(message) {
-        const stationId = message?.sender?.station_id;
-        if (!stationId) {
-            if (message?.operation_command === 'rz_resume') {
-                window.dispatchEvent(new CustomEvent('station:clear-all-alerts'));
-            }
-            return;
-        }
-
-        if (message.message_type === 'incident') {
-            window.dispatchEvent(new CustomEvent('station:alert', {
-                detail: {
-                    stationId,
-                },
-            }));
-            return;
-        }
-
-        if (message.readiness_state === 'ready') {
-            window.dispatchEvent(new CustomEvent('station:clear-alert', {
-                detail: {
-                    stationId,
-                },
-            }));
-        }
+        return window.AppMessagingModule.applyMarkerAlertFromMessage(message);
     },
 
     /**
@@ -383,42 +372,7 @@ const App = {
      * @returns {Object|null}
      */
     normalizeIncomingMessage(message) {
-        if (!message) {
-            return null;
-        }
-
-        if (message.type === 'error') {
-            return message;
-        }
-
-        if (message.message_type) {
-            const content = String(message.content || '').trim();
-            if (!content && message.message_type !== 'heartbeat') {
-                return null;
-            }
-            return message;
-        }
-
-        if (message.type === 'system') {
-            const content = String(message.message || '').trim();
-            if (!content) {
-                return null;
-            }
-            return {
-                message_id: `sys_${Date.now()}`,
-                sender: {
-                    user_id: 'system',
-                    name: 'Systém',
-                    role: 'system',
-                },
-                message_type: 'system',
-                priority: 'normal',
-                content,
-                created_at: message.timestamp || new Date().toISOString(),
-            };
-        }
-
-        return null;
+        return window.AppMessagingModule.normalizeIncomingMessage(message);
     },
 
     /**
@@ -426,50 +380,7 @@ const App = {
      * @param {Object} message
      */
     displayMessage(message, persist = true) {
-        const messagesArea = document.getElementById('messages');
-        
-        // Remove welcome message if present
-        const welcomeMsg = messagesArea.querySelector('.welcome-message');
-        if (welcomeMsg) {
-            welcomeMsg.remove();
-        }
-        
-        // Create message element
-        const messageEl = document.createElement('div');
-        messageEl.className = 'message';
-        
-        // Check if own message
-        const isOwnMessage = message.sender?.user_id === this.user.user_id;
-        if (isOwnMessage) {
-            messageEl.classList.add('own');
-        }
-        
-        // System/broadcast messages
-        if (message.message_type === 'system' || message.message_type === 'broadcast') {
-            messageEl.classList.add('system');
-        }
-        
-        // Build message HTML
-        const senderName = message.sender?.name || 'Systém';
-        const timestamp = this.formatTime(message.created_at);
-        
-        messageEl.innerHTML = `
-            <div class="message-header">
-                <span class="message-sender">${senderName}</span>
-                <span class="message-time">${timestamp}</span>
-            </div>
-            <div class="message-content">${this.renderTaggedContent(message.content)}</div>
-        `;
-        
-        // Add to DOM
-        messagesArea.appendChild(messageEl);
-
-        if (persist) {
-            this.persistStateItem('chat', message);
-        }
-        
-        // Scroll to bottom
-        messagesArea.scrollTop = messagesArea.scrollHeight;
+        return window.AppMessagingModule.displayMessage(this, message, persist);
     },
 
     /**
@@ -478,8 +389,7 @@ const App = {
      * @returns {boolean}
      */
     isInfoChannelMessage(message) {
-        const type = message.message_type;
-        return type === 'broadcast' || type === 'incident' || type === 'status_update' || type === 'system';
+        return window.AppMessagingModule.isInfoChannelMessage(message);
     },
 
     /**
@@ -487,35 +397,7 @@ const App = {
      * @param {Object} message
      */
     displayInfoMessage(message, persist = true) {
-        const infoFeed = document.getElementById('info-feed');
-        if (!infoFeed) {
-            return;
-        }
-
-        const welcomeMsg = infoFeed.querySelector('.welcome-message');
-        if (welcomeMsg) {
-            welcomeMsg.remove();
-        }
-
-        const item = document.createElement('div');
-        item.className = 'message system';
-
-        const senderName = message.sender?.name || 'Systém';
-        const timestamp = this.formatTime(message.created_at);
-        item.innerHTML = `
-            <div class="message-header">
-                <span class="message-sender">${this.escapeHtml(senderName)}</span>
-                <span class="message-time">${timestamp}</span>
-            </div>
-            <div class="message-content">${this.renderTaggedContent(message.content || '')}</div>
-        `;
-
-        infoFeed.appendChild(item);
-        infoFeed.scrollTop = infoFeed.scrollHeight;
-
-        if (persist) {
-            this.persistStateItem('info', message);
-        }
+        return window.AppMessagingModule.displayInfoMessage(this, message, persist);
     },
 
     /**
@@ -523,50 +405,21 @@ const App = {
      * @param {string} tabName
      */
     switchCommsTab(tabName) {
-        this.activeCommsTab = tabName === 'info' ? 'info' : 'chat';
-
-        document.querySelectorAll('.comms-tab').forEach((btn) => {
-            const isActive = btn.dataset.tab === this.activeCommsTab;
-            btn.classList.toggle('active', isActive);
-            btn.setAttribute('aria-selected', isActive ? 'true' : 'false');
-        });
-
-        const chatPane = document.getElementById('chat-pane');
-        const infoPane = document.getElementById('info-pane');
-        if (chatPane) {
-            chatPane.classList.toggle('active', this.activeCommsTab === 'chat');
-        }
-        if (infoPane) {
-            infoPane.classList.toggle('active', this.activeCommsTab === 'info');
-        }
+        return window.AppMessagingModule.switchCommsTab(this, tabName);
     },
 
     /**
      * Open communication drawer on mobile.
      */
     openCommsPanel() {
-        const panel = document.getElementById('comms-panel');
-        const overlay = document.getElementById('comms-overlay');
-        if (panel) {
-            panel.classList.add('open');
-        }
-        if (overlay) {
-            overlay.classList.remove('hidden');
-        }
+        return window.AppMessagingModule.openCommsPanel();
     },
 
     /**
      * Close communication drawer on mobile.
      */
     closeCommsPanel() {
-        const panel = document.getElementById('comms-panel');
-        const overlay = document.getElementById('comms-overlay');
-        if (panel) {
-            panel.classList.remove('open');
-        }
-        if (overlay) {
-            overlay.classList.add('hidden');
-        }
+        return window.AppMessagingModule.closeCommsPanel();
     },
 
     /**
@@ -574,44 +427,7 @@ const App = {
      * @param {string} status - 'online', 'offline', 'reconnecting', 'failed'
      */
     handleStatusChange(status) {
-        console.log('Status changed:', status);
-        
-        const indicator = document.getElementById('connection-status');
-        
-        // Update indicator
-        indicator.className = 'status-indicator';
-        
-        switch (status) {
-            case 'online':
-                indicator.classList.add('online');
-                indicator.title = 'Připojeno';
-                this.showToast('Připojeno k serveru', 'success');
-                break;
-                
-            case 'offline':
-                indicator.classList.add('offline');
-                indicator.title = 'Odpojeno';
-                break;
-                
-            case 'reconnecting':
-                indicator.classList.add('offline');
-                indicator.title = 'Připojování...';
-                break;
-                
-            case 'failed':
-                indicator.classList.add('offline');
-                indicator.title = 'Spojení selhalo';
-                this.showToast('Spojení se serverem selhalo', 'error');
-                this.scheduleReauthentication('Spojení selhalo. Přihlaste se znovu.');
-                break;
-
-            case 'auth_failed':
-                indicator.classList.add('offline');
-                indicator.title = 'Neplatné přihlášení';
-                this.showToast('Relace vypršela. Přihlaste se znovu.', 'error');
-                this.scheduleReauthentication('Relace vypršela. Přihlaste se znovu.');
-                break;
-        }
+        return window.AppUiCommonModule.handleStatusChange(this, status);
     },
 
     /**
@@ -619,17 +435,7 @@ const App = {
      * @param {string} reason
      */
     scheduleReauthentication(reason) {
-        if (this.reauthScheduled) {
-            return;
-        }
-
-        this.reauthScheduled = true;
-        setTimeout(() => {
-            if (reason) {
-                console.warn(reason);
-            }
-            window.Auth.logout();
-        }, 1200);
+        return window.AppUiCommonModule.scheduleReauthentication(this, reason);
     },
 
     /**
@@ -637,75 +443,28 @@ const App = {
      * @param {Error} error
      */
     handleError(error) {
-        console.error('App error:', error);
-        this.showToast('Chyba komunikace', 'error');
+        return window.AppUiCommonModule.handleError(this, error);
     },
 
     /**
      * Update admin stats
      */
     updateStats() {
-        // Message count intentionally hidden from dashboard for better signal/noise ratio.
+        return window.AppOperationsModule.updateStats();
     },
 
     /**
      * Toggle admin panel collapse
      */
     toggleAdminPanel() {
-        const header = document.querySelector('.panel-header');
-        const content = document.querySelector('.panel-content');
-        
-        if (header.classList.contains('collapsed')) {
-            header.classList.remove('collapsed');
-            content.style.display = '';
-        } else {
-            header.classList.add('collapsed');
-            content.style.display = 'none';
-        }
-
-        if (window.MapModule && window.MapModule.map) {
-            setTimeout(() => window.MapModule.map.invalidateSize(), 150);
-        }
+        return window.AppOperationsModule.toggleAdminPanel();
     },
 
     /**
      * Send broadcast message (admin only)
      */
     async sendBroadcast() {
-        const content = prompt('Hromadná zpráva všem stanicím:');
-        if (!content || !content.trim()) return;
-        
-        // Get current online count from stats
-        let onlineCount = '-';
-        try {
-            const statsResponse = await fetch('http://localhost:8000/api/stats');
-            if (statsResponse.ok) {
-                const stats = await statsResponse.json();
-                onlineCount = stats.active_connections || 0;
-            }
-        } catch (error) {
-            console.error('Failed to fetch stats:', error);
-        }
-        
-        // Show broadcast message immediately in own UI
-        const broadcastMessage = {
-            message_id: `broadcast_${Date.now()}`,
-            sender: {
-                user_id: this.user.user_id,
-                name: this.user.name,
-                role: this.user.role
-            },
-            message_type: 'broadcast',
-            content: `📢 HROMADNÁ ZPRÁVA VŠEM\n\n${content.trim()}\n\n→ Odesláno ${onlineCount} online stanicím`,
-            created_at: new Date().toISOString()
-        };
-        
-        this.displayMessage(broadcastMessage);
-        
-        // Send via WebSocket
-        window.wsClient.sendSystemMessage('broadcast', content.trim());
-        
-        this.showToast(`Hromadná zpráva odeslána ${onlineCount} stanicím`, 'success');
+        return window.AppOperationsModule.sendBroadcast(this);
     },
 
     /**
@@ -713,42 +472,7 @@ const App = {
      * @param {string} alertKey
      */
     sendAlertPreset(alertKey) {
-        const presets = {
-            rz_stop: { text: '🛑 RZ zastavena - okamžitě zajistit trať.', priority: 'critical' },
-            track_problem: { text: '⚠️ Pozor problém na trati - zvýšená opatrnost.', priority: 'high' },
-            rz_hold: { text: '⏸️ RZ pozastavena - vyčkejte dalších pokynů.', priority: 'high' },
-            rz_resume: { text: '✅ RZ opět v provozu - pokračujte dle standardního režimu.', priority: 'normal' },
-        };
-
-        const preset = presets[alertKey];
-        if (!preset) {
-            return;
-        }
-
-        const payload = {
-            message_type: 'broadcast',
-            priority: preset.priority,
-            content: preset.text,
-            operation_command: alertKey,
-            created_at: new Date().toISOString(),
-        };
-
-        const ownMessage = {
-            message_id: `preset_${Date.now()}`,
-            sender: {
-                user_id: this.user.user_id,
-                name: this.user.name,
-                role: this.user.role,
-                station_id: this.user.station_id || null,
-            },
-            ...payload,
-        };
-
-        this.displayMessage(ownMessage);
-        this.displayInfoMessage(ownMessage);
-        this.applyRzStateFromCommand(alertKey);
-        window.wsClient.sendMessage(payload);
-        this.showToast('Předdefinované hlášení odesláno', 'success');
+        return window.AppOperationsModule.sendAlertPreset(this, alertKey);
     },
 
     /**
@@ -756,19 +480,14 @@ const App = {
      * @returns {string}
      */
     getRzStateStorageKey() {
-        return 'rally_rz_state';
+        return window.AppUiCommonModule.getRzStateStorageKey();
     },
 
     /**
      * Load persisted RZ state and fallback to running.
      */
     loadRzState() {
-        const saved = localStorage.getItem(this.getRzStateStorageKey());
-        if (saved === 'running' || saved === 'paused' || saved === 'stopped') {
-            this.rzState = saved;
-            return;
-        }
-        this.rzState = 'running';
+        return window.AppUiCommonModule.loadRzState(this);
     },
 
     /**
@@ -776,35 +495,14 @@ const App = {
      * @param {'running'|'paused'|'stopped'} state
      */
     setRzState(state) {
-        this.rzState = state;
-        localStorage.setItem(this.getRzStateStorageKey(), state);
-        this.applyRzStateUi();
+        return window.AppUiCommonModule.setRzState(this, state);
     },
 
     /**
      * Update top badge + map border according to current RZ state.
      */
     applyRzStateUi() {
-        const badge = document.getElementById('rz-live-status');
-        const mapPanel = document.querySelector('.map-panel');
-
-        if (badge) {
-            badge.classList.remove('running', 'paused', 'stopped');
-            badge.classList.add(this.rzState);
-
-            if (this.rzState === 'paused') {
-                badge.textContent = 'RZ: Pozastavena';
-            } else if (this.rzState === 'stopped') {
-                badge.textContent = 'RZ: Zastavena';
-            } else {
-                badge.textContent = 'RZ: V provozu';
-            }
-        }
-
-        if (mapPanel) {
-            const warning = this.rzState === 'paused' || this.rzState === 'stopped';
-            mapPanel.classList.toggle('rz-warning', warning);
-        }
+        return window.AppOperationsModule.applyRzStateUi(this);
     },
 
     /**
@@ -812,13 +510,7 @@ const App = {
      * @param {string} command
      */
     applyRzStateFromCommand(command) {
-        if (command === 'rz_stop') {
-            this.setRzState('stopped');
-        } else if (command === 'rz_hold') {
-            this.setRzState('paused');
-        } else if (command === 'rz_resume') {
-            this.setRzState('running');
-        }
+        return window.AppOperationsModule.applyRzStateFromCommand(this, command);
     },
 
     /**
@@ -826,23 +518,7 @@ const App = {
      * @param {Object} message
      */
     applyRzStateFromMessage(message) {
-        if (!message) {
-            return;
-        }
-
-        if (message.operation_command) {
-            this.applyRzStateFromCommand(message.operation_command);
-            return;
-        }
-
-        const text = String(message.content || '').toLowerCase();
-        if (text.includes('rz zastavena')) {
-            this.setRzState('stopped');
-        } else if (text.includes('rz pozastavena')) {
-            this.setRzState('paused');
-        } else if (text.includes('rz opět v provozu')) {
-            this.setRzState('running');
-        }
+        return window.AppOperationsModule.applyRzStateFromMessage(this, message);
     },
 
     /**
@@ -850,105 +526,14 @@ const App = {
      * @param {string} action
      */
     handleQuickAction(action) {
-        if (action === 'ready') {
-            this.incidentGateActive = false;
-            if (this.user.station_id) {
-                window.dispatchEvent(new CustomEvent('station:clear-alert', {
-                    detail: {
-                        stationId: this.user.station_id,
-                    },
-                }));
-            }
-            window.wsClient.sendMessage({
-                message_type: 'status_update',
-                readiness_state: 'ready',
-                content: '✅ Stanice připravena',
-                created_at: new Date().toISOString(),
-            });
-            this.showToast('Stav odeslán', 'success');
-            return;
-        }
-
-        if (action === 'issue') {
-            const detail = prompt('Popiš stručně problém na stanici:');
-            if (!detail || !detail.trim()) {
-                this.showToast('Incident nebyl odeslán', 'info');
-                return;
-            }
-
-            const payload = {
-                message_type: 'incident',
-                priority: 'high',
-                target_roles: ['vedouci', 'zastupce'],
-                readiness_state: 'not_ready',
-                content: `⚠️ INCIDENT: ${detail.trim()}`,
-                created_at: new Date().toISOString(),
-            };
-
-            const ownMessage = {
-                message_id: `incident_${Date.now()}`,
-                sender: {
-                    user_id: this.user.user_id,
-                    name: this.user.name,
-                    role: this.user.role,
-                    station_id: this.user.station_id || null,
-                },
-                ...payload,
-            };
-
-            this.displayMessage(ownMessage);
-            this.displayInfoMessage(ownMessage);
-            this.applyMarkerAlertFromMessage(ownMessage);
-            window.wsClient.sendMessage(payload);
-            this.incidentGateActive = true;
-            this.showToast('Incident odeslán vedení', 'error');
-            return;
-        }
-
-        if (action === 'emergency') {
-            const payload = {
-                message_type: 'incident',
-                priority: 'critical',
-                target_roles: ['vedouci', 'zastupce'],
-                readiness_state: 'not_ready',
-                operation_command: 'emergency',
-                content: '🆘 AKUTNÍ: Okamžitá pomoc na stanici!',
-                created_at: new Date().toISOString(),
-            };
-
-            const ownMessage = {
-                message_id: `emergency_${Date.now()}`,
-                sender: {
-                    user_id: this.user.user_id,
-                    name: this.user.name,
-                    role: this.user.role,
-                    station_id: this.user.station_id || null,
-                },
-                ...payload,
-            };
-
-            this.displayMessage(ownMessage);
-            this.displayInfoMessage(ownMessage);
-            this.applyMarkerAlertFromMessage(ownMessage);
-            window.wsClient.sendMessage(payload);
-            this.incidentGateActive = true;
-            this.showToast('Akutní incident odeslán vedení', 'error');
-        }
+        return window.AppOperationsModule.handleQuickAction(this, action);
     },
 
     /**
      * Refresh readiness gate state from backend for admin dashboard.
      */
     startGateStatusRefresh() {
-        this.refreshGateStatus().catch((error) => {
-            console.error('Gate status refresh failed:', error);
-        });
-
-        setInterval(() => {
-            this.refreshGateStatus().catch((error) => {
-                console.error('Gate status refresh failed:', error);
-            });
-        }, 12000);
+        return window.AppOperationsModule.startGateStatusRefresh(this);
     },
 
     /**
@@ -956,43 +541,7 @@ const App = {
      * @returns {Promise<void>}
      */
     async refreshGateStatus() {
-        const gateLabel = document.getElementById('incident-gate-status');
-        const missingLabel = document.getElementById('incident-gate-missing');
-        if (!gateLabel || !missingLabel || !this.isVedeniUser()) {
-            return;
-        }
-
-        const response = await fetch('http://localhost:8000/api/stations/readiness');
-        if (!response.ok) {
-            gateLabel.textContent = 'Gate: nedostupné';
-            gateLabel.classList.remove('gate-open', 'gate-closed');
-            missingLabel.textContent = '-';
-            return;
-        }
-
-        const snapshot = await response.json();
-        const incidentActive = Boolean(snapshot.incident_active);
-        const total = Number(snapshot.total_stations || 0);
-        const ready = Number(snapshot.ready_stations || 0);
-        const missingStations = Array.isArray(snapshot.stations)
-            ? snapshot.stations
-                .filter((station) => station.ready === false)
-                .map((station) => station.station_id || 'N/A')
-            : [];
-        this.incidentGateActive = incidentActive;
-
-        if (!incidentActive) {
-            gateLabel.textContent = 'Gate: otevřeno';
-            gateLabel.classList.add('gate-open');
-            gateLabel.classList.remove('gate-closed');
-            missingLabel.textContent = '-';
-            return;
-        }
-
-        gateLabel.textContent = `Gate: čeká READY ${ready}/${total}`;
-        gateLabel.classList.add('gate-closed');
-        gateLabel.classList.remove('gate-open');
-        missingLabel.textContent = missingStations.length ? missingStations.join(', ') : '-';
+        return window.AppOperationsModule.refreshGateStatus(this);
     },
 
     /**
@@ -1000,7 +549,7 @@ const App = {
      * @returns {boolean}
      */
     isVedeniUser() {
-        return this.user?.role === 'vedouci' || this.user?.role === 'zastupce';
+        return window.AppOperationsModule.isVedeniUser(this);
     },
 
     /**
@@ -1009,7 +558,7 @@ const App = {
      * @returns {boolean}
      */
     isIncidentForDashboard(message) {
-        return message.message_type === 'incident' || message.message_type === 'broadcast';
+        return window.AppOperationsModule.isIncidentForDashboard(message);
     },
 
     /**
@@ -1017,40 +566,7 @@ const App = {
      * @param {Object} message
      */
     addIncidentWarning(message, persist = true) {
-        const feed = document.getElementById('incident-feed');
-        if (!feed) {
-            return;
-        }
-
-        const empty = feed.querySelector('.incident-empty');
-        if (empty) {
-            empty.remove();
-        }
-
-        const senderName = this.escapeHtml(message.sender?.name || 'Neznámý');
-        const senderPhone = this.escapeHtml(message.sender?.phone || 'neuvedeno');
-        const text = this.escapeHtml(message.content || 'Bez obsahu');
-
-        const item = document.createElement('div');
-        feed.querySelectorAll('.incident-item.latest').forEach((existing) => {
-            existing.classList.remove('latest');
-        });
-
-        item.className = 'incident-item latest';
-        item.innerHTML = `
-            <strong>${senderName}</strong> (${this.formatTime(message.created_at)})<br>
-            ${text}<br>
-            Kontakt: <a href="tel:${senderPhone}">${senderPhone}</a>
-        `;
-
-        feed.prepend(item);
-        while (feed.children.length > 20) {
-            feed.removeChild(feed.lastChild);
-        }
-
-        if (persist) {
-            this.persistStateItem('incidents', message);
-        }
+        return window.AppOperationsModule.addIncidentWarning(this, message, persist);
     },
 
     /**
@@ -1059,22 +575,14 @@ const App = {
      * @returns {string}
      */
     getStateStorageKey(bucket) {
-        return `rally_state_${this.user?.user_id || 'guest'}_${bucket}`;
+        return window.AppUiCommonModule.getStateStorageKey(this, bucket);
     },
 
     /**
      * Load persisted state arrays for current user.
      */
     loadPersistedState() {
-        ['chat', 'info', 'incidents'].forEach((bucket) => {
-            try {
-                const raw = localStorage.getItem(this.getStateStorageKey(bucket));
-                const parsed = raw ? JSON.parse(raw) : [];
-                this.persistedState[bucket] = Array.isArray(parsed) ? parsed : [];
-            } catch (_error) {
-                this.persistedState[bucket] = [];
-            }
-        });
+        return window.AppUiCommonModule.loadPersistedState(this);
     },
 
     /**
@@ -1083,43 +591,120 @@ const App = {
      * @param {Object} payload
      */
     persistStateItem(bucket, payload) {
-        if (!this.persistedState[bucket]) {
-            return;
-        }
-
-        const maxSize = this.stateStorageLimits[bucket] || 100;
-        this.persistedState[bucket].push(payload);
-        if (this.persistedState[bucket].length > maxSize) {
-            this.persistedState[bucket] = this.persistedState[bucket].slice(-maxSize);
-        }
-
-        localStorage.setItem(
-            this.getStateStorageKey(bucket),
-            JSON.stringify(this.persistedState[bucket]),
-        );
+        return window.AppUiCommonModule.persistStateItem(this, bucket, payload);
     },
 
     /**
      * Restore persisted chat/info/incident messages into current UI.
      */
     restorePersistedUiState() {
-        this.persistedState.chat.forEach((message) => this.displayMessage(message, false));
-        this.persistedState.info.forEach((message) => this.displayInfoMessage(message, false));
-        this.persistedState.incidents.forEach((message) => this.addIncidentWarning(message, false));
+        return window.AppUiCommonModule.restorePersistedUiState(this);
     },
 
     /**
      * Set vedeni contact link for komisar quick actions.
      */
     updateVedeniContact() {
-        const link = document.getElementById('vedeni-phone-link');
-        if (!link) {
-            return;
-        }
+        return window.AppUiCommonModule.updateVedeniContact(this);
+    },
 
-        const phone = this.user?.vedeni_phone || '+420777123456';
-        link.href = `tel:${phone}`;
-        link.textContent = phone;
+    /**
+     * Return headers for admin API requests.
+     * @returns {Object}
+     */
+    getAdminHeaders() {
+        return window.SetupAdminModule.getAdminHeaders(this);
+    },
+
+    /**
+     * Switch to dedicated setup screen for positions and map configuration.
+     */
+    openSetupScreen() {
+        return window.SetupAdminModule.openSetupScreen(this);
+    },
+
+    /**
+     * Return from setup screen back to live dashboard.
+     */
+    openDashboardScreen() {
+        return window.SetupAdminModule.openDashboardScreen(this);
+    },
+
+    /**
+     * Load station directory for admin panel.
+     * @param {boolean} announceRefresh
+     * @returns {Promise<void>}
+     */
+    async loadAdminStations(announceRefresh = false) {
+        return window.SetupAdminModule.loadAdminStations(this, announceRefresh);
+    },
+
+    /**
+     * Load people catalog for setup dropdown.
+     * @param {boolean} announceRefresh
+     * @returns {Promise<void>}
+     */
+    async loadAdminPeople(announceRefresh = false) {
+        return window.SetupAdminModule.loadAdminPeople(this, announceRefresh);
+    },
+
+    /**
+     * Render station selector list in admin panel.
+     */
+    renderAdminStationList() {
+        return window.SetupAdminModule.renderAdminStationList(this);
+    },
+
+    /**
+     * Find selected station record in loaded admin directory.
+     * @returns {Object|null}
+     */
+    getSelectedAdminStation() {
+        return window.SetupAdminModule.getSelectedAdminStation(this);
+    },
+
+    /**
+     * Render detail, form and history for selected station.
+     */
+    renderSelectedAdminStation() {
+        return window.SetupAdminModule.renderSelectedAdminStation(this);
+    },
+
+    /**
+     * Render people dropdown options in setup assignment form.
+     * @param {string} preferredName
+     */
+    renderAdminPeopleOptions(preferredName = '') {
+        return window.SetupAdminModule.renderAdminPeopleOptions(this, preferredName);
+    },
+
+    /**
+     * Prefill assignment form from selected person in catalog.
+     */
+    applySelectedCatalogPerson() {
+        return window.SetupAdminModule.applySelectedCatalogPerson(this);
+    },
+
+    /**
+     * Render assignment history for selected station.
+     * @param {Array<Object>} entries
+     */
+    renderAdminHistory(entries) {
+        return window.SetupAdminModule.renderAdminHistory(this, entries);
+    },
+
+    /**
+     * Submit assign/reassign form for selected station.
+     */
+    async submitAdminStationAssignment() {
+        return window.SetupAdminModule.submitAdminStationAssignment(this);
+    },
+
+    /**
+     * Release currently assigned person from selected station.
+     */
+    async releaseAdminStation() {
+        return window.SetupAdminModule.releaseAdminStation(this);
     },
 
     /**
@@ -1127,10 +712,7 @@ const App = {
      * @param {Object} message
      */
     registerSenderForTagging(message) {
-        const senderName = message?.sender?.name;
-        if (senderName) {
-            this.knownUsers.add(senderName);
-        }
+        return window.AppTaggingModule.registerSenderForTagging(this, message);
     },
 
     /**
@@ -1138,15 +720,7 @@ const App = {
      * @param {Array<Object>} stations
      */
     updateStationTags(stations) {
-        stations.forEach((station) => {
-            if (station.station_id) {
-                this.knownStations.add(station.station_id);
-            }
-
-            if (station.name) {
-                this.knownUsers.add(station.name);
-            }
-        });
+        return window.AppTaggingModule.updateStationTags(this, stations);
     },
 
     /**
@@ -1154,20 +728,7 @@ const App = {
      * @param {MouseEvent} event
      */
     handleTagClick(event) {
-        const stationTag = event.target.closest('.chat-tag-station[data-station-id]');
-        if (!stationTag) {
-            return;
-        }
-
-        const stationId = stationTag.dataset.stationId;
-        if (!stationId || !window.MapModule || typeof window.MapModule.focusStation !== 'function') {
-            return;
-        }
-
-        const focused = window.MapModule.focusStation(stationId);
-        if (!focused) {
-            this.showToast(`Stanice ${stationId} zatím není na mapě`, 'info');
-        }
+        return window.AppTaggingModule.handleTagClick(this, event);
     },
 
     /**
@@ -1177,13 +738,7 @@ const App = {
      * @returns {string|null}
      */
     resolveKnownItem(collection, value) {
-        const normalized = String(value || '').toLowerCase();
-        for (const item of collection) {
-            if (item.toLowerCase() === normalized) {
-                return item;
-            }
-        }
-        return null;
+        return window.AppTaggingModule.resolveKnownItem(collection, value);
     },
 
     /**
@@ -1191,42 +746,7 @@ const App = {
      * @param {InputEvent} event
      */
     onMessageInputChanged(event) {
-        const input = event.target;
-        const value = input.value;
-        const caret = input.selectionStart || value.length;
-        const context = this.findTagContext(value, caret);
-
-        if (!context) {
-            this.hideTagSuggestions();
-            return;
-        }
-
-        const pool = context.type === '@'
-            ? Array.from(this.knownUsers)
-            : Array.from(this.knownStations);
-
-        const normalizedQuery = context.query.toLowerCase();
-        const candidates = pool
-            .filter((item) => item.toLowerCase().startsWith(normalizedQuery))
-            .sort((a, b) => a.localeCompare(b, 'cs'))
-            .slice(0, 7);
-
-        if (!candidates.length) {
-            this.hideTagSuggestions();
-            return;
-        }
-
-        this.tagSuggestion = {
-            active: true,
-            type: context.type,
-            query: context.query,
-            start: context.start,
-            end: caret,
-            selectedIndex: 0,
-            candidates,
-        };
-
-        this.renderTagSuggestions();
+        return window.AppTaggingModule.onMessageInputChanged(this, event);
     },
 
     /**
@@ -1236,59 +756,14 @@ const App = {
      * @returns {Object|null}
      */
     findTagContext(text, caret) {
-        const before = text.slice(0, caret);
-        const markerIndex = Math.max(before.lastIndexOf('@'), before.lastIndexOf('#'));
-        if (markerIndex < 0) {
-            return null;
-        }
-
-        const marker = before[markerIndex];
-        const prefix = before.slice(markerIndex + 1);
-
-        if (markerIndex > 0) {
-            const prev = before[markerIndex - 1];
-            if (!/\s/.test(prev)) {
-                return null;
-            }
-        }
-
-        if (/\s/.test(prefix)) {
-            return null;
-        }
-
-        return {
-            type: marker,
-            query: prefix,
-            start: markerIndex,
-        };
+        return window.AppTaggingModule.findTagContext(text, caret);
     },
 
     /**
      * Render suggestion dropdown under message input.
      */
     renderTagSuggestions() {
-        const list = document.getElementById('tag-suggestions');
-        if (!list || !this.tagSuggestion.active) {
-            return;
-        }
-
-        const prefix = this.tagSuggestion.type;
-        list.innerHTML = this.tagSuggestion.candidates
-            .map((item, index) => {
-                const active = index === this.tagSuggestion.selectedIndex ? 'active' : '';
-                return `<button type="button" class="tag-suggestion-item ${active}" data-tag="${this.escapeHtml(item)}">${prefix}${this.escapeHtml(item)}</button>`;
-            })
-            .join('');
-
-        list.classList.remove('hidden');
-
-        list.querySelectorAll('.tag-suggestion-item').forEach((button) => {
-            button.addEventListener('mousedown', (event) => {
-                event.preventDefault();
-                const tag = button.dataset.tag;
-                this.applyTagSuggestion(tag);
-            });
-        });
+        return window.AppTaggingModule.renderTagSuggestions(this);
     },
 
     /**
@@ -1296,19 +771,7 @@ const App = {
      * @param {string} tag
      */
     applyTagSuggestion(tag) {
-        const input = document.getElementById('message-input');
-        if (!input || !this.tagSuggestion.active) {
-            return;
-        }
-
-        const before = input.value.slice(0, this.tagSuggestion.start);
-        const after = input.value.slice(this.tagSuggestion.end);
-        const insert = `${this.tagSuggestion.type}${tag} `;
-        input.value = `${before}${insert}${after}`;
-        const newCaret = (before + insert).length;
-        input.setSelectionRange(newCaret, newCaret);
-        input.focus();
-        this.hideTagSuggestions();
+        return window.AppTaggingModule.applyTagSuggestion(this, tag);
     },
 
     /**
@@ -1316,46 +779,14 @@ const App = {
      * @param {KeyboardEvent} event
      */
     onMessageInputKeyDown(event) {
-        if (!this.tagSuggestion.active) {
-            return;
-        }
-
-        const total = this.tagSuggestion.candidates.length;
-        if (!total) {
-            return;
-        }
-
-        if (event.key === 'ArrowDown') {
-            event.preventDefault();
-            this.tagSuggestion.selectedIndex = (this.tagSuggestion.selectedIndex + 1) % total;
-            this.renderTagSuggestions();
-        } else if (event.key === 'ArrowUp') {
-            event.preventDefault();
-            this.tagSuggestion.selectedIndex = (this.tagSuggestion.selectedIndex - 1 + total) % total;
-            this.renderTagSuggestions();
-        } else if (event.key === 'Enter') {
-            event.preventDefault();
-            const tag = this.tagSuggestion.candidates[this.tagSuggestion.selectedIndex];
-            this.applyTagSuggestion(tag);
-        } else if (event.key === 'Escape') {
-            event.preventDefault();
-            this.hideTagSuggestions();
-        }
+        return window.AppTaggingModule.onMessageInputKeyDown(this, event);
     },
 
     /**
      * Hide and reset tag suggestion UI.
      */
     hideTagSuggestions() {
-        this.tagSuggestion.active = false;
-        this.tagSuggestion.candidates = [];
-        this.tagSuggestion.selectedIndex = 0;
-
-        const list = document.getElementById('tag-suggestions');
-        if (list) {
-            list.classList.add('hidden');
-            list.innerHTML = '';
-        }
+        return window.AppTaggingModule.hideTagSuggestions(this);
     },
 
     /**
@@ -1364,39 +795,14 @@ const App = {
      * @returns {string}
      */
     renderTaggedContent(text) {
-        const source = String(text || '');
-        const tokenRegex = /([@#][\w-]+)/g;
-        const parts = source.split(tokenRegex);
-
-        return parts.map((part) => {
-            if (part.startsWith('@')) {
-                const rawUser = part.slice(1);
-                const knownUser = this.resolveKnownItem(this.knownUsers, rawUser);
-                if (!knownUser) {
-                    return this.escapeHtml(part);
-                }
-                return `<span class="chat-tag chat-tag-user">@${this.escapeHtml(knownUser)}</span>`;
-            }
-            if (part.startsWith('#')) {
-                const rawStation = part.slice(1);
-                const knownStation = this.resolveKnownItem(this.knownStations, rawStation);
-                if (!knownStation) {
-                    return this.escapeHtml(part);
-                }
-                const safeStation = this.escapeHtml(knownStation);
-                return `<span class="chat-tag chat-tag-station chat-tag-clickable" data-station-id="${safeStation}" title="Přejít na stanici na mapě">#${safeStation}</span>`;
-            }
-            return this.escapeHtml(part);
-        }).join('');
+        return window.AppTaggingModule.renderTaggedContent(this, text);
     },
 
     /**
      * Handle logout
      */
     handleLogout() {
-        if (confirm('Opravdu se chcete odhlásit?')) {
-            window.Auth.logout();
-        }
+        return window.AppUiCommonModule.handleLogout();
     },
 
     /**
@@ -1405,19 +811,7 @@ const App = {
      * @param {string} type - 'success', 'error', 'info'
      */
     showToast(message, type = 'info') {
-        const container = document.getElementById('toast-container');
-        
-        const toast = document.createElement('div');
-        toast.className = `toast ${type}`;
-        toast.textContent = message;
-        
-        container.appendChild(toast);
-        
-        // Auto-remove after 3 seconds
-        setTimeout(() => {
-            toast.style.opacity = '0';
-            setTimeout(() => toast.remove(), 300);
-        }, 3000);
+        return window.AppUiCommonModule.showToast(message, type);
     },
 
     /**
@@ -1426,17 +820,16 @@ const App = {
      * @returns {string}
      */
     formatTime(isoString) {
-        if (!isoString) return '';
-        
-        try {
-            const date = new Date(isoString);
-            return date.toLocaleTimeString('cs-CZ', { 
-                hour: '2-digit', 
-                minute: '2-digit' 
-            });
-        } catch {
-            return '';
-        }
+        return window.AppUiCommonModule.formatTime(isoString);
+    },
+
+    /**
+     * Format timestamp to locale date and time.
+     * @param {string} isoString
+     * @returns {string}
+     */
+    formatDateTime(isoString) {
+        return window.AppUiCommonModule.formatDateTime(isoString);
     },
 
     /**
@@ -1445,9 +838,7 @@ const App = {
      * @returns {string}
      */
     escapeHtml(text) {
-        const div = document.createElement('div');
-        div.textContent = text;
-        return div.innerHTML;
+        return window.AppUiCommonModule.escapeHtml(text);
     },
 };
 
