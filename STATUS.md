@@ -299,6 +299,19 @@ _Details in [ROADMAP.md](ROADMAP.md)_
 - ✅ Setup live sync: změna role/osoby na pozici okamžitě refreshne mapu + dashboard statusy
 - ✅ Maintenance: odstraněny Python/FastAPI deprecation warningy (Pydantic `ConfigDict`, FastAPI `lifespan`)
 - ✅ Testy: admin API integrační test přepsán z `TestClient` na `httpx.AsyncClient` (`ASGITransport`)
+- ✅ Setup map config (minimum): vlastní cesta k GeoJSON trati + ruční souřadnice vybrané pozice
+- ✅ Setup map config: hodnoty se ukládají lokálně a po uložení se ihned projeví na mapě bez reloadu
+- ⏳ Formální desktop/mobile průchod Fáze 4 odložen na závěrečnou validační iteraci
+- ✅ Mapa: stavová logika markerů sjednocena na offline červená / online-not-ready žlutá / online-ready zelená
+- ✅ Provoz RZ: při ztrátě komunikace stanice během běhu se vedení zobrazí varování v chatu s kontaktem, bez automatického stopu RZ
+- ✅ Incident gate: vedoucí může potvrdit `Spustit i přes warning` pro `RZ opět v provozu` i při chybějícím READY
+- ✅ Mapa: přidána vrstva GeoJSON prvků trati (start/cíl, časomíra, zdravotníci, hasiči, divácká místa, retardéry, uzavírky)
+- ✅ Mapa: komisařské body nesou flag `requires_commissioner` a jsou vizuálně odlišeny od nekomisařských prvků
+- ✅ Mapa: v hlavičce je viditelný badge `OpenStreetMap + vlastní vrstva`
+- ✅ Mapa: popisky pozic ukazují jméno, název pozice a telefon i pro offline použití
+- ✅ Resume warning UX: potvrzení vypisuje stanice mimo komunikaci a umožní jen vědomé potvrzení nebo zrušení
+- ✅ Audit trail: přidán endpoint `POST /api/audit/frontend-event` a logování klíčových UI akcí
+- ✅ Audit trail: admin změny lidí/pozic a provozní rozhodnutí (`rz_stop/hold/resume`) se logují server-side
 
 ## 💡 Backlog nápadů
 
@@ -350,10 +363,10 @@ _Details in [ROADMAP.md](ROADMAP.md)_
 
 ## 🎯 Next Actions
 
-1. Doplnit na setup obrazovce create/delete pozice a pohodlnější přesun osoby mezi dvěma pozicemi
-2. Navrhnout a implementovat konfiguraci mapy a předdefinovaných pozic na stejné setup obrazovce
+1. Dokončit minimální řez Fáze 5: konfigurace mapových podkladů a předdefinovaných pozic na setup obrazovce
+2. Doplnit na setup obrazovce create/delete pozice a pohodlnější přesun osoby mezi dvěma pozicemi
 3. Rozhodnout, zda držet plně dynamický station registry v `pins.json`, nebo zavést samostatný katalog stanic
-4. Vrátit se k formálnímu desktop/mobile průchodu Fáze 4 před širším field testem
+4. Formální desktop/mobile průchod Fáze 4 (checklist + E2E gate) odložit na závěrečnou validační iteraci
 
 ---
 

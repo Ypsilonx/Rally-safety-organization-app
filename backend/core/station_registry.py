@@ -2,12 +2,17 @@
 
 from __future__ import annotations
 
+import json
+from pathlib import Path
+
 from backend.core.auth import auth_manager
 from backend.models.station import AssignedUser, StationAccess, StationAssignmentRequest, StationCreateRequest, StationType
 
 
 class StationRegistry:
     """Provides station-first access and mutation helpers for admin flows."""
+
+    STATION_TEMPLATE_PATH = Path("data/station-coordinates.json")
 
     def _infer_station_type(self, station_id: str, fallback: str | None) -> StationType:
         """Infer station type from stored value or station identifier prefix.
@@ -81,6 +86,32 @@ class StationRegistry:
             created_at=station_access.created_at,
         )
 
+    def _load_station_templates(self) -> list[dict[str, str | int | float]]:
+        """Load predefined station templates generated from map source data.
+
+        Returns:
+            Deduplicated station template records keyed by station_id.
+        """
+        if not self.STATION_TEMPLATE_PATH.exists():
+            return []
+
+        payload = json.loads(self.STATION_TEMPLATE_PATH.read_text(encoding="utf-8"))
+        raw_templates = payload.get("stations", [])
+        if not isinstance(raw_templates, list):
+            return []
+
+        deduplicated: dict[str, dict[str, str | int | float]] = {}
+        for item in raw_templates:
+            if not isinstance(item, dict):
+                continue
+            station_id = str(item.get("station_id", "")).strip()
+            if not station_id:
+                continue
+            if station_id not in deduplicated:
+                deduplicated[station_id] = item
+
+        return list(deduplicated.values())
+
     def list_stations(self) -> list[StationAccess]:
         """Return all persisted station PINs as station-centric records.
 
@@ -122,6 +153,9 @@ class StationRegistry:
             name=request.name,
             role=request.role,
             phone=request.phone,
+            email=request.email,
+            address=request.address,
+            group=request.group,
             note=request.note,
         )
         return self._to_station_access(record)
@@ -181,9 +215,73 @@ class StationRegistry:
             assignee_name=request.name,
             assignee_role=request.role,
             assignee_phone=request.phone,
+            assignee_email=request.email,
+            assignee_address=request.address,
+            assignee_group=request.group,
             note=request.note,
         )
         return self._to_station_access(record)
+
+    def regenerate_station_pin(self, station_id: str) -> tuple[str, StationAccess]:
+        """Regenerate PIN code for one existing station.
+
+        Args:
+            station_id: Station identifier whose PIN should be rotated.
+
+        Returns:
+            Tuple of previous PIN and updated station record.
+
+        Raises:
+            KeyError: If the station does not exist.
+        """
+        old_pin, record = auth_manager.regenerate_station_pin(station_id)
+        return old_pin, self._to_station_access(record)
+
+    def bulk_generate_station_pins_from_map(self, regenerate_existing: bool = False) -> dict[str, int]:
+        """Create missing station PINs from map templates and optionally rotate existing ones.
+
+        Args:
+            regenerate_existing: When True, rotate PIN for already existing stations.
+
+        Returns:
+            Summary counters for created/regenerated/skipped stations.
+        """
+        templates = self._load_station_templates()
+        created = 0
+        regenerated = 0
+        skipped = 0
+
+        for item in templates:
+            station_id = str(item.get("station_id", "")).strip()
+            if not station_id:
+                continue
+
+            existing = auth_manager.find_pin_by_station_id(station_id)
+            if existing is not None:
+                if regenerate_existing:
+                    auth_manager.regenerate_station_pin(station_id)
+                    regenerated += 1
+                else:
+                    skipped += 1
+                continue
+
+            station_name = str(item.get("station_name", station_id)).strip() or station_id
+            station_type = str(item.get("suggested_station_type", "other")).strip() or "other"
+            auth_manager.create_station_pin_unassigned(
+                station_id=station_id,
+                station_name=station_name,
+                station_type=station_type,
+                capacity=1,
+                description="Auto-generated from map station templates",
+            )
+            created += 1
+
+        return {
+            "templates_total": len(templates),
+            "created": created,
+            "regenerated": regenerated,
+            "skipped": skipped,
+        }
 
     def delete_station(self, station_id: str) -> StationAccess:
         """Delete station-bound PIN.

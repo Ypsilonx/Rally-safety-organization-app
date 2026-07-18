@@ -22,6 +22,8 @@ def test_generate_pin_is_persistent(tmp_path: Path) -> None:
 
     verified = manager.verify_pin(created.pin_code)
     assert verified is not None
+    assert len(created.pin_code) == 8
+    assert created.pin_code.isdigit()
     assert verified.name == "Test Komisar"
     assert verified.station_id == "TK-01"
 
@@ -151,3 +153,57 @@ def test_create_and_delete_station_pin_persists(tmp_path: Path) -> None:
 
     final_reload = AuthManager(pins_file=str(pins_file))
     assert final_reload.find_pin_by_station_id("PK-10") is None
+
+
+def test_create_unassigned_station_pin_requires_assignment_for_login(tmp_path: Path) -> None:
+    """Station PIN without assignee should stay inactive until assignment is added."""
+    pins_file = tmp_path / "pins.json"
+    manager = AuthManager(pins_file=str(pins_file))
+
+    created = manager.create_station_pin_unassigned(
+        station_id="TK-01",
+        station_name="Traťový bod 01",
+        station_type="track_point",
+        capacity=1,
+        description="Auto-generated",
+    )
+
+    assert created.station_id == "TK-01"
+    assert created.assignment_history == []
+    assert manager.verify_pin(created.pin_code) is None
+
+    assigned = manager.assign_user_to_station(
+        station_id="TK-01",
+        name="Petr Nový",
+        role=UserRole.KOMISAR_TRAT,
+        phone="+420111222333",
+    )
+
+    assert manager.verify_pin(created.pin_code) is not None
+    assert assigned.assignment_history[-1].is_active is True
+
+
+def test_regenerate_station_pin_keeps_station_binding(tmp_path: Path) -> None:
+    """Regenerated station PIN should keep station identity and current assignment."""
+    pins_file = tmp_path / "pins.json"
+    manager = AuthManager(pins_file=str(pins_file))
+    created = manager.create_station_pin(
+        station_id="TK-22",
+        station_name="Traťový bod 22",
+        station_type="track_point",
+        capacity=1,
+        description="",
+        assignee_name="Alena Testovací",
+        assignee_role=UserRole.KOMISAR_TRAT,
+        assignee_phone="+420555444333",
+    )
+    original_pin = created.pin_code
+
+    old_pin, updated = manager.regenerate_station_pin("TK-22")
+
+    assert old_pin == original_pin
+    assert updated.station_id == "TK-22"
+    assert updated.pin_code != old_pin
+    assert len(updated.pin_code) == 8
+    assert manager.verify_pin(old_pin) is None
+    assert manager.verify_pin(updated.pin_code) is not None

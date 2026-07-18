@@ -1,0 +1,2214 @@
+{
+  "updated_at": "2026-07-18T13:00:16.514272+00:00",
+  "source_file": "data/RZ Hošťálková FINAL- 1_Tabulka pozic se jmény a tel.xlsx.csv",
+  "processed_rows": 133,
+  "coordinates": {
+    "1": [
+      49.3410736,
+      17.974425
+    ],
+    "TK-01": [
+      49.3410736,
+      17.974425
+    ],
+    "2": [
+      49.3415158,
+      17.9738309
+    ],
+    "TK-02": [
+      49.3415158,
+      17.9738309
+    ],
+    "3": [
+      49.3418714,
+      17.9705724
+    ],
+    "TK-03": [
+      49.3418714,
+      17.9705724
+    ],
+    "VRZ": [
+      49.3417912,
+      17.9704723
+    ],
+    "VBRZ": [
+      49.341758,
+      17.9704589
+    ],
+    "4": [
+      49.3413419,
+      17.970559
+    ],
+    "TK-04": [
+      49.3413419,
+      17.970559
+    ],
+    "5": [
+      49.3413856,
+      17.9703096
+    ],
+    "TK-05": [
+      49.3413856,
+      17.9703096
+    ],
+    "6": [
+      49.3412225,
+      17.9698673
+    ],
+    "TK-06": [
+      49.3412225,
+      17.9698673
+    ],
+    "7": [
+      49.3408643,
+      17.9674613
+    ],
+    "TK-07": [
+      49.3408643,
+      17.9674613
+    ],
+    "8": [
+      49.3411474,
+      17.9646289
+    ],
+    "TK-08": [
+      49.3411474,
+      17.9646289
+    ],
+    "9": [
+      49.3412382,
+      17.9636365
+    ],
+    "TK-09": [
+      49.3412382,
+      17.9636365
+    ],
+    "10": [
+      49.3415109,
+      17.9636204
+    ],
+    "TK-10": [
+      49.3415109,
+      17.9636204
+    ],
+    "11": [
+      49.3423625,
+      17.9606163
+    ],
+    "TK-11": [
+      49.3423625,
+      17.9606163
+    ],
+    "12": [
+      49.3424918,
+      17.9589157
+    ],
+    "TK-12": [
+      49.3424918,
+      17.9589157
+    ],
+    "13": [
+      49.3413348,
+      17.9582317
+    ],
+    "TK-13": [
+      49.3413348,
+      17.9582317
+    ],
+    "14": [
+      49.3403176,
+      17.9575665
+    ],
+    "TK-14": [
+      49.3403176,
+      17.9575665
+    ],
+    "15": [
+      49.3392691,
+      17.9567511
+    ],
+    "TK-15": [
+      49.3392691,
+      17.9567511
+    ],
+    "16": [
+      49.338189,
+      17.9562308
+    ],
+    "TK-16": [
+      49.338189,
+      17.9562308
+    ],
+    "17": [
+      49.33695,
+      17.9570573
+    ],
+    "TK-17": [
+      49.33695,
+      17.9570573
+    ],
+    "18": [
+      49.3355444,
+      17.9574114
+    ],
+    "TK-18": [
+      49.3355444,
+      17.9574114
+    ],
+    "19": [
+      49.334314,
+      17.9573792
+    ],
+    "TK-19": [
+      49.334314,
+      17.9573792
+    ],
+    "20": [
+      49.333475,
+      17.9578405
+    ],
+    "TK-20": [
+      49.333475,
+      17.9578405
+    ],
+    "21": [
+      49.3313721,
+      17.9586644
+    ],
+    "TK-21": [
+      49.3313721,
+      17.9586644
+    ],
+    "22": [
+      49.3317094,
+      17.958195
+    ],
+    "TK-22": [
+      49.3317094,
+      17.958195
+    ],
+    "23": [
+      49.3310181,
+      17.9570979
+    ],
+    "TK-23": [
+      49.3310181,
+      17.9570979
+    ],
+    "24": [
+      49.3306549,
+      17.9560456
+    ],
+    "TK-24": [
+      49.3306549,
+      17.9560456
+    ],
+    "25": [
+      49.3302913,
+      17.9552304
+    ],
+    "TK-25": [
+      49.3302913,
+      17.9552304
+    ],
+    "26": [
+      49.3302494,
+      17.9541441
+    ],
+    "TK-26": [
+      49.3302494,
+      17.9541441
+    ],
+    "27": [
+      49.3300414,
+      17.9545357
+    ],
+    "TK-27": [
+      49.3300414,
+      17.9545357
+    ],
+    "28": [
+      49.329961,
+      17.9537418
+    ],
+    "TK-28": [
+      49.329961,
+      17.9537418
+    ],
+    "29": [
+      49.3294733,
+      17.9539832
+    ],
+    "TK-29": [
+      49.3295415,
+      17.9536908
+    ],
+    "29*": [
+      49.3295415,
+      17.9536908
+    ],
+    "30": [
+      49.3290555,
+      17.9536077
+    ],
+    "TK-30": [
+      49.3290555,
+      17.9536077
+    ],
+    "31": [
+      49.3288929,
+      17.9538357
+    ],
+    "TK-31": [
+      49.3288929,
+      17.9538357
+    ],
+    "32": [
+      49.3286902,
+      17.9534307
+    ],
+    "TK-32": [
+      49.3286902,
+      17.9534307
+    ],
+    "33": [
+      49.3299042,
+      17.9520315
+    ],
+    "TK-33": [
+      49.3299042,
+      17.9520315
+    ],
+    "34": [
+      49.3311853,
+      17.9521886
+    ],
+    "TK-34": [
+      49.3311853,
+      17.9521886
+    ],
+    "35": [
+      49.3327042,
+      17.9514479
+    ],
+    "TK-35": [
+      49.3327042,
+      17.9514479
+    ],
+    "36": [
+      49.334643,
+      17.9505869
+    ],
+    "TK-36": [
+      49.334643,
+      17.9505869
+    ],
+    "37": [
+      49.3366355,
+      17.9496856
+    ],
+    "TK-37": [
+      49.3366355,
+      17.9496856
+    ],
+    "38": [
+      49.3370793,
+      17.9472798
+    ],
+    "TK-38": [
+      49.3370793,
+      17.9472798
+    ],
+    "39": [
+      49.337684,
+      17.9470813
+    ],
+    "TK-39": [
+      49.337684,
+      17.9470813
+    ],
+    "40": [
+      49.3380545,
+      17.9469848
+    ],
+    "TK-40": [
+      49.3380545,
+      17.9469848
+    ],
+    "41": [
+      49.3384303,
+      17.9469204
+    ],
+    "TK-41": [
+      49.3384303,
+      17.9469204
+    ],
+    "ZVBRZ": [
+      49.355059,
+      17.8704128
+    ],
+    "RB-1": [
+      49.3384177,
+      17.9465681
+    ],
+    "42": [
+      49.3381812,
+      17.9459361
+    ],
+    "TK-42": [
+      49.3381812,
+      17.9459361
+    ],
+    "43": [
+      49.3374034,
+      17.9448202
+    ],
+    "TK-43": [
+      49.3374034,
+      17.9448202
+    ],
+    "44": [
+      49.336727,
+      17.9419676
+    ],
+    "TK-44": [
+      49.336727,
+      17.9419676
+    ],
+    "45": [
+      49.3354185,
+      17.9398014
+    ],
+    "TK-45": [
+      49.3354185,
+      17.9398014
+    ],
+    "46": [
+      49.3348884,
+      17.9370917
+    ],
+    "TK-46": [
+      49.3348884,
+      17.9370917
+    ],
+    "47": [
+      49.3346708,
+      17.9362696
+    ],
+    "TK-47": [
+      49.3346708,
+      17.9362696
+    ],
+    "48": [
+      49.3344689,
+      17.9347891
+    ],
+    "TK-48": [
+      49.3344689,
+      17.9347891
+    ],
+    "49": [
+      49.3333463,
+      17.9324111
+    ],
+    "TK-49": [
+      49.3333463,
+      17.9324111
+    ],
+    "50": [
+      49.3332339,
+      17.9316888
+    ],
+    "TK-50": [
+      49.3332339,
+      17.9316888
+    ],
+    "51": [
+      49.3321817,
+      17.9290924
+    ],
+    "TK-51": [
+      49.3321817,
+      17.9290924
+    ],
+    "52": [
+      49.333271,
+      17.9251372
+    ],
+    "TK-52": [
+      49.333271,
+      17.9251372
+    ],
+    "53": [
+      49.3338373,
+      17.9218434
+    ],
+    "TK-53": [
+      49.3338373,
+      17.9218434
+    ],
+    "54": [
+      49.3344286,
+      17.9143954
+    ],
+    "TK-54": [
+      49.3344286,
+      17.9143954
+    ],
+    "55": [
+      49.3342993,
+      17.9078615
+    ],
+    "TK-55": [
+      49.3342993,
+      17.9078615
+    ],
+    "RB-2": [
+      49.3343245,
+      17.9080186
+    ],
+    "56": [
+      49.3331701,
+      17.9071909
+    ],
+    "TK-56": [
+      49.3331701,
+      17.9071909
+    ],
+    "57": [
+      49.3292591,
+      17.9025252
+    ],
+    "TK-57": [
+      49.3292591,
+      17.9025252
+    ],
+    "58": [
+      49.3274971,
+      17.8994889
+    ],
+    "TK-58": [
+      49.3274971,
+      17.8994889
+    ],
+    "59": [
+      49.3287766,
+      17.8925635
+    ],
+    "TK-59": [
+      49.3287766,
+      17.8925635
+    ],
+    "60": [
+      49.3304058,
+      17.8923811
+    ],
+    "TK-60": [
+      49.3304058,
+      17.8923811
+    ],
+    "61": [
+      49.3318601,
+      17.8880681
+    ],
+    "TK-61": [
+      49.3318601,
+      17.8880681
+    ],
+    "62": [
+      49.3317907,
+      17.8837535
+    ],
+    "TK-62": [
+      49.3317907,
+      17.8837535
+    ],
+    "RB-3": [
+      49.3317352,
+      17.8839261
+    ],
+    "63": [
+      49.3337449,
+      17.8807669
+    ],
+    "TK-63": [
+      49.3337449,
+      17.8807669
+    ],
+    "64": [
+      49.3347552,
+      17.8794205
+    ],
+    "TK-64": [
+      49.3347552,
+      17.8794205
+    ],
+    "65": [
+      49.3380473,
+      17.8781195
+    ],
+    "TK-65": [
+      49.3380473,
+      17.8781195
+    ],
+    "66": [
+      49.339995,
+      17.8774143
+    ],
+    "TK-66": [
+      49.339995,
+      17.8774143
+    ],
+    "67": [
+      49.3406416,
+      17.8771836
+    ],
+    "TK-67": [
+      49.3406416,
+      17.8771836
+    ],
+    "68": [
+      49.3406748,
+      17.8757942
+    ],
+    "TK-68": [
+      49.3406748,
+      17.8757942
+    ],
+    "69": [
+      49.3410628,
+      17.8741527
+    ],
+    "TK-69": [
+      49.3410628,
+      17.8741527
+    ],
+    "70": [
+      49.3415486,
+      17.873391
+    ],
+    "TK-70": [
+      49.3415486,
+      17.873391
+    ],
+    "71": [
+      49.3422284,
+      17.8725323
+    ],
+    "TK-71": [
+      49.3422284,
+      17.8725323
+    ],
+    "72": [
+      49.3444367,
+      17.8703789
+    ],
+    "TK-72": [
+      49.3444367,
+      17.8703789
+    ],
+    "73": [
+      49.3455257,
+      17.8700942
+    ],
+    "TK-73": [
+      49.3455257,
+      17.8700942
+    ],
+    "74": [
+      49.3464959,
+      17.8698553
+    ],
+    "TK-74": [
+      49.3464959,
+      17.8698553
+    ],
+    "RF1": [
+      49.346496,
+      17.8698554
+    ],
+    "75": [
+      49.3476354,
+      17.8686105
+    ],
+    "TK-75": [
+      49.3476354,
+      17.8686105
+    ],
+    "76": [
+      49.3492917,
+      17.8686058
+    ],
+    "TK-76": [
+      49.3492917,
+      17.8686058
+    ],
+    "77": [
+      49.3503205,
+      17.8684539
+    ],
+    "TK-77": [
+      49.3503205,
+      17.8684539
+    ],
+    "78": [
+      49.3524423,
+      17.8695891
+    ],
+    "TK-78": [
+      49.3524423,
+      17.8695891
+    ],
+    "79": [
+      49.3536353,
+      17.8703666
+    ],
+    "TK-79": [
+      49.3536353,
+      17.8703666
+    ],
+    "RF2": [
+      49.3536354,
+      17.8703667
+    ],
+    "80": [
+      49.3542297,
+      17.8701288
+    ],
+    "TK-80": [
+      49.3542297,
+      17.8701288
+    ],
+    "81": [
+      49.3547041,
+      17.8700206
+    ],
+    "TK-81": [
+      49.3547041,
+      17.8700206
+    ],
+    "82": [
+      49.3550326,
+      17.8704592
+    ],
+    "TK-82": [
+      49.3550326,
+      17.8704592
+    ],
+    "RB-4": [
+      49.3551187,
+      17.8704008
+    ],
+    "83": [
+      49.3552392,
+      17.8701896
+    ],
+    "TK-83": [
+      49.3552392,
+      17.8701896
+    ],
+    "84": [
+      49.3548797,
+      17.8695633
+    ],
+    "TK-84": [
+      49.3548797,
+      17.8695633
+    ],
+    "85": [
+      49.3545364,
+      17.8694319
+    ],
+    "TK-85": [
+      49.3545364,
+      17.8694319
+    ],
+    "86": [
+      49.354297,
+      17.8682316
+    ],
+    "TK-86": [
+      49.354297,
+      17.8682316
+    ],
+    "87": [
+      49.3539825,
+      17.8663997
+    ],
+    "TK-87": [
+      49.3539825,
+      17.8663997
+    ],
+    "88": [
+      49.3543718,
+      17.8669693
+    ],
+    "TK-88": [
+      49.3543718,
+      17.8669693
+    ],
+    "89": [
+      49.3547233,
+      17.8672325
+    ],
+    "TK-89": [
+      49.3547233,
+      17.8672325
+    ],
+    "90": [
+      49.3549662,
+      17.8665828
+    ],
+    "TK-90": [
+      49.3549662,
+      17.8665828
+    ],
+    "91": [
+      49.355596,
+      17.8673942
+    ],
+    "TK-91": [
+      49.355596,
+      17.8673942
+    ],
+    "92": [
+      49.3552073,
+      17.8660704
+    ],
+    "TK-92": [
+      49.3552073,
+      17.8660704
+    ],
+    "93": [
+      49.3554383,
+      17.86611
+    ],
+    "TK-93": [
+      49.3554383,
+      17.86611
+    ],
+    "94": [
+      49.3559559,
+      17.8631001
+    ],
+    "TK-94": [
+      49.3559559,
+      17.8631001
+    ],
+    "95": [
+      49.3567751,
+      17.861809
+    ],
+    "TK-95": [
+      49.3567751,
+      17.861809
+    ],
+    "96": [
+      49.3585443,
+      17.8597533
+    ],
+    "TK-96": [
+      49.3585443,
+      17.8597533
+    ],
+    "97": [
+      49.3589355,
+      17.8578635
+    ],
+    "TK-97": [
+      49.3589355,
+      17.8578635
+    ],
+    "98": [
+      49.3591381,
+      17.8567906
+    ],
+    "TK-98": [
+      49.3591381,
+      17.8567906
+    ],
+    "99": [
+      49.3601164,
+      17.8553679
+    ],
+    "TK-99": [
+      49.3601164,
+      17.8553679
+    ],
+    "100": [
+      49.361517,
+      17.8555356
+    ],
+    "TK-100": [
+      49.361517,
+      17.8555356
+    ],
+    "101": [
+      49.3624317,
+      17.8549301
+    ],
+    "TK-101": [
+      49.3624317,
+      17.8549301
+    ],
+    "102": [
+      49.3637869,
+      17.8539086
+    ],
+    "TK-102": [
+      49.3637869,
+      17.8539086
+    ],
+    "103": [
+      49.365106,
+      17.8498055
+    ],
+    "TK-103": [
+      49.365106,
+      17.8498055
+    ],
+    "104": [
+      49.3695531,
+      17.8472279
+    ],
+    "TK-104": [
+      49.3695531,
+      17.8472279
+    ],
+    "105": [
+      49.3712079,
+      17.8458872
+    ],
+    "TK-105": [
+      49.3712079,
+      17.8458872
+    ],
+    "106": [
+      49.3724549,
+      17.8432264
+    ],
+    "TK-106": [
+      49.3724549,
+      17.8432264
+    ],
+    "107": [
+      49.37345,
+      17.8383479
+    ],
+    "TK-107": [
+      49.37345,
+      17.8383479
+    ],
+    "RB-5": [
+      49.3736077,
+      17.8387295
+    ],
+    "108": [
+      49.3713127,
+      17.8361175
+    ],
+    "TK-108": [
+      49.3713127,
+      17.8361175
+    ],
+    "109": [
+      49.3698876,
+      17.8348628
+    ],
+    "TK-109": [
+      49.3698876,
+      17.8348628
+    ],
+    "110": [
+      49.3692154,
+      17.8307862
+    ],
+    "TK-110": [
+      49.3692154,
+      17.8307862
+    ],
+    "111": [
+      49.3679985,
+      17.8283413
+    ],
+    "TK-111": [
+      49.3679985,
+      17.8283413
+    ],
+    "112": [
+      49.3671322,
+      17.8272147
+    ],
+    "TK-112": [
+      49.3671322,
+      17.8272147
+    ],
+    "113": [
+      49.3653243,
+      17.8271396
+    ],
+    "TK-113": [
+      49.3653243,
+      17.8271396
+    ],
+    "114": [
+      49.3630465,
+      17.8249617
+    ],
+    "TK-114": [
+      49.3630465,
+      17.8249617
+    ],
+    "115": [
+      49.3615342,
+      17.8241214
+    ],
+    "TK-115": [
+      49.3615342,
+      17.8241214
+    ],
+    "116": [
+      49.3605559,
+      17.8236815
+    ],
+    "TK-116": [
+      49.3605559,
+      17.8236815
+    ],
+    "117": [
+      49.3597435,
+      17.8248281
+    ],
+    "TK-117": [
+      49.3597435,
+      17.8248281
+    ],
+    "118": [
+      49.3582376,
+      17.8221726
+    ],
+    "TK-118": [
+      49.3582376,
+      17.8221726
+    ],
+    "119": [
+      49.3572069,
+      17.8205733
+    ],
+    "TK-119": [
+      49.3572069,
+      17.8205733
+    ],
+    "ZVRZ": [
+      49.3547841,
+      17.8169675
+    ],
+    "120": [
+      49.354448,
+      17.8157257
+    ],
+    "TK-120": [
+      49.354448,
+      17.8157257
+    ]
+  },
+  "stations": [
+    {
+      "csv_code": "RB-1",
+      "station_id": "RB-1",
+      "station_name": "Radiobod RB-1",
+      "suggested_role": "technik",
+      "suggested_station_type": "technical",
+      "latitude": 49.3384177,
+      "longitude": 17.9465681
+    },
+    {
+      "csv_code": "RB-2",
+      "station_id": "RB-2",
+      "station_name": "Radiobod RB-2",
+      "suggested_role": "technik",
+      "suggested_station_type": "technical",
+      "latitude": 49.3343245,
+      "longitude": 17.9080186
+    },
+    {
+      "csv_code": "RB-3",
+      "station_id": "RB-3",
+      "station_name": "Radiobod RB-3",
+      "suggested_role": "technik",
+      "suggested_station_type": "technical",
+      "latitude": 49.3317352,
+      "longitude": 17.8839261
+    },
+    {
+      "csv_code": "RB-4",
+      "station_id": "RB-4",
+      "station_name": "Radiobod RB-4",
+      "suggested_role": "technik",
+      "suggested_station_type": "technical",
+      "latitude": 49.3551187,
+      "longitude": 17.8704008
+    },
+    {
+      "csv_code": "RB-5",
+      "station_id": "RB-5",
+      "station_name": "Radiobod RB-5",
+      "suggested_role": "technik",
+      "suggested_station_type": "technical",
+      "latitude": 49.3736077,
+      "longitude": 17.8387295
+    },
+    {
+      "csv_code": "RF1",
+      "station_id": "RF1",
+      "station_name": "Rozhodčí faktu RF1",
+      "suggested_role": "casomer",
+      "suggested_station_type": "timing",
+      "latitude": 49.346496,
+      "longitude": 17.8698554
+    },
+    {
+      "csv_code": "RF2",
+      "station_id": "RF2",
+      "station_name": "Rozhodčí faktu RF2",
+      "suggested_role": "casomer",
+      "suggested_station_type": "timing",
+      "latitude": 49.3536354,
+      "longitude": 17.8703667
+    },
+    {
+      "csv_code": "1",
+      "station_id": "TK-01",
+      "station_name": "Traťový bod TK-01",
+      "suggested_role": "komisar_trat",
+      "suggested_station_type": "track_point",
+      "latitude": 49.3410736,
+      "longitude": 17.974425
+    },
+    {
+      "csv_code": "2",
+      "station_id": "TK-02",
+      "station_name": "Traťový bod TK-02",
+      "suggested_role": "komisar_trat",
+      "suggested_station_type": "track_point",
+      "latitude": 49.3415158,
+      "longitude": 17.9738309
+    },
+    {
+      "csv_code": "3",
+      "station_id": "TK-03",
+      "station_name": "Traťový bod TK-03",
+      "suggested_role": "komisar_trat",
+      "suggested_station_type": "track_point",
+      "latitude": 49.3418714,
+      "longitude": 17.9705724
+    },
+    {
+      "csv_code": "4",
+      "station_id": "TK-04",
+      "station_name": "Traťový bod TK-04",
+      "suggested_role": "komisar_trat",
+      "suggested_station_type": "track_point",
+      "latitude": 49.3413419,
+      "longitude": 17.970559
+    },
+    {
+      "csv_code": "5",
+      "station_id": "TK-05",
+      "station_name": "Traťový bod TK-05",
+      "suggested_role": "komisar_trat",
+      "suggested_station_type": "track_point",
+      "latitude": 49.3413856,
+      "longitude": 17.9703096
+    },
+    {
+      "csv_code": "6",
+      "station_id": "TK-06",
+      "station_name": "Traťový bod TK-06",
+      "suggested_role": "komisar_trat",
+      "suggested_station_type": "track_point",
+      "latitude": 49.3412225,
+      "longitude": 17.9698673
+    },
+    {
+      "csv_code": "7",
+      "station_id": "TK-07",
+      "station_name": "Traťový bod TK-07",
+      "suggested_role": "komisar_trat",
+      "suggested_station_type": "track_point",
+      "latitude": 49.3408643,
+      "longitude": 17.9674613
+    },
+    {
+      "csv_code": "8",
+      "station_id": "TK-08",
+      "station_name": "Traťový bod TK-08",
+      "suggested_role": "komisar_trat",
+      "suggested_station_type": "track_point",
+      "latitude": 49.3411474,
+      "longitude": 17.9646289
+    },
+    {
+      "csv_code": "9",
+      "station_id": "TK-09",
+      "station_name": "Traťový bod TK-09",
+      "suggested_role": "komisar_trat",
+      "suggested_station_type": "track_point",
+      "latitude": 49.3412382,
+      "longitude": 17.9636365
+    },
+    {
+      "csv_code": "10",
+      "station_id": "TK-10",
+      "station_name": "Traťový bod TK-10",
+      "suggested_role": "komisar_trat",
+      "suggested_station_type": "track_point",
+      "latitude": 49.3415109,
+      "longitude": 17.9636204
+    },
+    {
+      "csv_code": "100",
+      "station_id": "TK-100",
+      "station_name": "Traťový bod TK-100",
+      "suggested_role": "komisar_trat",
+      "suggested_station_type": "track_point",
+      "latitude": 49.361517,
+      "longitude": 17.8555356
+    },
+    {
+      "csv_code": "101",
+      "station_id": "TK-101",
+      "station_name": "Traťový bod TK-101",
+      "suggested_role": "komisar_trat",
+      "suggested_station_type": "track_point",
+      "latitude": 49.3624317,
+      "longitude": 17.8549301
+    },
+    {
+      "csv_code": "102",
+      "station_id": "TK-102",
+      "station_name": "Traťový bod TK-102",
+      "suggested_role": "komisar_trat",
+      "suggested_station_type": "track_point",
+      "latitude": 49.3637869,
+      "longitude": 17.8539086
+    },
+    {
+      "csv_code": "103",
+      "station_id": "TK-103",
+      "station_name": "Traťový bod TK-103",
+      "suggested_role": "komisar_trat",
+      "suggested_station_type": "track_point",
+      "latitude": 49.365106,
+      "longitude": 17.8498055
+    },
+    {
+      "csv_code": "104",
+      "station_id": "TK-104",
+      "station_name": "Traťový bod TK-104",
+      "suggested_role": "komisar_trat",
+      "suggested_station_type": "track_point",
+      "latitude": 49.3695531,
+      "longitude": 17.8472279
+    },
+    {
+      "csv_code": "105",
+      "station_id": "TK-105",
+      "station_name": "Traťový bod TK-105",
+      "suggested_role": "komisar_trat",
+      "suggested_station_type": "track_point",
+      "latitude": 49.3712079,
+      "longitude": 17.8458872
+    },
+    {
+      "csv_code": "106",
+      "station_id": "TK-106",
+      "station_name": "Traťový bod TK-106",
+      "suggested_role": "komisar_trat",
+      "suggested_station_type": "track_point",
+      "latitude": 49.3724549,
+      "longitude": 17.8432264
+    },
+    {
+      "csv_code": "107",
+      "station_id": "TK-107",
+      "station_name": "Traťový bod TK-107",
+      "suggested_role": "komisar_trat",
+      "suggested_station_type": "track_point",
+      "latitude": 49.37345,
+      "longitude": 17.8383479
+    },
+    {
+      "csv_code": "108",
+      "station_id": "TK-108",
+      "station_name": "Traťový bod TK-108",
+      "suggested_role": "komisar_trat",
+      "suggested_station_type": "track_point",
+      "latitude": 49.3713127,
+      "longitude": 17.8361175
+    },
+    {
+      "csv_code": "109",
+      "station_id": "TK-109",
+      "station_name": "Traťový bod TK-109",
+      "suggested_role": "komisar_trat",
+      "suggested_station_type": "track_point",
+      "latitude": 49.3698876,
+      "longitude": 17.8348628
+    },
+    {
+      "csv_code": "11",
+      "station_id": "TK-11",
+      "station_name": "Traťový bod TK-11",
+      "suggested_role": "komisar_trat",
+      "suggested_station_type": "track_point",
+      "latitude": 49.3423625,
+      "longitude": 17.9606163
+    },
+    {
+      "csv_code": "110",
+      "station_id": "TK-110",
+      "station_name": "Traťový bod TK-110",
+      "suggested_role": "komisar_trat",
+      "suggested_station_type": "track_point",
+      "latitude": 49.3692154,
+      "longitude": 17.8307862
+    },
+    {
+      "csv_code": "111",
+      "station_id": "TK-111",
+      "station_name": "Traťový bod TK-111",
+      "suggested_role": "komisar_trat",
+      "suggested_station_type": "track_point",
+      "latitude": 49.3679985,
+      "longitude": 17.8283413
+    },
+    {
+      "csv_code": "112",
+      "station_id": "TK-112",
+      "station_name": "Traťový bod TK-112",
+      "suggested_role": "komisar_trat",
+      "suggested_station_type": "track_point",
+      "latitude": 49.3671322,
+      "longitude": 17.8272147
+    },
+    {
+      "csv_code": "113",
+      "station_id": "TK-113",
+      "station_name": "Traťový bod TK-113",
+      "suggested_role": "komisar_trat",
+      "suggested_station_type": "track_point",
+      "latitude": 49.3653243,
+      "longitude": 17.8271396
+    },
+    {
+      "csv_code": "114",
+      "station_id": "TK-114",
+      "station_name": "Traťový bod TK-114",
+      "suggested_role": "komisar_trat",
+      "suggested_station_type": "track_point",
+      "latitude": 49.3630465,
+      "longitude": 17.8249617
+    },
+    {
+      "csv_code": "115",
+      "station_id": "TK-115",
+      "station_name": "Traťový bod TK-115",
+      "suggested_role": "komisar_trat",
+      "suggested_station_type": "track_point",
+      "latitude": 49.3615342,
+      "longitude": 17.8241214
+    },
+    {
+      "csv_code": "116",
+      "station_id": "TK-116",
+      "station_name": "Traťový bod TK-116",
+      "suggested_role": "komisar_trat",
+      "suggested_station_type": "track_point",
+      "latitude": 49.3605559,
+      "longitude": 17.8236815
+    },
+    {
+      "csv_code": "117",
+      "station_id": "TK-117",
+      "station_name": "Traťový bod TK-117",
+      "suggested_role": "komisar_trat",
+      "suggested_station_type": "track_point",
+      "latitude": 49.3597435,
+      "longitude": 17.8248281
+    },
+    {
+      "csv_code": "118",
+      "station_id": "TK-118",
+      "station_name": "Traťový bod TK-118",
+      "suggested_role": "komisar_trat",
+      "suggested_station_type": "track_point",
+      "latitude": 49.3582376,
+      "longitude": 17.8221726
+    },
+    {
+      "csv_code": "119",
+      "station_id": "TK-119",
+      "station_name": "Traťový bod TK-119",
+      "suggested_role": "komisar_trat",
+      "suggested_station_type": "track_point",
+      "latitude": 49.3572069,
+      "longitude": 17.8205733
+    },
+    {
+      "csv_code": "12",
+      "station_id": "TK-12",
+      "station_name": "Traťový bod TK-12",
+      "suggested_role": "komisar_trat",
+      "suggested_station_type": "track_point",
+      "latitude": 49.3424918,
+      "longitude": 17.9589157
+    },
+    {
+      "csv_code": "120",
+      "station_id": "TK-120",
+      "station_name": "Traťový bod TK-120",
+      "suggested_role": "komisar_trat",
+      "suggested_station_type": "track_point",
+      "latitude": 49.354448,
+      "longitude": 17.8157257
+    },
+    {
+      "csv_code": "13",
+      "station_id": "TK-13",
+      "station_name": "Traťový bod TK-13",
+      "suggested_role": "komisar_trat",
+      "suggested_station_type": "track_point",
+      "latitude": 49.3413348,
+      "longitude": 17.9582317
+    },
+    {
+      "csv_code": "14",
+      "station_id": "TK-14",
+      "station_name": "Traťový bod TK-14",
+      "suggested_role": "komisar_trat",
+      "suggested_station_type": "track_point",
+      "latitude": 49.3403176,
+      "longitude": 17.9575665
+    },
+    {
+      "csv_code": "15",
+      "station_id": "TK-15",
+      "station_name": "Traťový bod TK-15",
+      "suggested_role": "komisar_trat",
+      "suggested_station_type": "track_point",
+      "latitude": 49.3392691,
+      "longitude": 17.9567511
+    },
+    {
+      "csv_code": "16",
+      "station_id": "TK-16",
+      "station_name": "Traťový bod TK-16",
+      "suggested_role": "komisar_trat",
+      "suggested_station_type": "track_point",
+      "latitude": 49.338189,
+      "longitude": 17.9562308
+    },
+    {
+      "csv_code": "17",
+      "station_id": "TK-17",
+      "station_name": "Traťový bod TK-17",
+      "suggested_role": "komisar_trat",
+      "suggested_station_type": "track_point",
+      "latitude": 49.33695,
+      "longitude": 17.9570573
+    },
+    {
+      "csv_code": "18",
+      "station_id": "TK-18",
+      "station_name": "Traťový bod TK-18",
+      "suggested_role": "komisar_trat",
+      "suggested_station_type": "track_point",
+      "latitude": 49.3355444,
+      "longitude": 17.9574114
+    },
+    {
+      "csv_code": "19",
+      "station_id": "TK-19",
+      "station_name": "Traťový bod TK-19",
+      "suggested_role": "komisar_trat",
+      "suggested_station_type": "track_point",
+      "latitude": 49.334314,
+      "longitude": 17.9573792
+    },
+    {
+      "csv_code": "20",
+      "station_id": "TK-20",
+      "station_name": "Traťový bod TK-20",
+      "suggested_role": "komisar_trat",
+      "suggested_station_type": "track_point",
+      "latitude": 49.333475,
+      "longitude": 17.9578405
+    },
+    {
+      "csv_code": "21",
+      "station_id": "TK-21",
+      "station_name": "Traťový bod TK-21",
+      "suggested_role": "komisar_trat",
+      "suggested_station_type": "track_point",
+      "latitude": 49.3313721,
+      "longitude": 17.9586644
+    },
+    {
+      "csv_code": "22",
+      "station_id": "TK-22",
+      "station_name": "Traťový bod TK-22",
+      "suggested_role": "komisar_trat",
+      "suggested_station_type": "track_point",
+      "latitude": 49.3317094,
+      "longitude": 17.958195
+    },
+    {
+      "csv_code": "23",
+      "station_id": "TK-23",
+      "station_name": "Traťový bod TK-23",
+      "suggested_role": "komisar_trat",
+      "suggested_station_type": "track_point",
+      "latitude": 49.3310181,
+      "longitude": 17.9570979
+    },
+    {
+      "csv_code": "24",
+      "station_id": "TK-24",
+      "station_name": "Traťový bod TK-24",
+      "suggested_role": "komisar_trat",
+      "suggested_station_type": "track_point",
+      "latitude": 49.3306549,
+      "longitude": 17.9560456
+    },
+    {
+      "csv_code": "25",
+      "station_id": "TK-25",
+      "station_name": "Traťový bod TK-25",
+      "suggested_role": "komisar_trat",
+      "suggested_station_type": "track_point",
+      "latitude": 49.3302913,
+      "longitude": 17.9552304
+    },
+    {
+      "csv_code": "26",
+      "station_id": "TK-26",
+      "station_name": "Traťový bod TK-26",
+      "suggested_role": "komisar_trat",
+      "suggested_station_type": "track_point",
+      "latitude": 49.3302494,
+      "longitude": 17.9541441
+    },
+    {
+      "csv_code": "27",
+      "station_id": "TK-27",
+      "station_name": "Traťový bod TK-27",
+      "suggested_role": "komisar_trat",
+      "suggested_station_type": "track_point",
+      "latitude": 49.3300414,
+      "longitude": 17.9545357
+    },
+    {
+      "csv_code": "28",
+      "station_id": "TK-28",
+      "station_name": "Traťový bod TK-28",
+      "suggested_role": "komisar_trat",
+      "suggested_station_type": "track_point",
+      "latitude": 49.329961,
+      "longitude": 17.9537418
+    },
+    {
+      "csv_code": "29",
+      "station_id": "TK-29",
+      "station_name": "Traťový bod TK-29",
+      "suggested_role": "komisar_trat",
+      "suggested_station_type": "track_point",
+      "latitude": 49.3294733,
+      "longitude": 17.9539832
+    },
+    {
+      "csv_code": "29*",
+      "station_id": "TK-29A",
+      "station_name": "Traťový bod TK-29A",
+      "suggested_role": "komisar_trat",
+      "suggested_station_type": "track_point",
+      "latitude": 49.3295415,
+      "longitude": 17.9536908
+    },
+    {
+      "csv_code": "30",
+      "station_id": "TK-30",
+      "station_name": "Traťový bod TK-30",
+      "suggested_role": "komisar_trat",
+      "suggested_station_type": "track_point",
+      "latitude": 49.3290555,
+      "longitude": 17.9536077
+    },
+    {
+      "csv_code": "31",
+      "station_id": "TK-31",
+      "station_name": "Traťový bod TK-31",
+      "suggested_role": "komisar_trat",
+      "suggested_station_type": "track_point",
+      "latitude": 49.3288929,
+      "longitude": 17.9538357
+    },
+    {
+      "csv_code": "32",
+      "station_id": "TK-32",
+      "station_name": "Traťový bod TK-32",
+      "suggested_role": "komisar_trat",
+      "suggested_station_type": "track_point",
+      "latitude": 49.3286902,
+      "longitude": 17.9534307
+    },
+    {
+      "csv_code": "33",
+      "station_id": "TK-33",
+      "station_name": "Traťový bod TK-33",
+      "suggested_role": "komisar_trat",
+      "suggested_station_type": "track_point",
+      "latitude": 49.3299042,
+      "longitude": 17.9520315
+    },
+    {
+      "csv_code": "34",
+      "station_id": "TK-34",
+      "station_name": "Traťový bod TK-34",
+      "suggested_role": "komisar_trat",
+      "suggested_station_type": "track_point",
+      "latitude": 49.3311853,
+      "longitude": 17.9521886
+    },
+    {
+      "csv_code": "35",
+      "station_id": "TK-35",
+      "station_name": "Traťový bod TK-35",
+      "suggested_role": "komisar_trat",
+      "suggested_station_type": "track_point",
+      "latitude": 49.3327042,
+      "longitude": 17.9514479
+    },
+    {
+      "csv_code": "36",
+      "station_id": "TK-36",
+      "station_name": "Traťový bod TK-36",
+      "suggested_role": "komisar_trat",
+      "suggested_station_type": "track_point",
+      "latitude": 49.334643,
+      "longitude": 17.9505869
+    },
+    {
+      "csv_code": "37",
+      "station_id": "TK-37",
+      "station_name": "Traťový bod TK-37",
+      "suggested_role": "komisar_trat",
+      "suggested_station_type": "track_point",
+      "latitude": 49.3366355,
+      "longitude": 17.9496856
+    },
+    {
+      "csv_code": "38",
+      "station_id": "TK-38",
+      "station_name": "Traťový bod TK-38",
+      "suggested_role": "komisar_trat",
+      "suggested_station_type": "track_point",
+      "latitude": 49.3370793,
+      "longitude": 17.9472798
+    },
+    {
+      "csv_code": "39",
+      "station_id": "TK-39",
+      "station_name": "Traťový bod TK-39",
+      "suggested_role": "komisar_trat",
+      "suggested_station_type": "track_point",
+      "latitude": 49.337684,
+      "longitude": 17.9470813
+    },
+    {
+      "csv_code": "40",
+      "station_id": "TK-40",
+      "station_name": "Traťový bod TK-40",
+      "suggested_role": "komisar_trat",
+      "suggested_station_type": "track_point",
+      "latitude": 49.3380545,
+      "longitude": 17.9469848
+    },
+    {
+      "csv_code": "41",
+      "station_id": "TK-41",
+      "station_name": "Traťový bod TK-41",
+      "suggested_role": "komisar_trat",
+      "suggested_station_type": "track_point",
+      "latitude": 49.3384303,
+      "longitude": 17.9469204
+    },
+    {
+      "csv_code": "42",
+      "station_id": "TK-42",
+      "station_name": "Traťový bod TK-42",
+      "suggested_role": "komisar_trat",
+      "suggested_station_type": "track_point",
+      "latitude": 49.3381812,
+      "longitude": 17.9459361
+    },
+    {
+      "csv_code": "43",
+      "station_id": "TK-43",
+      "station_name": "Traťový bod TK-43",
+      "suggested_role": "komisar_trat",
+      "suggested_station_type": "track_point",
+      "latitude": 49.3374034,
+      "longitude": 17.9448202
+    },
+    {
+      "csv_code": "44",
+      "station_id": "TK-44",
+      "station_name": "Traťový bod TK-44",
+      "suggested_role": "komisar_trat",
+      "suggested_station_type": "track_point",
+      "latitude": 49.336727,
+      "longitude": 17.9419676
+    },
+    {
+      "csv_code": "45",
+      "station_id": "TK-45",
+      "station_name": "Traťový bod TK-45",
+      "suggested_role": "komisar_trat",
+      "suggested_station_type": "track_point",
+      "latitude": 49.3354185,
+      "longitude": 17.9398014
+    },
+    {
+      "csv_code": "46",
+      "station_id": "TK-46",
+      "station_name": "Traťový bod TK-46",
+      "suggested_role": "komisar_trat",
+      "suggested_station_type": "track_point",
+      "latitude": 49.3348884,
+      "longitude": 17.9370917
+    },
+    {
+      "csv_code": "47",
+      "station_id": "TK-47",
+      "station_name": "Traťový bod TK-47",
+      "suggested_role": "komisar_trat",
+      "suggested_station_type": "track_point",
+      "latitude": 49.3346708,
+      "longitude": 17.9362696
+    },
+    {
+      "csv_code": "48",
+      "station_id": "TK-48",
+      "station_name": "Traťový bod TK-48",
+      "suggested_role": "komisar_trat",
+      "suggested_station_type": "track_point",
+      "latitude": 49.3344689,
+      "longitude": 17.9347891
+    },
+    {
+      "csv_code": "49",
+      "station_id": "TK-49",
+      "station_name": "Traťový bod TK-49",
+      "suggested_role": "komisar_trat",
+      "suggested_station_type": "track_point",
+      "latitude": 49.3333463,
+      "longitude": 17.9324111
+    },
+    {
+      "csv_code": "50",
+      "station_id": "TK-50",
+      "station_name": "Traťový bod TK-50",
+      "suggested_role": "komisar_trat",
+      "suggested_station_type": "track_point",
+      "latitude": 49.3332339,
+      "longitude": 17.9316888
+    },
+    {
+      "csv_code": "51",
+      "station_id": "TK-51",
+      "station_name": "Traťový bod TK-51",
+      "suggested_role": "komisar_trat",
+      "suggested_station_type": "track_point",
+      "latitude": 49.3321817,
+      "longitude": 17.9290924
+    },
+    {
+      "csv_code": "52",
+      "station_id": "TK-52",
+      "station_name": "Traťový bod TK-52",
+      "suggested_role": "komisar_trat",
+      "suggested_station_type": "track_point",
+      "latitude": 49.333271,
+      "longitude": 17.9251372
+    },
+    {
+      "csv_code": "53",
+      "station_id": "TK-53",
+      "station_name": "Traťový bod TK-53",
+      "suggested_role": "komisar_trat",
+      "suggested_station_type": "track_point",
+      "latitude": 49.3338373,
+      "longitude": 17.9218434
+    },
+    {
+      "csv_code": "54",
+      "station_id": "TK-54",
+      "station_name": "Traťový bod TK-54",
+      "suggested_role": "komisar_trat",
+      "suggested_station_type": "track_point",
+      "latitude": 49.3344286,
+      "longitude": 17.9143954
+    },
+    {
+      "csv_code": "55",
+      "station_id": "TK-55",
+      "station_name": "Traťový bod TK-55",
+      "suggested_role": "komisar_trat",
+      "suggested_station_type": "track_point",
+      "latitude": 49.3342993,
+      "longitude": 17.9078615
+    },
+    {
+      "csv_code": "56",
+      "station_id": "TK-56",
+      "station_name": "Traťový bod TK-56",
+      "suggested_role": "komisar_trat",
+      "suggested_station_type": "track_point",
+      "latitude": 49.3331701,
+      "longitude": 17.9071909
+    },
+    {
+      "csv_code": "57",
+      "station_id": "TK-57",
+      "station_name": "Traťový bod TK-57",
+      "suggested_role": "komisar_trat",
+      "suggested_station_type": "track_point",
+      "latitude": 49.3292591,
+      "longitude": 17.9025252
+    },
+    {
+      "csv_code": "58",
+      "station_id": "TK-58",
+      "station_name": "Traťový bod TK-58",
+      "suggested_role": "komisar_trat",
+      "suggested_station_type": "track_point",
+      "latitude": 49.3274971,
+      "longitude": 17.8994889
+    },
+    {
+      "csv_code": "59",
+      "station_id": "TK-59",
+      "station_name": "Traťový bod TK-59",
+      "suggested_role": "komisar_trat",
+      "suggested_station_type": "track_point",
+      "latitude": 49.3287766,
+      "longitude": 17.8925635
+    },
+    {
+      "csv_code": "60",
+      "station_id": "TK-60",
+      "station_name": "Traťový bod TK-60",
+      "suggested_role": "komisar_trat",
+      "suggested_station_type": "track_point",
+      "latitude": 49.3304058,
+      "longitude": 17.8923811
+    },
+    {
+      "csv_code": "61",
+      "station_id": "TK-61",
+      "station_name": "Traťový bod TK-61",
+      "suggested_role": "komisar_trat",
+      "suggested_station_type": "track_point",
+      "latitude": 49.3318601,
+      "longitude": 17.8880681
+    },
+    {
+      "csv_code": "62",
+      "station_id": "TK-62",
+      "station_name": "Traťový bod TK-62",
+      "suggested_role": "komisar_trat",
+      "suggested_station_type": "track_point",
+      "latitude": 49.3317907,
+      "longitude": 17.8837535
+    },
+    {
+      "csv_code": "63",
+      "station_id": "TK-63",
+      "station_name": "Traťový bod TK-63",
+      "suggested_role": "komisar_trat",
+      "suggested_station_type": "track_point",
+      "latitude": 49.3337449,
+      "longitude": 17.8807669
+    },
+    {
+      "csv_code": "64",
+      "station_id": "TK-64",
+      "station_name": "Traťový bod TK-64",
+      "suggested_role": "komisar_trat",
+      "suggested_station_type": "track_point",
+      "latitude": 49.3347552,
+      "longitude": 17.8794205
+    },
+    {
+      "csv_code": "65",
+      "station_id": "TK-65",
+      "station_name": "Traťový bod TK-65",
+      "suggested_role": "komisar_trat",
+      "suggested_station_type": "track_point",
+      "latitude": 49.3380473,
+      "longitude": 17.8781195
+    },
+    {
+      "csv_code": "66",
+      "station_id": "TK-66",
+      "station_name": "Traťový bod TK-66",
+      "suggested_role": "komisar_trat",
+      "suggested_station_type": "track_point",
+      "latitude": 49.339995,
+      "longitude": 17.8774143
+    },
+    {
+      "csv_code": "67",
+      "station_id": "TK-67",
+      "station_name": "Traťový bod TK-67",
+      "suggested_role": "komisar_trat",
+      "suggested_station_type": "track_point",
+      "latitude": 49.3406416,
+      "longitude": 17.8771836
+    },
+    {
+      "csv_code": "68",
+      "station_id": "TK-68",
+      "station_name": "Traťový bod TK-68",
+      "suggested_role": "komisar_trat",
+      "suggested_station_type": "track_point",
+      "latitude": 49.3406748,
+      "longitude": 17.8757942
+    },
+    {
+      "csv_code": "69",
+      "station_id": "TK-69",
+      "station_name": "Traťový bod TK-69",
+      "suggested_role": "komisar_trat",
+      "suggested_station_type": "track_point",
+      "latitude": 49.3410628,
+      "longitude": 17.8741527
+    },
+    {
+      "csv_code": "70",
+      "station_id": "TK-70",
+      "station_name": "Traťový bod TK-70",
+      "suggested_role": "komisar_trat",
+      "suggested_station_type": "track_point",
+      "latitude": 49.3415486,
+      "longitude": 17.873391
+    },
+    {
+      "csv_code": "71",
+      "station_id": "TK-71",
+      "station_name": "Traťový bod TK-71",
+      "suggested_role": "komisar_trat",
+      "suggested_station_type": "track_point",
+      "latitude": 49.3422284,
+      "longitude": 17.8725323
+    },
+    {
+      "csv_code": "72",
+      "station_id": "TK-72",
+      "station_name": "Traťový bod TK-72",
+      "suggested_role": "komisar_trat",
+      "suggested_station_type": "track_point",
+      "latitude": 49.3444367,
+      "longitude": 17.8703789
+    },
+    {
+      "csv_code": "73",
+      "station_id": "TK-73",
+      "station_name": "Traťový bod TK-73",
+      "suggested_role": "komisar_trat",
+      "suggested_station_type": "track_point",
+      "latitude": 49.3455257,
+      "longitude": 17.8700942
+    },
+    {
+      "csv_code": "74",
+      "station_id": "TK-74",
+      "station_name": "Traťový bod TK-74",
+      "suggested_role": "komisar_trat",
+      "suggested_station_type": "track_point",
+      "latitude": 49.3464959,
+      "longitude": 17.8698553
+    },
+    {
+      "csv_code": "75",
+      "station_id": "TK-75",
+      "station_name": "Traťový bod TK-75",
+      "suggested_role": "komisar_trat",
+      "suggested_station_type": "track_point",
+      "latitude": 49.3476354,
+      "longitude": 17.8686105
+    },
+    {
+      "csv_code": "76",
+      "station_id": "TK-76",
+      "station_name": "Traťový bod TK-76",
+      "suggested_role": "komisar_trat",
+      "suggested_station_type": "track_point",
+      "latitude": 49.3492917,
+      "longitude": 17.8686058
+    },
+    {
+      "csv_code": "77",
+      "station_id": "TK-77",
+      "station_name": "Traťový bod TK-77",
+      "suggested_role": "komisar_trat",
+      "suggested_station_type": "track_point",
+      "latitude": 49.3503205,
+      "longitude": 17.8684539
+    },
+    {
+      "csv_code": "78",
+      "station_id": "TK-78",
+      "station_name": "Traťový bod TK-78",
+      "suggested_role": "komisar_trat",
+      "suggested_station_type": "track_point",
+      "latitude": 49.3524423,
+      "longitude": 17.8695891
+    },
+    {
+      "csv_code": "79",
+      "station_id": "TK-79",
+      "station_name": "Traťový bod TK-79",
+      "suggested_role": "komisar_trat",
+      "suggested_station_type": "track_point",
+      "latitude": 49.3536353,
+      "longitude": 17.8703666
+    },
+    {
+      "csv_code": "80",
+      "station_id": "TK-80",
+      "station_name": "Traťový bod TK-80",
+      "suggested_role": "komisar_trat",
+      "suggested_station_type": "track_point",
+      "latitude": 49.3542297,
+      "longitude": 17.8701288
+    },
+    {
+      "csv_code": "81",
+      "station_id": "TK-81",
+      "station_name": "Traťový bod TK-81",
+      "suggested_role": "komisar_trat",
+      "suggested_station_type": "track_point",
+      "latitude": 49.3547041,
+      "longitude": 17.8700206
+    },
+    {
+      "csv_code": "82",
+      "station_id": "TK-82",
+      "station_name": "Traťový bod TK-82",
+      "suggested_role": "komisar_trat",
+      "suggested_station_type": "track_point",
+      "latitude": 49.3550326,
+      "longitude": 17.8704592
+    },
+    {
+      "csv_code": "83",
+      "station_id": "TK-83",
+      "station_name": "Traťový bod TK-83",
+      "suggested_role": "komisar_trat",
+      "suggested_station_type": "track_point",
+      "latitude": 49.3552392,
+      "longitude": 17.8701896
+    },
+    {
+      "csv_code": "84",
+      "station_id": "TK-84",
+      "station_name": "Traťový bod TK-84",
+      "suggested_role": "komisar_trat",
+      "suggested_station_type": "track_point",
+      "latitude": 49.3548797,
+      "longitude": 17.8695633
+    },
+    {
+      "csv_code": "85",
+      "station_id": "TK-85",
+      "station_name": "Traťový bod TK-85",
+      "suggested_role": "komisar_trat",
+      "suggested_station_type": "track_point",
+      "latitude": 49.3545364,
+      "longitude": 17.8694319
+    },
+    {
+      "csv_code": "86",
+      "station_id": "TK-86",
+      "station_name": "Traťový bod TK-86",
+      "suggested_role": "komisar_trat",
+      "suggested_station_type": "track_point",
+      "latitude": 49.354297,
+      "longitude": 17.8682316
+    },
+    {
+      "csv_code": "87",
+      "station_id": "TK-87",
+      "station_name": "Traťový bod TK-87",
+      "suggested_role": "komisar_trat",
+      "suggested_station_type": "track_point",
+      "latitude": 49.3539825,
+      "longitude": 17.8663997
+    },
+    {
+      "csv_code": "88",
+      "station_id": "TK-88",
+      "station_name": "Traťový bod TK-88",
+      "suggested_role": "komisar_trat",
+      "suggested_station_type": "track_point",
+      "latitude": 49.3543718,
+      "longitude": 17.8669693
+    },
+    {
+      "csv_code": "89",
+      "station_id": "TK-89",
+      "station_name": "Traťový bod TK-89",
+      "suggested_role": "komisar_trat",
+      "suggested_station_type": "track_point",
+      "latitude": 49.3547233,
+      "longitude": 17.8672325
+    },
+    {
+      "csv_code": "90",
+      "station_id": "TK-90",
+      "station_name": "Traťový bod TK-90",
+      "suggested_role": "komisar_trat",
+      "suggested_station_type": "track_point",
+      "latitude": 49.3549662,
+      "longitude": 17.8665828
+    },
+    {
+      "csv_code": "91",
+      "station_id": "TK-91",
+      "station_name": "Traťový bod TK-91",
+      "suggested_role": "komisar_trat",
+      "suggested_station_type": "track_point",
+      "latitude": 49.355596,
+      "longitude": 17.8673942
+    },
+    {
+      "csv_code": "92",
+      "station_id": "TK-92",
+      "station_name": "Traťový bod TK-92",
+      "suggested_role": "komisar_trat",
+      "suggested_station_type": "track_point",
+      "latitude": 49.3552073,
+      "longitude": 17.8660704
+    },
+    {
+      "csv_code": "93",
+      "station_id": "TK-93",
+      "station_name": "Traťový bod TK-93",
+      "suggested_role": "komisar_trat",
+      "suggested_station_type": "track_point",
+      "latitude": 49.3554383,
+      "longitude": 17.86611
+    },
+    {
+      "csv_code": "94",
+      "station_id": "TK-94",
+      "station_name": "Traťový bod TK-94",
+      "suggested_role": "komisar_trat",
+      "suggested_station_type": "track_point",
+      "latitude": 49.3559559,
+      "longitude": 17.8631001
+    },
+    {
+      "csv_code": "95",
+      "station_id": "TK-95",
+      "station_name": "Traťový bod TK-95",
+      "suggested_role": "komisar_trat",
+      "suggested_station_type": "track_point",
+      "latitude": 49.3567751,
+      "longitude": 17.861809
+    },
+    {
+      "csv_code": "96",
+      "station_id": "TK-96",
+      "station_name": "Traťový bod TK-96",
+      "suggested_role": "komisar_trat",
+      "suggested_station_type": "track_point",
+      "latitude": 49.3585443,
+      "longitude": 17.8597533
+    },
+    {
+      "csv_code": "97",
+      "station_id": "TK-97",
+      "station_name": "Traťový bod TK-97",
+      "suggested_role": "komisar_trat",
+      "suggested_station_type": "track_point",
+      "latitude": 49.3589355,
+      "longitude": 17.8578635
+    },
+    {
+      "csv_code": "98",
+      "station_id": "TK-98",
+      "station_name": "Traťový bod TK-98",
+      "suggested_role": "komisar_trat",
+      "suggested_station_type": "track_point",
+      "latitude": 49.3591381,
+      "longitude": 17.8567906
+    },
+    {
+      "csv_code": "99",
+      "station_id": "TK-99",
+      "station_name": "Traťový bod TK-99",
+      "suggested_role": "komisar_trat",
+      "suggested_station_type": "track_point",
+      "latitude": 49.3601164,
+      "longitude": 17.8553679
+    },
+    {
+      "csv_code": "VBRZ",
+      "station_id": "VBRZ",
+      "station_name": "Zástupce vedoucího RZ",
+      "suggested_role": "zastupce",
+      "suggested_station_type": "start_finish",
+      "latitude": 49.341758,
+      "longitude": 17.9704589
+    },
+    {
+      "csv_code": "VRZ",
+      "station_id": "VRZ",
+      "station_name": "Vedoucí RZ",
+      "suggested_role": "vedouci",
+      "suggested_station_type": "start_finish",
+      "latitude": 49.3417912,
+      "longitude": 17.9704723
+    },
+    {
+      "csv_code": "ZVBRZ",
+      "station_id": "ZVBRZ",
+      "station_name": "Zástupce vedoucího RZ",
+      "suggested_role": "zastupce",
+      "suggested_station_type": "start_finish",
+      "latitude": 49.3385051,
+      "longitude": 17.9467625
+    },
+    {
+      "csv_code": "ZVBRZ",
+      "station_id": "ZVBRZ",
+      "station_name": "Zástupce vedoucího RZ",
+      "suggested_role": "zastupce",
+      "suggested_station_type": "start_finish",
+      "latitude": 49.355059,
+      "longitude": 17.8704128
+    },
+    {
+      "csv_code": "ZVRZ",
+      "station_id": "ZVRZ",
+      "station_name": "Zástupce vedoucího RZ",
+      "suggested_role": "zastupce",
+      "suggested_station_type": "start_finish",
+      "latitude": 49.3547841,
+      "longitude": 17.8169675
+    }
+  ]
+}

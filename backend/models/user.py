@@ -24,7 +24,7 @@ class User(BaseModel):
     name: str = Field(..., min_length=1, max_length=100)
     role: UserRole
     station_id: Optional[str] = Field(None, description="Assigned station ID")
-    pin_code: Optional[str] = Field(None, description="4-digit PIN for komisaři")
+    pin_code: Optional[str] = Field(None, description="Numeric PIN for komisaři (legacy 4-digit or current 8-digit)")
     phone: Optional[str] = Field(None, description="Phone number (optional)")
     
     model_config = ConfigDict(
@@ -34,7 +34,7 @@ class User(BaseModel):
                 "name": "Jan Novák",
                 "role": "komisar_trat",
                 "station_id": "TK-01",
-                "pin_code": "1234",
+                "pin_code": "12345678",
                 "phone": "+420123456789"
             }
         }
@@ -57,6 +57,9 @@ class AssignmentHistoryEntry(BaseModel):
     name: str = Field(..., min_length=1, max_length=100)
     role: UserRole
     phone: Optional[str] = None
+    email: Optional[str] = None
+    address: Optional[str] = None
+    group: Optional[str] = None
     assigned_at: str
     assigned_until: Optional[str] = None
     is_active: bool = True
@@ -67,7 +70,7 @@ class KomisarAccess(BaseModel):
     """Komisař access credentials bound to one station PIN.
 
     Attributes:
-        pin_code: Stable 4-digit PIN code.
+        pin_code: Stable numeric PIN code.
         name: Currently assigned person name.
         role: Current person role.
         phone: Current person phone number.
@@ -80,10 +83,13 @@ class KomisarAccess(BaseModel):
         assignment_history: Chronological assignment history.
     """
 
-    pin_code: str = Field(..., min_length=4, max_length=4, pattern=r"^\d{4}$")
+    pin_code: str = Field(..., min_length=4, max_length=8, pattern=r"^\d{4,8}$")
     name: str = Field(..., min_length=1, max_length=100)
     role: UserRole
     phone: Optional[str] = None
+    email: Optional[str] = None
+    address: Optional[str] = None
+    group: Optional[str] = None
     station_id: Optional[str] = None
     station_name: Optional[str] = None
     station_type: Optional[str] = None
@@ -95,10 +101,11 @@ class KomisarAccess(BaseModel):
     model_config = ConfigDict(
         json_schema_extra={
             "example": {
-                "pin_code": "1234",
+                "pin_code": "12345678",
                 "name": "Jan Novák",
                 "role": "komisar_trat",
                 "phone": "+420123456789",
+                "email": "jan@example.com",
                 "station_id": "TK-01",
                 "station_name": "Traťový bod 01",
                 "station_type": "track_point",
@@ -108,6 +115,7 @@ class KomisarAccess(BaseModel):
                         "name": "Jan Novák",
                         "role": "komisar_trat",
                         "phone": "+420123456789",
+                        "email": "jan@example.com",
                         "assigned_at": "2026-02-15T15:00:00+00:00",
                         "assigned_until": None,
                         "is_active": True,

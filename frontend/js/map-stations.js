@@ -21,6 +21,7 @@ const MapStationsModule = {
 
             const payload = await response.json();
             const stations = Array.isArray(payload.stations) ? payload.stations : [];
+            this.emitOfflineTransitions(mapModule, stations);
             this.renderStationMarkers(mapModule, stations);
             this.updateStatusFromStations(mapModule, stations);
             this.updateOnlineCounter(stations);
@@ -140,10 +141,11 @@ const MapStationsModule = {
         stations.forEach((station, index) => {
             const latLng = this.getStationLatLng(mapModule, station.station_id, index);
             const online = Boolean(station.online);
+            const ready = Boolean(station.ready);
             const roleIcon = this.getRoleIcon(mapModule, station.role);
             const alertActive = this.isStationAlert(mapModule, station.station_id);
             const marker = L.marker(latLng, {
-                icon: this.createStationIcon(mapModule, online, roleIcon, alertActive),
+                icon: this.createStationIcon(mapModule, online, ready, roleIcon, alertActive),
             });
 
             marker.bindPopup(this.buildStationPopup(station));
@@ -165,16 +167,18 @@ const MapStationsModule = {
      * Build custom marker icon with status color + role symbol.
      * @param {Object} mapModule
      * @param {boolean} online
+     * @param {boolean} ready
      * @param {string} roleIcon
      * @param {boolean} alertActive
      * @returns {Object}
      */
-    createStationIcon(mapModule, online, roleIcon, alertActive) {
+    createStationIcon(mapModule, online, ready, roleIcon, alertActive) {
         const stateClass = online ? 'online' : 'offline';
+        const readinessClass = online ? (ready ? 'ready' : 'waiting') : '';
         const alertClass = alertActive ? 'alert' : '';
         const alertFlag = alertActive ? '<span class="station-alert-flag">!</span>' : '';
         const html = `
-            <div class="station-marker ${stateClass} ${alertClass}">
+            <div class="station-marker ${stateClass} ${readinessClass} ${alertClass}">
                 ${this.escapeHtml(roleIcon)}
                 ${alertFlag}
             </div>
@@ -209,9 +213,14 @@ const MapStationsModule = {
     buildStationPopup(station) {
         const status = station.online ? 'Online' : 'Offline';
         const badgeClass = station.online ? 'online' : 'offline';
-        const name = this.escapeHtml(station.name || 'Neznámá stanice');
+        const readiness = station.online
+            ? (station.ready ? 'Připraveno' : 'Čeká READY')
+            : 'Nedostupné';
+        const name = this.escapeHtml(station.name || 'Neznámé jméno');
+        const positionName = this.escapeHtml(station.station_name || station.station_id || 'neuvedeno');
         const role = this.escapeHtml(station.role || 'N/A');
-        const stationId = this.escapeHtml(station.station_id || 'N/A');
+        const phone = this.escapeHtml(station.phone || 'neuvedeno');
+        const email = this.escapeHtml(station.email || 'neuvedeno');
         const seconds = Number.isFinite(station.seconds_since_last_seen)
             ? station.seconds_since_last_seen
             : 0;
@@ -222,10 +231,14 @@ const MapStationsModule = {
 
         return `
             <div class="map-popup">
-                <h4>${stationId}</h4>
-                <p><strong>Stanice:</strong> ${name}</p>
+                <h4>${this.escapeHtml(station.station_id || 'N/A')}</h4>
+                <p><strong>Jméno:</strong> ${name}</p>
+                <p><strong>Název pozice:</strong> ${positionName}</p>
                 <p><strong>Role:</strong> ${role}</p>
+                <p><strong>Telefon:</strong> ${phone}</p>
+                <p><strong>E-mail:</strong> ${email}</p>
                 <p><strong>Připojení:</strong> ${activeConnections}</p>
+                <p><strong>Stav READY:</strong> ${readiness}</p>
                 <p><strong>Poslední aktivita:</strong> před ${seconds}s</p>
                 <p><strong>Naposledy:</strong> ${absoluteLastSeen}</p>
                 <span class="map-popup-badge ${badgeClass}">${status}</span>
@@ -283,6 +296,50 @@ const MapStationsModule = {
         offlineListEl.textContent = offlineStations.length
             ? offlineStations.map((item) => item.station_id || 'N/A').join(', ')
             : '-';
+    },
+
+    /**
+     * Emit event when station transitions from online to offline.
+     * @param {Object} mapModule
+     * @param {Array<Object>} stations
+     */
+    emitOfflineTransitions(mapModule, stations) {
+        const nextSnapshot = new Map();
+        const wentOffline = [];
+
+        stations.forEach((station) => {
+            const stationId = String(station.station_id || '');
+            if (!stationId) {
+                return;
+            }
+
+            const online = Boolean(station.online);
+            nextSnapshot.set(stationId.toLowerCase(), {
+                online,
+                ready: Boolean(station.ready),
+                phone: station.phone || null,
+                role: station.role || null,
+            });
+
+            const previous = mapModule.stationStatusCache.get(stationId.toLowerCase());
+            if (previous && previous.online && !online) {
+                wentOffline.push({
+                    station_id: station.station_id,
+                    role: station.role || null,
+                    phone: station.phone || null,
+                });
+            }
+        });
+
+        mapModule.stationStatusCache = nextSnapshot;
+
+        if (wentOffline.length) {
+            window.dispatchEvent(new CustomEvent('stations:went-offline', {
+                detail: {
+                    stations: wentOffline,
+                },
+            }));
+        }
     },
 
     /**

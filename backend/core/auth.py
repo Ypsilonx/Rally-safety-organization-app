@@ -13,6 +13,8 @@ from backend.models.user import AssignmentHistoryEntry, KomisarAccess, VEDENI_CR
 
 class AuthManager:
     """Manages authentication for both vedení and komisaři."""
+
+    PIN_LENGTH = 8
     
     def __init__(self, pins_file: str = "data/pins.json"):
         """Initialize auth manager with persistent PIN storage.
@@ -32,6 +34,9 @@ class AuthManager:
         name: str,
         role: UserRole,
         phone: Optional[str],
+        email: Optional[str],
+        address: Optional[str],
+        group: Optional[str],
         assigned_at: str,
         note: Optional[str] = None,
     ) -> AssignmentHistoryEntry:
@@ -51,6 +56,9 @@ class AuthManager:
             name=name,
             role=role,
             phone=phone,
+            email=email,
+            address=address,
+            group=group,
             assigned_at=assigned_at,
             assigned_until=None,
             is_active=True,
@@ -58,13 +66,14 @@ class AuthManager:
         )
 
     def _generate_unique_pin_code(self) -> str:
-        """Generate unique 4-digit PIN code.
+        """Generate unique numeric PIN code.
 
         Returns:
-            Unique 4-digit PIN string.
+            Unique PIN string with configured length.
         """
+        upper_bound = 10 ** self.PIN_LENGTH
         while True:
-            pin_code = str(secrets.randbelow(10000)).zfill(4)
+            pin_code = str(secrets.randbelow(upper_bound)).zfill(self.PIN_LENGTH)
             if pin_code not in self.komisar_pins:
                 return pin_code
 
@@ -86,6 +95,9 @@ class AuthManager:
                 name=name,
                 role=UserRole(role),
                 phone=pin_data.get("phone"),
+                email=pin_data.get("email"),
+                address=pin_data.get("address"),
+                group=pin_data.get("group"),
                 assigned_at=pin_data.get("created_at") or datetime.now(UTC).isoformat(),
             )
         ]
@@ -115,6 +127,9 @@ class AuthManager:
                     name=pin_data["name"],
                     role=UserRole(pin_data["role"]),
                     phone=pin_data.get("phone"),
+                    email=pin_data.get("email"),
+                    address=pin_data.get("address"),
+                    group=pin_data.get("group"),
                     station_id=pin_data.get("station_id"),
                     station_name=pin_data.get("station_name"),
                     station_type=pin_data.get("station_type"),
@@ -137,6 +152,9 @@ class AuthManager:
                     "name": komisar.name,
                     "role": komisar.role.value,
                     "phone": komisar.phone,
+                    "email": komisar.email,
+                    "address": komisar.address,
+                    "group": komisar.group,
                     "station_id": komisar.station_id,
                     "station_name": komisar.station_name,
                     "station_type": komisar.station_type,
@@ -236,7 +254,7 @@ class AuthManager:
         """Verify komisař PIN code.
         
         Args:
-            pin_code: 4-digit PIN
+            pin_code: Numeric PIN (legacy 4-digit or current 8-digit)
             
         Returns:
             KomisarAccess object if valid, None otherwise
@@ -248,7 +266,10 @@ class AuthManager:
             return None
         return access
     
-    def generate_pin(self, name: str, role: UserRole, phone: Optional[str] = None, 
+    def generate_pin(self, name: str, role: UserRole, phone: Optional[str] = None,
+                     email: Optional[str] = None,
+                     address: Optional[str] = None,
+                     group: Optional[str] = None,
                      station_id: Optional[str] = None) -> KomisarAccess:
         """Generate new PIN for komisař.
         
@@ -268,6 +289,9 @@ class AuthManager:
             name=name,
             role=role,
             phone=phone,
+            email=email,
+            address=address,
+            group=group,
             station_id=station_id,
             station_name=station_id,
             created_at=datetime.now(UTC).isoformat(),
@@ -276,6 +300,9 @@ class AuthManager:
                     name=name,
                     role=role,
                     phone=phone,
+                    email=email,
+                    address=address,
+                    group=group,
                     assigned_at=datetime.now(UTC).isoformat(),
                 )
             ],
@@ -295,6 +322,9 @@ class AuthManager:
         assignee_name: str,
         assignee_role: UserRole,
         assignee_phone: Optional[str] = None,
+        assignee_email: Optional[str] = None,
+        assignee_address: Optional[str] = None,
+        assignee_group: Optional[str] = None,
         note: Optional[str] = None,
     ) -> KomisarAccess:
         """Create a new station-bound PIN with initial assignment.
@@ -326,6 +356,9 @@ class AuthManager:
             name=assignee_name,
             role=assignee_role,
             phone=assignee_phone,
+            email=assignee_email,
+            address=assignee_address,
+            group=assignee_group,
             station_id=station_id,
             station_name=station_name,
             station_type=station_type,
@@ -337,6 +370,9 @@ class AuthManager:
                     name=assignee_name,
                     role=assignee_role,
                     phone=assignee_phone,
+                    email=assignee_email,
+                    address=assignee_address,
+                    group=assignee_group,
                     assigned_at=now,
                     note=note,
                 )
@@ -345,6 +381,79 @@ class AuthManager:
         self.komisar_pins[pin_code] = komisar
         self._save_pins()
         return komisar
+
+    def create_station_pin_unassigned(
+        self,
+        station_id: str,
+        station_name: str,
+        station_type: str,
+        capacity: int,
+        description: Optional[str],
+    ) -> KomisarAccess:
+        """Create a new station-bound PIN without active assignee.
+
+        Args:
+            station_id: New station identifier.
+            station_name: Human-readable station label.
+            station_type: Station type value.
+            capacity: Maximum allowed headcount.
+            description: Optional station note.
+
+        Returns:
+            Persisted station-bound PIN record without active assignment.
+
+        Raises:
+            ValueError: If the station already exists.
+        """
+        if self.find_pin_by_station_id(station_id) is not None:
+            raise ValueError(f"Station '{station_id}' already exists")
+
+        now = datetime.now(UTC).isoformat()
+        pin_code = self._generate_unique_pin_code()
+        komisar = KomisarAccess(
+            pin_code=pin_code,
+            name=station_name,
+            role=UserRole.KOMISAR_TRAT,
+            phone=None,
+            email=None,
+            address=None,
+            group=None,
+            station_id=station_id,
+            station_name=station_name,
+            station_type=station_type,
+            station_capacity=capacity,
+            station_description=description,
+            created_at=now,
+            assignment_history=[],
+        )
+        self.komisar_pins[pin_code] = komisar
+        self._save_pins()
+        return komisar
+
+    def regenerate_station_pin(self, station_id: str) -> tuple[str, KomisarAccess]:
+        """Regenerate PIN for one station while preserving station assignment data.
+
+        Args:
+            station_id: Station identifier whose PIN should be replaced.
+
+        Returns:
+            Tuple of previous PIN and updated station-bound record.
+
+        Raises:
+            KeyError: If no station PIN exists for the given station.
+        """
+        access = self.find_pin_by_station_id(station_id)
+        if access is None:
+            raise KeyError(f"Unknown station '{station_id}'")
+
+        old_pin = access.pin_code
+        new_pin = self._generate_unique_pin_code()
+        access.pin_code = new_pin
+
+        del self.komisar_pins[old_pin]
+        self.komisar_pins[new_pin] = access
+        self._save_pins()
+        return old_pin, access
     
     def remove_pin(self, pin_code: str) -> bool:
         """Remove komisař PIN.
@@ -409,6 +518,9 @@ class AuthManager:
         name: str,
         role: UserRole,
         phone: Optional[str] = None,
+        email: Optional[str] = None,
+        address: Optional[str] = None,
+        group: Optional[str] = None,
         note: Optional[str] = None,
     ) -> KomisarAccess:
         """Assign or reassign a person to an existing station-bound PIN.
@@ -441,11 +553,17 @@ class AuthManager:
         access.name = name
         access.role = role
         access.phone = phone
+        access.email = email
+        access.address = address
+        access.group = group
         access.assignment_history.append(
             self._create_history_entry(
                 name=name,
                 role=role,
                 phone=phone,
+                email=email,
+                address=address,
+                group=group,
                 assigned_at=now,
                 note=note,
             )

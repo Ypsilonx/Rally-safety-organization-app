@@ -10,9 +10,9 @@ def test_import_csv_supports_semicolon_and_basic_aliases(tmp_path: Path) -> None
     catalog = PeopleCatalog(storage_file=str(tmp_path / "people.json"))
 
     result = catalog.import_csv(
-        "jmeno;telefon\n"
-        "Jan Novák;+420111222333\n"
-        "Eva Testovací;+420444555666\n"
+        "jmeno;prijmeni;telefon;email;bydliste;skupina\n"
+        "Jan;Novák;+420111222333;jan@example.com;Brno;Cibulec\n"
+        "Eva;Testovací;+420444555666;eva@example.com;Olomouc;Přerováci\n"
     )
 
     assert result.imported == 2
@@ -22,9 +22,31 @@ def test_import_csv_supports_semicolon_and_basic_aliases(tmp_path: Path) -> None
     assert result.errors == []
 
     people = catalog.list_people()
-    assert people[0].name == "Eva Testovací"
-    assert people[1].name == "Jan Novák"
+    assert people[0].first_name == "Eva"
+    assert people[0].last_name == "Testovací"
+    assert people[0].email == "eva@example.com"
+    assert people[0].group == "Přerováci"
+    assert people[1].first_name == "Jan"
+    assert people[1].last_name == "Novák"
     assert people[1].phone == "+420111222333"
+
+
+def test_import_csv_supports_single_name_and_contact_aliases(tmp_path: Path) -> None:
+    """CSV import should split full name and keep contact metadata."""
+    catalog = PeopleCatalog(storage_file=str(tmp_path / "people.json"))
+
+    result = catalog.import_csv(
+        "name,phone,email,address,group\n"
+        "Petr Volčík,+420724236940,petr@example.com,Přerov,Cibulec\n"
+    )
+
+    assert result.imported == 1
+    person = catalog.list_people()[0]
+    assert person.first_name == "Petr"
+    assert person.last_name == "Volčík"
+    assert person.email == "petr@example.com"
+    assert person.address == "Přerov"
+    assert person.group == "Cibulec"
 
 
 def test_import_csv_reports_invalid_rows(tmp_path: Path) -> None:

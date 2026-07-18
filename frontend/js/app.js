@@ -38,6 +38,7 @@ const App = {
     adminPeople: [],
     selectedAdminStationId: null,
     currentScreen: 'dashboard',
+    lastOfflineStations: [],
 
     /**
      * Initialize application
@@ -60,6 +61,10 @@ const App = {
         this.restorePersistedUiState();
         this.loadRzState();
         this.applyRzStateUi();
+
+        if (window.SetupAdminModule?.applyStoredMapConfig) {
+            window.SetupAdminModule.applyStoredMapConfig(this);
+        }
 
         this.startGateStatusRefresh();
 
@@ -268,6 +273,16 @@ const App = {
             });
         }
 
+        const bulkGeneratePinsBtn = document.getElementById('btn-bulk-generate-pins');
+        if (bulkGeneratePinsBtn) {
+            bulkGeneratePinsBtn.addEventListener('click', () => {
+                this.bulkGeneratePinsFromMap().catch((error) => {
+                    console.error('Bulk PIN generation failed:', error);
+                    this.showToast('Hromadné generování PINů selhalo', 'error');
+                });
+            });
+        }
+
         const refreshPeopleBtn = document.getElementById('btn-refresh-people');
         if (refreshPeopleBtn) {
             refreshPeopleBtn.addEventListener('click', () => {
@@ -297,6 +312,69 @@ const App = {
         if (releaseBtn) {
             releaseBtn.addEventListener('click', () => {
                 this.releaseAdminStation();
+            });
+        }
+
+        const regeneratePinBtn = document.getElementById('btn-regenerate-station-pin');
+        if (regeneratePinBtn) {
+            regeneratePinBtn.addEventListener('click', () => {
+                this.regenerateSelectedStationPin().catch((error) => {
+                    console.error('Station PIN regeneration failed:', error);
+                    this.showToast('Regenerace PINu selhala', 'error');
+                });
+            });
+        }
+
+        const closeBulkSummaryBtn = document.getElementById('btn-close-pin-bulk-summary');
+        if (closeBulkSummaryBtn) {
+            closeBulkSummaryBtn.addEventListener('click', () => {
+                window.SetupAdminModule.hideBulkPinSummaryModal();
+            });
+        }
+
+        const bulkSummaryModal = document.getElementById('pin-bulk-summary-modal');
+        if (bulkSummaryModal) {
+            bulkSummaryModal.addEventListener('click', (event) => {
+                if (event.target === bulkSummaryModal) {
+                    window.SetupAdminModule.hideBulkPinSummaryModal();
+                }
+            });
+        }
+
+        const applyTrackBtn = document.getElementById('btn-map-track-apply');
+        if (applyTrackBtn) {
+            applyTrackBtn.addEventListener('click', () => {
+                this.applySetupTrackSource().catch((error) => {
+                    console.error('Track source apply failed:', error);
+                    this.showToast('Podklad trati se nepodařilo použít', 'error');
+                });
+            });
+        }
+
+        const loadCoordsBtn = document.getElementById('btn-map-station-load');
+        if (loadCoordsBtn) {
+            loadCoordsBtn.addEventListener('click', () => {
+                this.loadSelectedSetupStationCoordinate();
+            });
+        }
+
+        const saveCoordsBtn = document.getElementById('btn-map-station-save');
+        if (saveCoordsBtn) {
+            saveCoordsBtn.addEventListener('click', () => {
+                this.saveSelectedSetupStationCoordinate().catch((error) => {
+                    console.error('Station coordinate save failed:', error);
+                    this.showToast('Souřadnice se nepodařilo uložit', 'error');
+                });
+            });
+        }
+
+        const resetMapConfigBtn = document.getElementById('btn-map-config-reset');
+        if (resetMapConfigBtn) {
+            resetMapConfigBtn.addEventListener('click', () => {
+                this.resetSetupMapConfig().catch((error) => {
+                    console.error('Map config reset failed:', error);
+                    this.showToast('Reset map config se nepodařil', 'error');
+                });
             });
         }
 
@@ -345,7 +423,15 @@ const App = {
 
         window.addEventListener('stations:update', (event) => {
             const stations = event.detail?.stations || [];
+            this.lastOfflineStations = stations
+                .filter((station) => station && station.online === false)
+                .map((station) => station.station_id)
+                .filter(Boolean);
             this.updateStationTags(stations);
+        });
+
+        window.addEventListener('stations:went-offline', (event) => {
+            this.handleStationsWentOffline(event.detail?.stations || []);
         });
     },
 
@@ -718,6 +804,132 @@ const App = {
      */
     async releaseAdminStation() {
         return window.SetupAdminModule.releaseAdminStation(this);
+    },
+
+    /**
+     * Bulk-generate missing station PINs from map templates.
+     */
+    async bulkGeneratePinsFromMap() {
+        return window.SetupAdminModule.bulkGeneratePinsFromMap(this);
+    },
+
+    /**
+     * Regenerate PIN for currently selected station.
+     */
+    async regenerateSelectedStationPin() {
+        return window.SetupAdminModule.regenerateSelectedStationPin(this);
+    },
+
+    /**
+     * Apply custom track source from setup map configuration.
+     * @returns {Promise<void>}
+     */
+    async applySetupTrackSource() {
+        return window.SetupAdminModule.applySetupTrackSource(this);
+    },
+
+    /**
+     * Load selected station coordinates into setup map form.
+     */
+    loadSelectedSetupStationCoordinate() {
+        return window.SetupAdminModule.loadSelectedSetupStationCoordinate(this);
+    },
+
+    /**
+     * Save selected station coordinates from setup map form.
+     * @returns {Promise<void>}
+     */
+    async saveSelectedSetupStationCoordinate() {
+        return window.SetupAdminModule.saveSelectedSetupStationCoordinate(this);
+    },
+
+    /**
+     * Reset setup map configuration to defaults.
+     * @returns {Promise<void>}
+     */
+    async resetSetupMapConfig() {
+        return window.SetupAdminModule.resetSetupMapConfig(this);
+    },
+
+    /**
+     * Warn vedeni when station stops communicating during running RZ.
+     * @param {Array<Object>} stations
+     */
+    handleStationsWentOffline(stations) {
+        if (!this.isVedeniUser() || this.rzState !== 'running' || !Array.isArray(stations) || !stations.length) {
+            return;
+        }
+
+        stations.forEach((station, index) => {
+            const stationId = station?.station_id || 'N/A';
+            const phone = station?.phone || 'neuvedeno';
+            const email = station?.email || 'neuvedeno';
+            const content = `⚠️ Pozice ${stationId} přestala komunikovat. Kontakt: ${phone} / ${email}`;
+            const timestamp = new Date(Date.now() + index).toISOString();
+            const warningMessage = {
+                message_id: `offline_warn_${stationId}_${Date.now()}_${index}`,
+                sender: {
+                    user_id: 'system',
+                    name: 'Systém',
+                    role: 'system',
+                    phone,
+                    email,
+                },
+                message_type: 'system',
+                priority: 'high',
+                content,
+                created_at: timestamp,
+            };
+
+            this.displayMessage(warningMessage);
+            this.displayInfoMessage(warningMessage);
+            this.showToast(content, 'error');
+            this.logUiAction('station_went_offline_warning', {
+                station_id: stationId,
+                phone,
+                email,
+                rz_state: this.rzState,
+            });
+        });
+    },
+
+    /**
+     * Send frontend action audit log to backend.
+     * @param {string} action
+     * @param {Object} details
+     */
+    async logUiAction(action, details = {}) {
+        if (!action) {
+            return;
+        }
+
+        const authIdentifier = window.Auth.getAuthIdentifier();
+        if (!authIdentifier) {
+            return;
+        }
+
+        const headers = {
+            'Content-Type': 'application/json',
+            'X-Auth-Identifier': authIdentifier,
+        };
+
+        if (this.user?.session_token) {
+            headers['X-Session-Token'] = this.user.session_token;
+        }
+
+        try {
+            await fetch('http://localhost:8000/api/audit/frontend-event', {
+                method: 'POST',
+                headers,
+                body: JSON.stringify({
+                    action,
+                    source: 'frontend_app',
+                    details,
+                }),
+            });
+        } catch (error) {
+            console.error('UI audit log failed:', error);
+        }
     },
 
     /**

@@ -9,12 +9,26 @@ class CatalogPerson(BaseModel):
     """One reusable person entry for pre-race assignment.
 
     Attributes:
-        name: Person display name.
+        first_name: Person first name.
+        last_name: Person surname.
         phone: Optional phone number.
+        email: Optional email address.
+        address: Optional home or contact address.
+        group: Optional group or affiliation label.
     """
 
-    name: str = Field(..., min_length=1, max_length=100)
+    first_name: str = Field(..., min_length=1, max_length=100)
+    last_name: str = Field("", max_length=100)
     phone: str | None = Field(None, max_length=30)
+    email: str | None = Field(None, max_length=100)
+    address: str | None = Field(None, max_length=200)
+    group: str | None = Field(None, max_length=100)
+
+    @property
+    def display_name(self) -> str:
+        """Return combined person name for UI labels."""
+        parts = [self.first_name.strip(), self.last_name.strip()]
+        return " ".join(part for part in parts if part)
 
 
 class CsvImportError(BaseModel):

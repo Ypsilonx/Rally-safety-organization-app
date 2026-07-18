@@ -57,7 +57,7 @@ class PeopleCatalog:
         Returns:
             Sorted people list.
         """
-        return sorted(self._people, key=lambda item: item.name.lower())
+        return sorted(self._people, key=lambda item: item.display_name.lower())
 
     def _normalize_name_key(self, value: str) -> str:
         """Normalize person name for stable matching.
@@ -69,6 +69,17 @@ class PeopleCatalog:
             Lowercase trimmed key.
         """
         return " ".join(value.strip().split()).lower()
+
+    def _person_key(self, person: CatalogPerson) -> str:
+        """Build stable matching key for one person entry.
+
+        Args:
+            person: Catalog person entry.
+
+        Returns:
+            Normalized display-name key.
+        """
+        return self._normalize_name_key(person.display_name)
 
     def _detect_delimiter(self, csv_content: str) -> str:
         """Detect CSV delimiter from sample.
@@ -110,8 +121,12 @@ class PeopleCatalog:
         """Import people from CSV text.
 
         Supported headers include both Czech and English aliases:
-        - name / jmeno
+        - first_name / jmeno / name
+        - last_name / prijmeni / surname
         - phone / telefon
+        - email / e-mail
+        - address / bydliste / bydliště
+        - group / skupina
 
         Args:
             csv_content: CSV text including header.
@@ -125,23 +140,45 @@ class PeopleCatalog:
         reader = csv.DictReader(io.StringIO(csv_content), delimiter=delimiter)
 
         existing_by_key = {
-            self._normalize_name_key(person.name): index
+            self._person_key(person): index
             for index, person in enumerate(self._people)
         }
 
         for index, row in enumerate(reader, start=2):
             try:
-                name = self._column_value(row, ("name", "jmeno"))
-                if not name:
-                    raise ValueError("Chybí sloupec name/jmeno nebo je prázdný")
+                first_name = self._column_value(row, ("first_name", "jmeno"))
+                last_name = self._column_value(row, ("last_name", "prijmeni", "surname"))
+                full_name = self._column_value(row, ("name",))
+
+                if full_name and not first_name:
+                    parts = " ".join(full_name.split()).split(" ", 1)
+                    first_name = parts[0]
+                    if len(parts) > 1 and not last_name:
+                        last_name = parts[1]
+
+                if first_name and not last_name and " " in first_name:
+                    parts = " ".join(first_name.split()).split(" ", 1)
+                    first_name = parts[0]
+                    if len(parts) > 1:
+                        last_name = parts[1]
+
+                if not first_name:
+                    raise ValueError("Chybí sloupec first_name/jmeno/name nebo je prázdný")
 
                 phone = self._column_value(row, ("phone", "telefon"))
+                email = self._column_value(row, ("email", "e-mail", "mail"))
+                address = self._column_value(row, ("address", "bydliste", "bydliště"))
+                group = self._column_value(row, ("group", "skupina"))
 
                 person = CatalogPerson(
-                    name=" ".join(name.split()),
+                    first_name=" ".join(first_name.split()),
+                    last_name=" ".join(last_name.split()) if last_name else "",
                     phone=phone,
+                    email=email,
+                    address=address,
+                    group=group,
                 )
-                key = self._normalize_name_key(person.name)
+                key = self._person_key(person)
 
                 existing_index = existing_by_key.get(key)
                 if existing_index is not None:

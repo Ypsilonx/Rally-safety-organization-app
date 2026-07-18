@@ -12,11 +12,17 @@ const MAP_CONFIG = {
     statusApiUrl: 'http://localhost:8000/api/stations/status',
     stationRefreshMs: 15000,
     markerAlertDurationMs: 15 * 60 * 1000,
+    trackGeoJsonUrl: '',
+    stationCoordinatesUrl: '',
 };
 
 const STATION_COORDINATES = {
     'TK-01': [49.2088, 16.5792],
     'ZT-05': [49.1936, 16.6241],
+};
+
+const DEFAULT_STATION_COORDINATES = {
+    ...STATION_COORDINATES,
 };
 
 const ROLE_ICON_MAP = {
@@ -62,9 +68,12 @@ const MapModule = {
     fallbackTrack: SAMPLE_TRACK_FALLBACK,
     map: null,
     trackLayer: null,
+    elementLayer: null,
     stationLayer: null,
+    elementMarkers: new Map(),
     stationMarkers: new Map(),
     stationAlerts: new Map(),
+    stationStatusCache: new Map(),
     stationRefreshTimer: null,
     isInitialized: false,
 
@@ -96,6 +105,12 @@ const MapModule = {
 
         const geojson = await window.MapTrackModule.loadTrackGeoJson(this);
         window.MapTrackModule.renderTrack(this, geojson);
+
+        await this.loadStationCoordinates();
+
+        this.elementLayer = L.layerGroup().addTo(this.map);
+        const elementsGeojson = await window.MapElementsModule.loadElementsGeoJson(this);
+        window.MapElementsModule.renderElements(this, elementsGeojson);
 
         this.stationLayer = L.layerGroup().addTo(this.map);
 
@@ -130,6 +145,109 @@ const MapModule = {
                 this.map.invalidateSize();
             }
         }, 120);
+    },
+
+    /**
+     * Load station-coordinate overrides from JSON file when available.
+     *
+     * @returns {Promise<void>}
+     */
+    async loadStationCoordinates() {
+        const customSource = String(this.config.stationCoordinatesUrl || '').trim();
+        const candidates = [
+            customSource,
+            '/data/station-coordinates.json',
+            '../data/station-coordinates.json',
+            'data/station-coordinates.json',
+        ].filter(Boolean);
+
+        for (const path of candidates) {
+            try {
+                const response = await fetch(path);
+                if (!response.ok) {
+                    continue;
+                }
+
+                const payload = await response.json();
+                const incoming = payload?.coordinates;
+                if (!incoming || typeof incoming !== 'object') {
+                    continue;
+                }
+
+                this.stationCoordinates = {
+                    ...this.stationCoordinates,
+                    ...incoming,
+                };
+                return;
+            } catch (_error) {
+                // Continue with next candidate path.
+            }
+        }
+    },
+
+    /**
+     * Replace station coordinate dictionary used for marker placement.
+     * @param {Object<string, Array<number>>} coordinates
+     */
+    setStationCoordinates(coordinates) {
+        if (!coordinates || typeof coordinates !== 'object') {
+            return;
+        }
+
+        this.stationCoordinates = { ...coordinates };
+    },
+
+    /**
+     * Reset runtime map configuration to built-in defaults.
+     */
+    resetRuntimeConfig() {
+        this.config.trackGeoJsonUrl = '';
+        this.stationCoordinates = { ...DEFAULT_STATION_COORDINATES };
+    },
+
+    /**
+     * Set custom GeoJSON path for track rendering.
+     * @param {string} trackGeoJsonUrl
+     */
+    setTrackSource(trackGeoJsonUrl) {
+        this.config.trackGeoJsonUrl = String(trackGeoJsonUrl || '').trim();
+    },
+
+    /**
+     * Re-load and redraw track from current source configuration.
+     * @returns {Promise<void>}
+     */
+    async refreshTrack() {
+        if (!this.map) {
+            return;
+        }
+
+        const geojson = await window.MapTrackModule.loadTrackGeoJson(this);
+        window.MapTrackModule.renderTrack(this, geojson);
+    },
+
+    /**
+     * Reload and redraw generic map elements layer.
+     * @returns {Promise<void>}
+     */
+    async refreshMapElements() {
+        if (!this.map) {
+            return;
+        }
+
+        const geojson = await window.MapElementsModule.loadElementsGeoJson(this);
+        window.MapElementsModule.renderElements(this, geojson);
+    },
+
+    /**
+     * Return current runtime map configuration for setup persistence.
+     * @returns {{trackGeoJsonUrl: string, stationCoordinates: Object<string, Array<number>>}}
+     */
+    getRuntimeConfig() {
+        return {
+            trackGeoJsonUrl: this.config.trackGeoJsonUrl || '',
+            stationCoordinates: { ...this.stationCoordinates },
+        };
     },
 
     /**

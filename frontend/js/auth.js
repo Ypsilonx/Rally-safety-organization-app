@@ -98,7 +98,7 @@ const Auth = {
 
     /**
      * Login as Komisař (PIN code)
-     * @param {string} pin - 4-digit PIN code
+        * @param {string} pin - Numeric PIN code (8-digit primary, 4-digit legacy)
      * @returns {Promise<Object>} User object
      * @throws {Error} Login failed
      */
@@ -263,9 +263,9 @@ const LoginUI = {
         const pin = document.getElementById('pin').value.trim();
         const errorEl = document.getElementById('komisar-error');
 
-        // Validate PIN format
-        if (!/^\d{4}$/.test(pin)) {
-            errorEl.textContent = 'PIN musí být 4 číslice';
+        // Validate PIN format (8-digit primary, 4-digit legacy compatibility)
+        if (!/^\d{4,8}$/.test(pin)) {
+            errorEl.textContent = 'PIN musí mít 4 až 8 číslic';
             errorEl.classList.remove('hidden');
             return;
         }

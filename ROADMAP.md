@@ -261,7 +261,7 @@ Aktuální průběžný stav drž v `STATUS.md`. Tento dokument je plán a backl
 - ✅ Absolutní timestamp poslední aktivity v popupu
 - ✅ Modularizace frontend logiky: operations/map rozděleny do menších modulů
 - ✅ Manuální test checklist pro mapový modul
-- ⏳ Finální manuální průchod desktop + mobil a zápis výsledků
+- ⏳ Finální manuální průchod desktop + mobil a zápis výsledků (odloženo na finální validační průchod)
 
 ### Testování:
 ```bash
@@ -664,5 +664,7 @@ Již implementováno mimo plný scope fáze:
 3. **Testuj na mobilu** - Od Fáze 2 testuj i na skutečném mobilu
 4. **Dokumentuj problémy** - Když něco nefunguje, zapiš do ISSUES.md
 
-**Aktuální priorita:** zavřít Fázi 4 (manuální checklist + E2E gate scénář),
-poté rozjet Fázi 5 v minimálním řezu (správa mapových podkladů + seznam komisařů).
+**Aktuální priorita:** rozjet Fázi 5 v minimálním řezu
+(správa mapových podkladů + seznam komisařů);
+formální finální průchod Fáze 4 (manuální checklist + E2E gate scénář) je odložen
+na závěrečnou validační iteraci před širším field testem.

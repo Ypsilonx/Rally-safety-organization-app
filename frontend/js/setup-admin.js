@@ -5,6 +5,84 @@
 
 const SetupAdminModule = {
     /**
+     * Return local storage key for setup map configuration.
+     * @returns {string}
+     */
+    getMapConfigStorageKey() {
+        return 'rally_setup_map_config_v1';
+    },
+
+    /**
+     * Read map config from local storage.
+     * @returns {{trackGeoJsonUrl: string, stationCoordinates: Object<string, Array<number>>}}
+     */
+    readStoredMapConfig() {
+        try {
+            const raw = localStorage.getItem(this.getMapConfigStorageKey());
+            if (!raw) {
+                return { trackGeoJsonUrl: '', stationCoordinates: {} };
+            }
+            const parsed = JSON.parse(raw);
+            return {
+                trackGeoJsonUrl: String(parsed.trackGeoJsonUrl || ''),
+                stationCoordinates: parsed.stationCoordinates && typeof parsed.stationCoordinates === 'object'
+                    ? parsed.stationCoordinates
+                    : {},
+            };
+        } catch (_error) {
+            return { trackGeoJsonUrl: '', stationCoordinates: {} };
+        }
+    },
+
+    /**
+     * Persist map config to local storage.
+     * @param {Object} payload
+     */
+    storeMapConfig(payload) {
+        localStorage.setItem(this.getMapConfigStorageKey(), JSON.stringify(payload));
+    },
+
+    /**
+     * Merge map runtime config with storage and apply on startup/setup open.
+     * @param {Object} app
+     */
+    applyStoredMapConfig(app) {
+        if (!window.MapModule) {
+            return;
+        }
+
+        const stored = this.readStoredMapConfig();
+        const runtime = window.MapModule.getRuntimeConfig
+            ? window.MapModule.getRuntimeConfig()
+            : { trackGeoJsonUrl: '', stationCoordinates: {} };
+
+        const mergedCoordinates = {
+            ...(runtime.stationCoordinates || {}),
+            ...(stored.stationCoordinates || {}),
+        };
+
+        window.MapModule.setTrackSource(stored.trackGeoJsonUrl || runtime.trackGeoJsonUrl || '');
+        window.MapModule.setStationCoordinates(mergedCoordinates);
+        this.storeMapConfig({
+            trackGeoJsonUrl: String(stored.trackGeoJsonUrl || runtime.trackGeoJsonUrl || ''),
+            stationCoordinates: mergedCoordinates,
+        });
+        this.syncMapConfigForm(app);
+    },
+
+    /**
+     * Fill setup map config form with current values.
+     * @param {Object} app
+     */
+    syncMapConfigForm(app) {
+        const trackInput = document.getElementById('map-track-path');
+        if (trackInput && window.MapModule) {
+            trackInput.value = window.MapModule.config.trackGeoJsonUrl || '';
+        }
+        this.loadSelectedSetupStationCoordinate(app);
+    },
+
+    /**
      * Return default role suggested by station type.
      * @param {string} stationType
      * @returns {string}
@@ -61,6 +139,9 @@ const SetupAdminModule = {
         setupScreen.classList.remove('hidden');
         setupScreen.classList.add('active');
         app.currentScreen = 'setup';
+        app.logUiAction('open_setup_screen', {});
+
+        this.applyStoredMapConfig(app);
 
         Promise.all([
             app.loadAdminStations(),
@@ -117,15 +198,24 @@ const SetupAdminModule = {
 
         select.innerHTML = '<option value="">Ruční zadání</option>';
         app.adminPeople.forEach((person) => {
+            const displayName = [person.first_name, person.last_name].filter(Boolean).join(' ').trim() || 'Neznámá osoba';
             const option = document.createElement('option');
-            option.value = person.name || '';
-            option.textContent = person.phone
-                ? `${person.name} · ${person.phone}`
-                : (person.name || 'Neznámá osoba');
+            option.value = displayName;
+            const pieces = [displayName];
+            if (person.phone) {
+                pieces.push(person.phone);
+            }
+            if (person.email) {
+                pieces.push(person.email);
+            }
+            if (person.group) {
+                pieces.push(`SKUPINA: ${person.group}`);
+            }
+            option.textContent = pieces.join(' · ');
             select.appendChild(option);
         });
 
-        if (preferredName && app.adminPeople.some((person) => person.name === preferredName)) {
+        if (preferredName && app.adminPeople.some((person) => [person.first_name, person.last_name].filter(Boolean).join(' ').trim() === preferredName)) {
             select.value = preferredName;
         } else {
             select.value = '';
@@ -147,19 +237,31 @@ const SetupAdminModule = {
             return;
         }
 
-        const person = app.adminPeople.find((item) => item.name === selectedName);
+        const person = app.adminPeople.find((item) => [item.first_name, item.last_name].filter(Boolean).join(' ').trim() === selectedName);
         if (!person) {
             return;
         }
 
         const nameField = document.getElementById('admin-person-name');
         const phoneField = document.getElementById('admin-person-phone');
+        const emailField = document.getElementById('admin-person-email');
+        const addressField = document.getElementById('admin-person-address');
+        const groupField = document.getElementById('admin-person-group');
 
         if (nameField) {
-            nameField.value = person.name || '';
+            nameField.value = [person.first_name, person.last_name].filter(Boolean).join(' ').trim();
         }
         if (phoneField) {
             phoneField.value = person.phone || '';
+        }
+        if (emailField) {
+            emailField.value = person.email || '';
+        }
+        if (addressField) {
+            addressField.value = person.address || '';
+        }
+        if (groupField) {
+            groupField.value = person.group || '';
         }
     },
 
@@ -179,6 +281,7 @@ const SetupAdminModule = {
         appScreen.classList.remove('hidden');
         appScreen.classList.add('active');
         app.currentScreen = 'dashboard';
+        app.logUiAction('return_to_dashboard', {});
 
         if (window.MapModule?.map) {
             setTimeout(() => window.MapModule.map.invalidateSize(), 120);
@@ -300,6 +403,9 @@ const SetupAdminModule = {
         const currentName = station.current_user?.name || 'Neobsazeno';
         const currentRole = station.current_user?.role || '-';
         const currentPhone = station.current_user?.phone || 'neuvedeno';
+        const currentEmail = station.current_user?.email || 'neuvedeno';
+        const currentAddress = station.current_user?.address || 'neuvedeno';
+        const currentGroup = station.current_user?.group || 'neuvedeno';
         detail.innerHTML = `
             <h5>${app.escapeHtml(station.station_id)} · ${app.escapeHtml(station.station_name || station.station_id)}</h5>
             <div class="station-detail-grid">
@@ -310,6 +416,9 @@ const SetupAdminModule = {
                 <div class="station-detail-meta"><strong>Osoba:</strong> ${app.escapeHtml(currentName)}</div>
                 <div class="station-detail-meta"><strong>Role:</strong> ${app.escapeHtml(currentRole)}</div>
                 <div class="station-detail-meta"><strong>Telefon:</strong> ${app.escapeHtml(currentPhone)}</div>
+                <div class="station-detail-meta"><strong>E-mail:</strong> ${app.escapeHtml(currentEmail)}</div>
+                <div class="station-detail-meta"><strong>Bydliště:</strong> ${app.escapeHtml(currentAddress)}</div>
+                <div class="station-detail-meta"><strong>SKUPINA:</strong> ${app.escapeHtml(currentGroup)}</div>
                 <div class="station-detail-meta"><strong>Poznámka:</strong> ${app.escapeHtml(station.description || '-')}</div>
             </div>
         `;
@@ -319,11 +428,150 @@ const SetupAdminModule = {
         document.getElementById('admin-person-role').value = station.current_user?.role
             || this.getDefaultRoleForStation(station.station_type);
         document.getElementById('admin-person-phone').value = station.current_user?.phone || '';
+        document.getElementById('admin-person-email').value = station.current_user?.email || '';
+        document.getElementById('admin-person-address').value = station.current_user?.address || '';
+        document.getElementById('admin-person-group').value = station.current_user?.group || '';
         document.getElementById('admin-person-note').value = '';
         this.renderAdminPeopleOptions(app, station.current_user?.name || '');
         form.classList.remove('hidden');
 
         this.renderAdminHistory(app, station.assigned_users || []);
+        this.loadSelectedSetupStationCoordinate(app);
+    },
+
+    /**
+     * Apply custom track source from setup form.
+     * @param {Object} app
+     * @returns {Promise<void>}
+     */
+    async applySetupTrackSource(app) {
+        const trackInput = document.getElementById('map-track-path');
+        if (!trackInput || !window.MapModule) {
+            return;
+        }
+
+        const trackGeoJsonUrl = String(trackInput.value || '').trim();
+        window.MapModule.setTrackSource(trackGeoJsonUrl);
+
+        const stored = this.readStoredMapConfig();
+        this.storeMapConfig({
+            trackGeoJsonUrl,
+            stationCoordinates: stored.stationCoordinates || {},
+        });
+        app.logUiAction('setup_track_source_updated', {
+            track_geojson_url: trackGeoJsonUrl || 'default',
+        });
+
+        if (window.MapModule.isInitialized) {
+            await window.MapModule.refreshTrack();
+        }
+
+        app.showToast('Podklad trati aktualizován', 'success');
+    },
+
+    /**
+     * Load selected station coordinates into setup form fields.
+     * @param {Object} app
+     */
+    loadSelectedSetupStationCoordinate(app) {
+        const latInput = document.getElementById('map-station-lat');
+        const lonInput = document.getElementById('map-station-lon');
+        if (!latInput || !lonInput) {
+            return;
+        }
+
+        const stationId = app.selectedAdminStationId;
+        if (!stationId || !window.MapModule) {
+            latInput.value = '';
+            lonInput.value = '';
+            return;
+        }
+
+        const coordinates = window.MapModule.stationCoordinates[stationId];
+        if (!Array.isArray(coordinates) || coordinates.length !== 2) {
+            latInput.value = '';
+            lonInput.value = '';
+            return;
+        }
+
+        latInput.value = String(coordinates[0]);
+        lonInput.value = String(coordinates[1]);
+    },
+
+    /**
+     * Save selected station coordinates from setup form.
+     * @param {Object} app
+     * @returns {Promise<void>}
+     */
+    async saveSelectedSetupStationCoordinate(app) {
+        const stationId = app.selectedAdminStationId;
+        if (!stationId || !window.MapModule) {
+            app.showToast('Nejprve vyber pozici ze seznamu', 'info');
+            return;
+        }
+
+        const latInput = document.getElementById('map-station-lat');
+        const lonInput = document.getElementById('map-station-lon');
+        const latitude = Number(latInput?.value);
+        const longitude = Number(lonInput?.value);
+
+        if (!Number.isFinite(latitude) || !Number.isFinite(longitude)) {
+            app.showToast('Zadej platné souřadnice lat/lon', 'error');
+            return;
+        }
+
+        if (latitude < -90 || latitude > 90 || longitude < -180 || longitude > 180) {
+            app.showToast('Souřadnice jsou mimo povolený rozsah', 'error');
+            return;
+        }
+
+        const mergedCoordinates = {
+            ...window.MapModule.stationCoordinates,
+            [stationId]: [latitude, longitude],
+        };
+
+        window.MapModule.setStationCoordinates(mergedCoordinates);
+
+        const stored = this.readStoredMapConfig();
+        this.storeMapConfig({
+            trackGeoJsonUrl: String(window.MapModule.config.trackGeoJsonUrl || stored.trackGeoJsonUrl || ''),
+            stationCoordinates: mergedCoordinates,
+        });
+        app.logUiAction('setup_station_coordinates_saved', {
+            station_id: stationId,
+            latitude,
+            longitude,
+        });
+
+        if (window.MapModule.isInitialized) {
+            await window.MapModule.refreshStationMarkers();
+        }
+
+        app.showToast(`Souřadnice ${stationId} uloženy`, 'success');
+    },
+
+    /**
+     * Reset setup map configuration to defaults.
+     * @param {Object} app
+     * @returns {Promise<void>}
+     */
+    async resetSetupMapConfig(app) {
+        if (!window.MapModule) {
+            return;
+        }
+
+        localStorage.removeItem(this.getMapConfigStorageKey());
+        window.MapModule.resetRuntimeConfig();
+
+        this.applyStoredMapConfig(app);
+        app.logUiAction('setup_map_config_reset', {});
+
+        if (window.MapModule.isInitialized) {
+            await window.MapModule.refreshTrack();
+            await window.MapModule.refreshStationMarkers();
+        }
+
+        app.showToast('Map config vrácen na výchozí hodnoty', 'success');
     },
 
     /**
@@ -367,6 +615,9 @@ const SetupAdminModule = {
         const name = document.getElementById('admin-person-name')?.value.trim();
         const role = document.getElementById('admin-person-role')?.value;
         const phone = document.getElementById('admin-person-phone')?.value.trim() || null;
+        const email = document.getElementById('admin-person-email')?.value.trim() || null;
+        const address = document.getElementById('admin-person-address')?.value.trim() || null;
+        const group = document.getElementById('admin-person-group')?.value.trim() || null;
         const note = document.getElementById('admin-person-note')?.value.trim() || null;
 
         if (!stationId || !name || !role) {
@@ -377,7 +628,7 @@ const SetupAdminModule = {
         const response = await fetch(`http://localhost:8000/api/admin/station/${encodeURIComponent(stationId)}/reassign-user`, {
             method: 'POST',
             headers: this.getAdminHeaders(app),
-            body: JSON.stringify({ name, role, phone, note }),
+            body: JSON.stringify({ name, role, phone, email, address, group, note }),
         });
 
         if (response.status === 401) {
@@ -400,6 +651,15 @@ const SetupAdminModule = {
             detail: { stationId },
         }));
         app.requestGateStatusRefresh();
+        app.logUiAction('setup_assignment_saved', {
+            station_id: stationId,
+            name,
+            role,
+            phone,
+            email,
+            address,
+            group,
+        });
         app.showToast(`Pozice ${stationId} aktualizována`, 'success');
     },
 
@@ -449,7 +709,165 @@ const SetupAdminModule = {
             detail: { stationId },
         }));
         app.requestGateStatusRefresh();
+        app.logUiAction('setup_assignment_released', {
+            station_id: stationId,
+            note,
+        });
         app.showToast(`Pozice ${stationId} uvolněna`, 'success');
+    },
+
+    /**
+     * Generate missing station PINs from map station templates in bulk.
+     *
+     * Args:
+     *     app: Main app instance.
+     *
+     * Returns:
+     *     Promise that resolves when refresh is complete.
+     */
+    async bulkGeneratePinsFromMap(app) {
+        if (!app.isVedeniUser()) {
+            return;
+        }
+
+        const regenerateExisting = Boolean(
+            document.getElementById('bulk-regenerate-existing-pins')?.checked,
+        );
+
+        const confirmText = [
+            'Vygenerovat PINy pro pozice z mapových podkladů?',
+            regenerateExisting
+                ? 'Pozor: existující PINy budou také regenerované.'
+                : 'Existující pozice zůstanou beze změny.',
+        ].join('\n');
+
+        if (!confirm(confirmText)) {
+            return;
+        }
+
+        const response = await fetch('http://localhost:8000/api/admin/station/bulk-generate-pins', {
+            method: 'POST',
+            headers: this.getAdminHeaders(app),
+            body: JSON.stringify({ regenerate_existing: regenerateExisting }),
+        });
+
+        if (response.status === 401) {
+            window.Auth.handleUnauthorized();
+            return;
+        }
+
+        if (!response.ok) {
+            app.showToast('Hromadné generování PINů selhalo', 'error');
+            return;
+        }
+
+        const payload = await response.json();
+        const summary = payload.summary || {};
+        await this.loadAdminStations(app);
+        app.requestGateStatusRefresh();
+        app.logUiAction('setup_bulk_generate_pins', {
+            created: Number(summary.created || 0),
+            regenerated: Number(summary.regenerated || 0),
+            skipped: Number(summary.skipped || 0),
+            templates_total: Number(summary.templates_total || 0),
+            regenerate_existing: regenerateExisting,
+        });
+        this.showBulkPinSummaryModal(summary, regenerateExisting);
+    },
+
+    /**
+     * Show summary modal for bulk PIN generation outcome.
+     *
+     * Args:
+     *     summary: API summary object.
+     *     regenerateExisting: Whether existing PINs were included.
+     */
+    showBulkPinSummaryModal(summary, regenerateExisting) {
+        const modal = document.getElementById('pin-bulk-summary-modal');
+        const content = document.getElementById('pin-bulk-summary-content');
+        if (!modal || !content) {
+            return;
+        }
+
+        const templatesTotal = Number(summary.templates_total || 0);
+        const created = Number(summary.created || 0);
+        const regenerated = Number(summary.regenerated || 0);
+        const skipped = Number(summary.skipped || 0);
+        const mode = regenerateExisting ? 'včetně regenerace existujících PINů' : 'pouze nové pozice';
+
+        content.innerHTML = [
+            `<p><strong>Režim:</strong> ${mode}</p>`,
+            `<p><strong>Mapové šablony:</strong> ${templatesTotal}</p>`,
+            `<p><strong>Vytvořeno:</strong> ${created}</p>`,
+            `<p><strong>Regenerováno:</strong> ${regenerated}</p>`,
+            `<p><strong>Přeskočeno:</strong> ${skipped}</p>`,
+        ].join('');
+
+        modal.classList.remove('hidden');
+    },
+
+    /**
+     * Hide bulk PIN summary modal.
+     */
+    hideBulkPinSummaryModal() {
+        const modal = document.getElementById('pin-bulk-summary-modal');
+        if (!modal) {
+            return;
+        }
+        modal.classList.add('hidden');
+    },
+
+    /**
+     * Regenerate PIN for currently selected station.
+     *
+     * Args:
+     *     app: Main app instance.
+     *
+     * Returns:
+     *     Promise that resolves when station list is refreshed.
+     */
+    async regenerateSelectedStationPin(app) {
+        const station = this.getSelectedAdminStation(app);
+        const stationId = station?.station_id;
+        if (!stationId) {
+            app.showToast('Nejprve vyber pozici', 'info');
+            return;
+        }
+
+        const confirmed = confirm(
+            `Regenerovat PIN pro pozici ${stationId}?\nStarý PIN bude okamžitě neplatný.`,
+        );
+        if (!confirmed) {
+            return;
+        }
+
+        const response = await fetch(
+            `http://localhost:8000/api/admin/station/${encodeURIComponent(stationId)}/regenerate-pin`,
+            {
+                method: 'POST',
+                headers: this.getAdminHeaders(app),
+            },
+        );
+
+        if (response.status === 401) {
+            window.Auth.handleUnauthorized();
+            return;
+        }
+
+        if (!response.ok) {
+            app.showToast('Regenerace PINu selhala', 'error');
+            return;
+        }
+
+        const payload = await response.json();
+        await this.loadAdminStations(app);
+        app.requestGateStatusRefresh();
+        app.logUiAction('setup_regenerate_station_pin', {
+            station_id: stationId,
+            old_pin_code: payload.old_pin_code || null,
+            new_pin_code: payload.station?.pin_code || null,
+        });
+        app.showToast(`PIN pro ${stationId} byl regenerován`, 'success');
     },
 };
 

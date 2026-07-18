@@ -401,6 +401,17 @@ body {
     color: #475569;
 }
 
+.setup-map-config-grid {
+    margin-top: 0.65rem;
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 0.55rem;
+}
+
+.setup-map-config-grid .btn {
+    width: 100%;
+}
+
 /* Main Content */
 .app-main {
     flex: 1;
@@ -528,6 +539,7 @@ body {
     display: flex;
     justify-content: space-between;
     align-items: center;
+    gap: 0.5rem;
     padding: 0.5rem 0.75rem;
     background: #111827;
     color: #f9fafb;
@@ -536,6 +548,19 @@ body {
 .map-toolbar h3 {
     font-size: 0.95rem;
     font-weight: 700;
+}
+
+.map-source-badge {
+    display: inline-flex;
+    align-items: center;
+    padding: 0.18rem 0.5rem;
+    border-radius: 999px;
+    background: rgba(255, 255, 255, 0.1);
+    color: #f9fafb;
+    font-size: 0.72rem;
+    font-weight: 700;
+    letter-spacing: 0.02em;
+    white-space: nowrap;
 }
 
 .station-marker-wrapper {
@@ -563,6 +588,14 @@ body {
     background: #10b981;
 }
 
+.station-marker.online.waiting {
+    background: #f59e0b;
+}
+
+.station-marker.online.ready {
+    background: #10b981;
+}
+
 .station-marker.offline {
     background: #ef4444;
 }
@@ -572,6 +605,61 @@ body {
     box-shadow:
         0 0 0 0 rgba(220, 38, 38, 0.55),
         0 2px 10px rgba(15, 23, 42, 0.22);
+}
+
+.element-marker-wrapper {
+    background: transparent;
+    border: none;
+}
+
+.element-marker {
+    width: 24px;
+    height: 24px;
+    border-radius: 8px;
+    border: 2px solid #0f172a;
+    color: #ffffff;
+    font-size: 0.68rem;
+    font-weight: 800;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 2px 10px rgba(15, 23, 42, 0.18);
+}
+
+.element-marker.start,
+.element-marker.finish {
+    background: #2563eb;
+}
+
+.element-marker.timing {
+    background: #7c3aed;
+}
+
+.element-marker.medical {
+    background: #059669;
+}
+
+.element-marker.fire {
+    background: #dc2626;
+}
+
+.element-marker.spectator {
+    background: #64748b;
+}
+
+.element-marker.retarder {
+    background: #d97706;
+}
+
+.element-marker.closure {
+    background: #7f1d1d;
+}
+
+.element-marker.commissioner {
+    outline: 2px solid rgba(245, 158, 11, 0.35);
+    box-shadow:
+        0 0 0 3px rgba(245, 158, 11, 0.22),
+        0 2px 10px rgba(15, 23, 42, 0.18);
 }
 
 .station-alert-flag {
@@ -593,6 +681,21 @@ body {
 .map-status {
     font-size: 0.8rem;
     color: #9ca3af;
+}
+
+@media (max-width: 900px) {
+    .map-toolbar {
+        flex-wrap: wrap;
+    }
+
+    .map-toolbar h3 {
+        flex: 1 1 auto;
+    }
+
+    .map-source-badge,
+    .map-status {
+        order: 3;
+    }
 }
 
 .map-canvas {
@@ -792,6 +895,25 @@ body {
     margin-bottom: 0.55rem;
 }
 
+.station-admin-header-tools {
+    display: grid;
+    gap: 0.35rem;
+    justify-items: end;
+}
+
+.station-pin-safety-toggle {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+    font-size: 0.76rem;
+    color: #334155;
+}
+
+.station-pin-safety-toggle input[type="checkbox"] {
+    width: 14px;
+    height: 14px;
+}
+
 .station-admin-header h4,
 .station-admin-form h5,
 .station-history-card h5 {
@@ -970,6 +1092,38 @@ body {
 .station-admin-empty {
     color: var(--text-secondary);
     font-size: 0.8rem;
+}
+
+.setup-modal {
+    position: fixed;
+    inset: 0;
+    z-index: 5200;
+    background: rgba(15, 23, 42, 0.45);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 1rem;
+}
+
+.setup-modal-card {
+    width: min(520px, 100%);
+    background: #ffffff;
+    border: 1px solid var(--border-color);
+    border-radius: 10px;
+    padding: 0.8rem;
+    box-shadow: 0 18px 40px rgba(15, 23, 42, 0.28);
+}
+
+.setup-modal-card h4 {
+    margin: 0 0 0.5rem;
+    font-size: 0.9rem;
+}
+
+.setup-modal-content {
+    font-size: 0.82rem;
+    color: #334155;
+    line-height: 1.4;
+    margin-bottom: 0.6rem;
 }
 
 /* Chat Container */
@@ -1403,6 +1557,16 @@ body {
         padding: 0.65rem 0.75rem;
     }
 
+    .setup-map-config-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 0.5rem 0.75rem;
+        align-items: end;
+    }
+
+    .setup-map-config-grid .station-admin-actions {
+        grid-column: 1 / -1;
+    }
+
     .station-admin-layout {
         grid-template-columns: minmax(220px, 280px) minmax(380px, 1fr);
         gap: 0.55rem;
@@ -1414,6 +1578,14 @@ body {
 
     .station-admin-actions {
         grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .station-admin-header-tools {
+        justify-items: stretch;
+    }
+
+    .station-pin-safety-toggle {
+        justify-self: end;
     }
 
     .station-history-list {

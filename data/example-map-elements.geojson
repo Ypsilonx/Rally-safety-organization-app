@@ -1,0 +1,3025 @@
+{
+  "type": "FeatureCollection",
+  "features": [
+    {
+      "type": "Feature",
+      "properties": {
+        "element_id": "Zakázaný průchod",
+        "name": "Zakázaný průchod",
+        "position_name": "Zakázaný průchod",
+        "contact_name": null,
+        "contact_phone": null,
+        "kind": "closure",
+        "requires_commissioner": true,
+        "commissioner_rule": "ready_before_rz",
+        "note": null,
+        "source_name": "Zakázaný průchod",
+        "source_style_url": "#poly-A52714-1-120-nodesc",
+        "source_layer": "Zakázané průchody",
+        "source_layer_kind": "closure"
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              17.9743713,
+              49.3411095
+            ],
+            [
+              17.9740105,
+              49.3414922
+            ],
+            [
+              17.9739569,
+              49.3415429
+            ],
+            [
+              17.9738388,
+              49.3415674
+            ],
+            [
+              17.9737718,
+              49.3415831
+            ],
+            [
+              17.9736296,
+              49.3415674
+            ],
+            [
+              17.9732943,
+              49.3414555
+            ],
+            [
+              17.972884,
+              49.3413507
+            ],
+            [
+              17.9727043,
+              49.3413489
+            ],
+            [
+              17.9725272,
+              49.3413577
+            ],
+            [
+              17.9723234,
+              49.3414153
+            ],
+            [
+              17.9718245,
+              49.3416897
+            ],
+            [
+              17.9711835,
+              49.3419938
+            ],
+            [
+              17.9708535,
+              49.3420322
+            ],
+            [
+              17.9706336,
+              49.341999
+            ],
+            [
+              17.9705424,
+              49.3419518
+            ],
+            [
+              17.9704888,
+              49.3419064
+            ],
+            [
+              17.9704753,
+              49.3418313
+            ],
+            [
+              17.97058,
+              49.3418278
+            ],
+            [
+              17.9706175,
+              49.3419116
+            ],
+            [
+              17.9707167,
+              49.3419623
+            ],
+            [
+              17.9708965,
+              49.3419815
+            ],
+            [
+              17.9711218,
+              49.3419536
+            ],
+            [
+              17.9712237,
+              49.3419064
+            ],
+            [
+              17.9714383,
+              49.341798
+            ],
+            [
+              17.9716958,
+              49.3416827
+            ],
+            [
+              17.9720954,
+              49.3414678
+            ],
+            [
+              17.9723019,
+              49.3413577
+            ],
+            [
+              17.9725567,
+              49.3412965
+            ],
+            [
+              17.9727767,
+              49.3412878
+            ],
+            [
+              17.972943,
+              49.3413052
+            ],
+            [
+              17.9733145,
+              49.3414118
+            ],
+            [
+              17.9736564,
+              49.3415088
+            ],
+            [
+              17.9737691,
+              49.3415254
+            ],
+            [
+              17.9739019,
+              49.3414852
+            ],
+            [
+              17.9739595,
+              49.3414319
+            ],
+            [
+              17.9740883,
+              49.3413131
+            ],
+            [
+              17.9743015,
+              49.3410798
+            ],
+            [
+              17.9743713,
+              49.3411095
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "element_id": "Zakázaný průchod",
+        "name": "Zakázaný průchod",
+        "position_name": "Zakázaný průchod",
+        "contact_name": null,
+        "contact_phone": null,
+        "kind": "closure",
+        "requires_commissioner": true,
+        "commissioner_rule": "ready_before_rz",
+        "note": null,
+        "source_name": "Zakázaný průchod",
+        "source_style_url": "#poly-A52714-1200-138-nodesc",
+        "source_layer": "Zakázané průchody",
+        "source_layer_kind": "closure"
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              17.8658727,
+              49.355333
+            ],
+            [
+              17.8652558,
+              49.3552683
+            ],
+            [
+              17.8647489,
+              49.3552928
+            ],
+            [
+              17.8641212,
+              49.3553749
+            ],
+            [
+              17.8637296,
+              49.3554832
+            ],
+            [
+              17.8635231,
+              49.3555618
+            ],
+            [
+              17.8632173,
+              49.3557051
+            ],
+            [
+              17.8623697,
+              49.3563148
+            ],
+            [
+              17.8622839,
+              49.3562642
+            ],
+            [
+              17.863161,
+              49.3556475
+            ],
+            [
+              17.8634668,
+              49.3555129
+            ],
+            [
+              17.8636679,
+              49.3554361
+            ],
+            [
+              17.8641024,
+              49.3553208
+            ],
+            [
+              17.8647381,
+              49.3552369
+            ],
+            [
+              17.8652853,
+              49.3552107
+            ],
+            [
+              17.8658968,
+              49.3552613
+            ],
+            [
+              17.8658727,
+              49.355333
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "element_id": "Soukromý pozemek",
+        "name": "Soukromý pozemek",
+        "position_name": "Soukromý pozemek",
+        "contact_name": null,
+        "contact_phone": null,
+        "kind": "closure",
+        "requires_commissioner": true,
+        "commissioner_rule": "ready_before_rz",
+        "note": null,
+        "source_name": "Soukromý pozemek",
+        "source_style_url": "#poly-A52714-1-194-nodesc",
+        "source_layer": "Zakázané průchody",
+        "source_layer_kind": "closure"
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              17.9596512,
+              49.3426146
+            ],
+            [
+              17.9596136,
+              49.3427405
+            ],
+            [
+              17.9594205,
+              49.3427789
+            ],
+            [
+              17.9591094,
+              49.3428104
+            ],
+            [
+              17.9588143,
+              49.3428069
+            ],
+            [
+              17.9585944,
+              49.3428348
+            ],
+            [
+              17.9584549,
+              49.3425412
+            ],
+            [
+              17.9586695,
+              49.3425412
+            ],
+            [
+              17.9588197,
+              49.3425028
+            ],
+            [
+              17.9591255,
+              49.3424294
+            ],
+            [
+              17.9593454,
+              49.3424294
+            ],
+            [
+              17.9595332,
+              49.3424608
+            ],
+            [
+              17.9596512,
+              49.3426146
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "element_id": "Troják",
+        "name": "Troják",
+        "position_name": "Troják",
+        "contact_name": null,
+        "contact_phone": null,
+        "kind": "closure",
+        "requires_commissioner": true,
+        "commissioner_rule": "ready_before_rz",
+        "note": null,
+        "source_name": "Troják",
+        "source_style_url": "#icon-1499-FF5252-nodesc",
+        "source_layer": "Zakázané průchody",
+        "source_layer_kind": "closure"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          17.8135315,
+          49.3537589
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "element_id": "k Marušce",
+        "name": "k Marušce",
+        "position_name": "k Marušce",
+        "contact_name": null,
+        "contact_phone": null,
+        "kind": "closure",
+        "requires_commissioner": true,
+        "commissioner_rule": "ready_before_rz",
+        "note": null,
+        "source_name": "k Marušce",
+        "source_style_url": "#icon-1499-FF5252-nodesc",
+        "source_layer": "Zakázané průchody",
+        "source_layer_kind": "closure"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          17.8292328,
+          49.3587663
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "element_id": "Hoštálková horní",
+        "name": "Hoštálková horní",
+        "position_name": "Hoštálková horní",
+        "contact_name": null,
+        "contact_phone": null,
+        "kind": "closure",
+        "requires_commissioner": true,
+        "commissioner_rule": "ready_before_rz",
+        "note": null,
+        "source_name": "Hoštálková horní",
+        "source_style_url": "#icon-1499-FF5252-nodesc",
+        "source_layer": "Zakázané průchody",
+        "source_layer_kind": "closure"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          17.8636853,
+          49.3532156
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "element_id": "Hošťálková dolní",
+        "name": "Hošťálková dolní",
+        "position_name": "Hošťálková dolní",
+        "contact_name": null,
+        "contact_phone": null,
+        "kind": "closure",
+        "requires_commissioner": true,
+        "commissioner_rule": "ready_before_rz",
+        "note": null,
+        "source_name": "Hošťálková dolní",
+        "source_style_url": "#icon-1499-FF5252-nodesc",
+        "source_layer": "Zakázané průchody",
+        "source_layer_kind": "closure"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          17.8725483,
+          49.3560218
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "element_id": "Semetín horní",
+        "name": "Semetín horní",
+        "position_name": "Semetín horní",
+        "contact_name": null,
+        "contact_phone": null,
+        "kind": "closure",
+        "requires_commissioner": true,
+        "commissioner_rule": "ready_before_rz",
+        "note": null,
+        "source_name": "Semetín horní",
+        "source_style_url": "#icon-1499-FF5252-nodesc",
+        "source_layer": "Zakázané průchody",
+        "source_layer_kind": "closure"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          17.9479725,
+          49.3398119
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "element_id": "Semetín dolní",
+        "name": "Semetín dolní",
+        "position_name": "Semetín dolní",
+        "contact_name": null,
+        "contact_phone": null,
+        "kind": "closure",
+        "requires_commissioner": true,
+        "commissioner_rule": "ready_before_rz",
+        "note": null,
+        "source_name": "Semetín dolní",
+        "source_style_url": "#icon-1499-FF5252-nodesc",
+        "source_layer": "Zakázané průchody",
+        "source_layer_kind": "closure"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          17.9540677,
+          49.3537124
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "element_id": "Lhota u Vsetína",
+        "name": "Lhota u Vsetína",
+        "position_name": "Lhota u Vsetína",
+        "contact_name": null,
+        "contact_phone": null,
+        "kind": "closure",
+        "requires_commissioner": true,
+        "commissioner_rule": "ready_before_rz",
+        "note": null,
+        "source_name": "Lhota u Vsetína",
+        "source_style_url": "#icon-1499-FF5252-nodesc",
+        "source_layer": "Zakázané průchody",
+        "source_layer_kind": "closure"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          17.9563413,
+          49.3037514
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "element_id": "Janišov",
+        "name": "Janišov",
+        "position_name": "Janišov",
+        "contact_name": null,
+        "contact_phone": null,
+        "kind": "closure",
+        "requires_commissioner": true,
+        "commissioner_rule": "ready_before_rz",
+        "note": null,
+        "source_name": "Janišov",
+        "source_style_url": "#icon-1499-FF5252-nodesc",
+        "source_layer": "Zakázané průchody",
+        "source_layer_kind": "closure"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          17.9787248,
+          49.3201518
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "element_id": "Potůčky",
+        "name": "Potůčky",
+        "position_name": "Potůčky",
+        "contact_name": null,
+        "contact_phone": null,
+        "kind": "closure",
+        "requires_commissioner": true,
+        "commissioner_rule": "ready_before_rz",
+        "note": null,
+        "source_name": "Potůčky",
+        "source_style_url": "#icon-1499-FF5252-nodesc",
+        "source_layer": "Zakázané průchody",
+        "source_layer_kind": "closure"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          17.9745081,
+          49.3409965
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "element_id": "Čk 1",
+        "name": "Čk 1",
+        "position_name": "Čk 1",
+        "contact_name": null,
+        "contact_phone": null,
+        "kind": "spectator",
+        "requires_commissioner": false,
+        "commissioner_rule": null,
+        "note": "Jméno: <br>Přijmení: <br>Telefon:",
+        "source_name": "Čk 1",
+        "source_style_url": "#line-FFD600-15919",
+        "source_layer": "Důležité body a funkce",
+        "source_layer_kind": "unknown"
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            17.9741641,
+            49.3413442
+          ],
+          [
+            17.9740716,
+            49.3413084
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "element_id": "Čk 2",
+        "name": "Čk 2",
+        "position_name": "Čk 2",
+        "contact_name": null,
+        "contact_phone": null,
+        "kind": "spectator",
+        "requires_commissioner": false,
+        "commissioner_rule": null,
+        "note": "Jméno: <br>Přijmení: <br>Telefon:",
+        "source_name": "Čk 2",
+        "source_style_url": "#line-FF5252-16113",
+        "source_layer": "Důležité body a funkce",
+        "source_layer_kind": "unknown"
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            17.973908,
+            49.3415592
+          ],
+          [
+            17.9738597,
+            49.3414928
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "element_id": "START",
+        "name": "START",
+        "position_name": "START",
+        "contact_name": null,
+        "contact_phone": null,
+        "kind": "start",
+        "requires_commissioner": true,
+        "commissioner_rule": "ready_before_rz",
+        "note": "Jméno: <br>Přijmení: <br>Telefon:",
+        "source_name": "START",
+        "source_style_url": "#line-FF5252-32000",
+        "source_layer": "Důležité body a funkce",
+        "source_layer_kind": "unknown"
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            17.9704693,
+            49.3418318
+          ],
+          [
+            17.9705886,
+            49.3418296
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "element_id": "Čk 4",
+        "name": "Čk 4",
+        "position_name": "Čk 4",
+        "contact_name": null,
+        "contact_phone": null,
+        "kind": "spectator",
+        "requires_commissioner": false,
+        "commissioner_rule": null,
+        "note": "Jméno: <br>Přijmení: <br>Telefon:",
+        "source_name": "Čk 4",
+        "source_style_url": "#line-FF5252-15338",
+        "source_layer": "Důležité body a funkce",
+        "source_layer_kind": "unknown"
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            17.8218374,
+            49.3573575
+          ],
+          [
+            17.8219648,
+            49.3572702
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "element_id": "Čk 3",
+        "name": "Čk 3",
+        "position_name": "Čk 3",
+        "contact_name": null,
+        "contact_phone": null,
+        "kind": "spectator",
+        "requires_commissioner": false,
+        "commissioner_rule": null,
+        "note": "Jméno: <br>Přijmení: <br>Telefon:",
+        "source_name": "Čk 3",
+        "source_style_url": "#line-FFD600-16694",
+        "source_layer": "Důležité body a funkce",
+        "source_layer_kind": "unknown"
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            17.8227273,
+            49.3579467
+          ],
+          [
+            17.822844,
+            49.3578768
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "element_id": "STOP",
+        "name": "STOP",
+        "position_name": "STOP",
+        "contact_name": null,
+        "contact_phone": null,
+        "kind": "spectator",
+        "requires_commissioner": false,
+        "commissioner_rule": null,
+        "note": "Jméno: <br>Přijmení: <br>Telefon:",
+        "source_name": "STOP",
+        "source_style_url": "#line-FF5252-30063",
+        "source_layer": "Důležité body a funkce",
+        "source_layer_kind": "unknown"
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            17.8168943,
+            49.3549383
+          ],
+          [
+            17.8170271,
+            49.3548177
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "element_id": "ASR 1",
+        "name": "ASR 1",
+        "position_name": "ASR 1",
+        "contact_name": null,
+        "contact_phone": null,
+        "kind": "element",
+        "requires_commissioner": false,
+        "commissioner_rule": null,
+        "note": "Jméno: <br>Přijmení: <br>Telefon:",
+        "source_name": "ASR 1",
+        "source_style_url": "#icon-1558-0288D1-labelson",
+        "source_layer": "Důležité body a funkce",
+        "source_layer_kind": "unknown"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          17.9705009,
+          49.3412678
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "element_id": "ASR 2",
+        "name": "ASR 2",
+        "position_name": "ASR 2",
+        "contact_name": null,
+        "contact_phone": null,
+        "kind": "element",
+        "requires_commissioner": false,
+        "commissioner_rule": null,
+        "note": "Jméno: <br>Přijmení: <br>Telefon:",
+        "source_name": "ASR 2",
+        "source_style_url": "#icon-1558-0288D1-labelson",
+        "source_layer": "Důležité body a funkce",
+        "source_layer_kind": "unknown"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          17.9466723,
+          49.3384772
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "element_id": "ASR 3",
+        "name": "ASR 3",
+        "position_name": "ASR 3",
+        "contact_name": null,
+        "contact_phone": null,
+        "kind": "element",
+        "requires_commissioner": false,
+        "commissioner_rule": null,
+        "note": "Jméno: <br>Přijmení: <br>Telefon:",
+        "source_name": "ASR 3",
+        "source_style_url": "#icon-1558-0288D1-labelson",
+        "source_layer": "Důležité body a funkce",
+        "source_layer_kind": "unknown"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          17.8703145,
+          49.3552818
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "element_id": "Divácká trasa",
+        "name": "Divácká trasa",
+        "position_name": "Divácká trasa",
+        "contact_name": null,
+        "contact_phone": null,
+        "kind": "spectator",
+        "requires_commissioner": false,
+        "commissioner_rule": null,
+        "note": null,
+        "source_name": "Divácká trasa",
+        "source_style_url": "#line-B2EBF2-8944-nodesc",
+        "source_layer": "Diváci",
+        "source_layer_kind": "spectator"
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            17.9741083,
+            49.3409083
+          ],
+          [
+            17.973702,
+            49.3408279
+          ],
+          [
+            17.9734002,
+            49.3407245
+          ],
+          [
+            17.9732943,
+            49.3406771
+          ],
+          [
+            17.9733446,
+            49.3406661
+          ],
+          [
+            17.9732675,
+            49.3406548
+          ],
+          [
+            17.9732943,
+            49.3406771
+          ],
+          [
+            17.9732809,
+            49.3406994
+          ],
+          [
+            17.9732675,
+            49.3406548
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "element_id": "Divácká trasa",
+        "name": "Divácká trasa",
+        "position_name": "Divácká trasa",
+        "contact_name": null,
+        "contact_phone": null,
+        "kind": "spectator",
+        "requires_commissioner": false,
+        "commissioner_rule": null,
+        "note": null,
+        "source_name": "Divácká trasa",
+        "source_style_url": "#line-B2EBF2-11656-nodesc",
+        "source_layer": "Diváci",
+        "source_layer_kind": "spectator"
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            17.9708161,
+            49.3413748
+          ],
+          [
+            17.9708537,
+            49.3413888
+          ],
+          [
+            17.9707317,
+            49.3413679
+          ],
+          [
+            17.970843,
+            49.341339
+          ],
+          [
+            17.9708161,
+            49.3413626
+          ],
+          [
+            17.9711984,
+            49.3413399
+          ],
+          [
+            17.9715336,
+            49.3412682
+          ],
+          [
+            17.9717147,
+            49.341194
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "element_id": "Divácká trasa",
+        "name": "Divácká trasa",
+        "position_name": "Divácká trasa",
+        "contact_name": null,
+        "contact_phone": null,
+        "kind": "spectator",
+        "requires_commissioner": false,
+        "commissioner_rule": null,
+        "note": null,
+        "source_name": "Divácká trasa",
+        "source_style_url": "#line-B2EBF2-10106-nodesc",
+        "source_layer": "Diváci",
+        "source_layer_kind": "spectator"
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            17.8651695,
+            49.3556352
+          ],
+          [
+            17.8652633,
+            49.3556562
+          ],
+          [
+            17.8650219,
+            49.3556632
+          ],
+          [
+            17.8651158,
+            49.3555514
+          ],
+          [
+            17.8651373,
+            49.3556195
+          ],
+          [
+            17.865722,
+            49.3554343
+          ],
+          [
+            17.8661458,
+            49.3555199
+          ],
+          [
+            17.8664274,
+            49.3558362
+          ],
+          [
+            17.8671811,
+            49.3558816
+          ],
+          [
+            17.867452,
+            49.3556912
+          ],
+          [
+            17.8682379,
+            49.355609
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "element_id": "Divácká trasa",
+        "name": "Divácká trasa",
+        "position_name": "Divácká trasa",
+        "contact_name": null,
+        "contact_phone": null,
+        "kind": "spectator",
+        "requires_commissioner": false,
+        "commissioner_rule": null,
+        "note": null,
+        "source_name": "Divácká trasa",
+        "source_style_url": "#line-B2EBF2-11075-nodesc",
+        "source_layer": "Diváci",
+        "source_layer_kind": "spectator"
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            17.8625436,
+            49.3565437
+          ],
+          [
+            17.8626804,
+            49.3565647
+          ],
+          [
+            17.8623746,
+            49.3565857
+          ],
+          [
+            17.8624873,
+            49.3564372
+          ],
+          [
+            17.8625275,
+            49.3565158
+          ],
+          [
+            17.8646518,
+            49.3557837
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "element_id": "Divácká trasa",
+        "name": "Divácká trasa",
+        "position_name": "Divácká trasa",
+        "contact_name": null,
+        "contact_phone": null,
+        "kind": "spectator",
+        "requires_commissioner": false,
+        "commissioner_rule": null,
+        "note": null,
+        "source_name": "Divácká trasa",
+        "source_style_url": "#line-B2EBF2-10494-nodesc",
+        "source_layer": "Diváci",
+        "source_layer_kind": "spectator"
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            17.8177129,
+            49.3557675
+          ],
+          [
+            17.8176834,
+            49.3556977
+          ],
+          [
+            17.8179543,
+            49.3558357
+          ],
+          [
+            17.8175439,
+            49.3558304
+          ],
+          [
+            17.81767,
+            49.3557903
+          ],
+          [
+            17.8171979,
+            49.3556505
+          ],
+          [
+            17.8164737,
+            49.3554496
+          ],
+          [
+            17.8158997,
+            49.3551875
+          ],
+          [
+            17.8153928,
+            49.3549464
+          ],
+          [
+            17.8156315,
+            49.3545725
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "element_id": "Divácké místo 1",
+        "name": "Divácké místo 1",
+        "position_name": "Divácké místo 1",
+        "contact_name": null,
+        "contact_phone": null,
+        "kind": "spectator",
+        "requires_commissioner": false,
+        "commissioner_rule": null,
+        "note": null,
+        "source_name": "Divácké místo 1",
+        "source_style_url": "#line-F48FB1-10688-nodesc",
+        "source_layer": "Diváci",
+        "source_layer_kind": "spectator"
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            17.9703339,
+            49.3418181
+          ],
+          [
+            17.9703446,
+            49.3416748
+          ],
+          [
+            17.9703553,
+            49.3415393
+          ],
+          [
+            17.9703553,
+            49.3414563
+          ],
+          [
+            17.9703353,
+            49.341417
+          ],
+          [
+            17.9702722,
+            49.3413856
+          ],
+          [
+            17.9702078,
+            49.3413698
+          ],
+          [
+            17.9701569,
+            49.3413751
+          ],
+          [
+            17.9701381,
+            49.3414091
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "element_id": "Páska 2",
+        "name": "Páska 2",
+        "position_name": "Páska 2",
+        "contact_name": null,
+        "contact_phone": null,
+        "kind": "spectator",
+        "requires_commissioner": false,
+        "commissioner_rule": null,
+        "note": null,
+        "source_name": "Páska 2",
+        "source_style_url": "#line-F48FB1-7394-nodesc",
+        "source_layer": "Diváci",
+        "source_layer_kind": "spectator"
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            17.9698234,
+            49.3411208
+          ],
+          [
+            17.9696531,
+            49.3411899
+          ],
+          [
+            17.9676226,
+            49.3409015
+          ],
+          [
+            17.9675314,
+            49.3408299
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "element_id": "Páska 3",
+        "name": "Páska 3",
+        "position_name": "Páska 3",
+        "contact_name": null,
+        "contact_phone": null,
+        "kind": "spectator",
+        "requires_commissioner": false,
+        "commissioner_rule": null,
+        "note": null,
+        "source_name": "Páska 3",
+        "source_style_url": "#line-F48FB1-8556-nodesc",
+        "source_layer": "Diváci",
+        "source_layer_kind": "spectator"
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            17.959113,
+            49.3422799
+          ],
+          [
+            17.9589977,
+            49.3422974
+          ],
+          [
+            17.9589306,
+            49.3422834
+          ],
+          [
+            17.9588582,
+            49.342259
+          ],
+          [
+            17.9587737,
+            49.3421401
+          ],
+          [
+            17.9588314,
+            49.3420895
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "element_id": "Páska 4",
+        "name": "Páska 4",
+        "position_name": "Páska 4",
+        "contact_name": null,
+        "contact_phone": null,
+        "kind": "spectator",
+        "requires_commissioner": false,
+        "commissioner_rule": null,
+        "note": null,
+        "source_name": "Páska 4",
+        "source_style_url": "#line-F48FB1-7975-nodesc",
+        "source_layer": "Diváci",
+        "source_layer_kind": "spectator"
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            17.9562974,
+            49.3381966
+          ],
+          [
+            17.9561097,
+            49.3382813
+          ],
+          [
+            17.9560641,
+            49.3384142
+          ],
+          [
+            17.956107,
+            49.3385409
+          ],
+          [
+            17.9562988,
+            49.338568
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "element_id": "Páska 5",
+        "name": "Páska 5",
+        "position_name": "Páska 5",
+        "contact_name": null,
+        "contact_phone": null,
+        "kind": "spectator",
+        "requires_commissioner": false,
+        "commissioner_rule": null,
+        "note": null,
+        "source_name": "Páska 5",
+        "source_style_url": "#line-F48FB1-7588-nodesc",
+        "source_layer": "Diváci",
+        "source_layer_kind": "spectator"
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            17.9574644,
+            49.3344217
+          ],
+          [
+            17.9572954,
+            49.3342469
+          ],
+          [
+            17.9579016,
+            49.3335845
+          ],
+          [
+            17.9577728,
+            49.3334919
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "element_id": "Páska 6",
+        "name": "Páska 6",
+        "position_name": "Páska 6",
+        "contact_name": null,
+        "contact_phone": null,
+        "kind": "spectator",
+        "requires_commissioner": false,
+        "commissioner_rule": null,
+        "note": null,
+        "source_name": "Páska 6",
+        "source_style_url": "#line-F48FB1-6813-nodesc",
+        "source_layer": "Diváci",
+        "source_layer_kind": "spectator"
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            17.9581453,
+            49.3316919
+          ],
+          [
+            17.9582486,
+            49.3316377
+          ],
+          [
+            17.9581721,
+            49.3312602
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "element_id": "Páska 7",
+        "name": "Páska 7",
+        "position_name": "Páska 7",
+        "contact_name": null,
+        "contact_phone": null,
+        "kind": "spectator",
+        "requires_commissioner": false,
+        "commissioner_rule": null,
+        "note": null,
+        "source_name": "Páska 7",
+        "source_style_url": "#line-F48FB1-8363-nodesc",
+        "source_layer": "Diváci",
+        "source_layer_kind": "spectator"
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            17.9576341,
+            49.3310406
+          ],
+          [
+            17.9572063,
+            49.3310162
+          ],
+          [
+            17.9571231,
+            49.3310905
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "element_id": "Páska 8",
+        "name": "Páska 8",
+        "position_name": "Páska 8",
+        "contact_name": null,
+        "contact_phone": null,
+        "kind": "spectator",
+        "requires_commissioner": false,
+        "commissioner_rule": null,
+        "note": null,
+        "source_name": "Páska 8",
+        "source_style_url": "#line-F48FB1-7588-nodesc",
+        "source_layer": "Diváci",
+        "source_layer_kind": "spectator"
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            17.9559317,
+            49.3307235
+          ],
+          [
+            17.955984,
+            49.3306334
+          ],
+          [
+            17.9552491,
+            49.3304123
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "element_id": "Velký STROM",
+        "name": "Velký STROM",
+        "position_name": "Velký STROM",
+        "contact_name": null,
+        "contact_phone": null,
+        "kind": "spectator",
+        "requires_commissioner": false,
+        "commissioner_rule": null,
+        "note": "druhá řada",
+        "source_name": "Velký STROM",
+        "source_style_url": "#icon-1720-7CB342",
+        "source_layer": "Diváci",
+        "source_layer_kind": "spectator"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          17.9550289,
+          49.3302805
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "element_id": "Páska 9",
+        "name": "Páska 9",
+        "position_name": "Páska 9",
+        "contact_name": null,
+        "contact_phone": null,
+        "kind": "spectator",
+        "requires_commissioner": false,
+        "commissioner_rule": null,
+        "note": null,
+        "source_name": "Páska 9",
+        "source_style_url": "#line-F48FB1-7781-nodesc",
+        "source_layer": "Diváci",
+        "source_layer_kind": "spectator"
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            17.9550289,
+            49.3302805
+          ],
+          [
+            17.9543154,
+            49.3302866
+          ],
+          [
+            17.9541773,
+            49.3303661
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "element_id": "Páska 10",
+        "name": "Páska 10",
+        "position_name": "Páska 10",
+        "contact_name": null,
+        "contact_phone": null,
+        "kind": "spectator",
+        "requires_commissioner": false,
+        "commissioner_rule": null,
+        "note": null,
+        "source_name": "Páska 10",
+        "source_style_url": "#line-F48FB1-7588-nodesc",
+        "source_layer": "Diváci",
+        "source_layer_kind": "spectator"
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            17.9545563,
+            49.3299741
+          ],
+          [
+            17.9543766,
+            49.3299872
+          ],
+          [
+            17.9542063,
+            49.329836
+          ],
+          [
+            17.9542894,
+            49.3297285
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "element_id": "Páska 11",
+        "name": "Páska 11",
+        "position_name": "Páska 11",
+        "contact_name": null,
+        "contact_phone": null,
+        "kind": "spectator",
+        "requires_commissioner": false,
+        "commissioner_rule": null,
+        "note": null,
+        "source_name": "Páska 11",
+        "source_style_url": "#line-F48FB1-6813-nodesc",
+        "source_layer": "Diváci",
+        "source_layer_kind": "spectator"
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            17.9539313,
+            49.3294689
+          ],
+          [
+            17.9541204,
+            49.3294095
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "element_id": "Páska 12",
+        "name": "Páska 12",
+        "position_name": "Páska 12",
+        "contact_name": null,
+        "contact_phone": null,
+        "kind": "spectator",
+        "requires_commissioner": false,
+        "commissioner_rule": null,
+        "note": null,
+        "source_name": "Páska 12",
+        "source_style_url": "#line-F48FB1-7394-nodesc",
+        "source_layer": "Diváci",
+        "source_layer_kind": "spectator"
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            17.9539246,
+            49.3294387
+          ],
+          [
+            17.9541057,
+            49.3293836
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "element_id": "Divácké místo 13",
+        "name": "Divácké místo 13",
+        "position_name": "Divácké místo 13",
+        "contact_name": null,
+        "contact_phone": null,
+        "kind": "spectator",
+        "requires_commissioner": false,
+        "commissioner_rule": null,
+        "note": null,
+        "source_name": "Divácké místo 13",
+        "source_style_url": "#line-F48FB1-9331-nodesc",
+        "source_layer": "Diváci",
+        "source_layer_kind": "spectator"
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            17.9537776,
+            49.3301625
+          ],
+          [
+            17.9539037,
+            49.3301416
+          ],
+          [
+            17.9536838,
+            49.3298505
+          ],
+          [
+            17.9535966,
+            49.3293384
+          ],
+          [
+            17.9535362,
+            49.3293034
+          ],
+          [
+            17.9534169,
+            49.3292772
+          ],
+          [
+            17.953201,
+            49.3293322
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "element_id": "Páska 14",
+        "name": "Páska 14",
+        "position_name": "Páska 14",
+        "contact_name": null,
+        "contact_phone": null,
+        "kind": "spectator",
+        "requires_commissioner": false,
+        "commissioner_rule": null,
+        "note": null,
+        "source_name": "Páska 14",
+        "source_style_url": "#line-F48FB1-8750-nodesc",
+        "source_layer": "Diváci",
+        "source_layer_kind": "spectator"
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            17.9538648,
+            49.3294826
+          ],
+          [
+            17.9536422,
+            49.3295062
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "element_id": "Páska 15",
+        "name": "Páska 15",
+        "position_name": "Páska 15",
+        "contact_name": null,
+        "contact_phone": null,
+        "kind": "spectator",
+        "requires_commissioner": false,
+        "commissioner_rule": null,
+        "note": null,
+        "source_name": "Páska 15",
+        "source_style_url": "#line-F48FB1-8363-nodesc",
+        "source_layer": "Diváci",
+        "source_layer_kind": "spectator"
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            17.9538621,
+            49.3294467
+          ],
+          [
+            17.9536355,
+            49.3294756
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "element_id": "Páska 16",
+        "name": "Páska 16",
+        "position_name": "Páska 16",
+        "contact_name": null,
+        "contact_phone": null,
+        "kind": "spectator",
+        "requires_commissioner": false,
+        "commissioner_rule": null,
+        "note": null,
+        "source_name": "Páska 16",
+        "source_style_url": "#line-F48FB1-7975-nodesc",
+        "source_layer": "Diváci",
+        "source_layer_kind": "spectator"
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            17.9539525,
+            49.3291035
+          ],
+          [
+            17.9538224,
+            49.3289191
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "element_id": "Páska 17",
+        "name": "Páska 17",
+        "position_name": "Páska 17",
+        "contact_name": null,
+        "contact_phone": null,
+        "kind": "spectator",
+        "requires_commissioner": false,
+        "commissioner_rule": null,
+        "note": null,
+        "source_name": "Páska 17",
+        "source_style_url": "#line-F48FB1-7588-nodesc",
+        "source_layer": "Diváci",
+        "source_layer_kind": "spectator"
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            17.947127,
+            49.3379561
+          ],
+          [
+            17.9469768,
+            49.3379561
+          ],
+          [
+            17.946903,
+            49.3380531
+          ],
+          [
+            17.9469044,
+            49.3381789
+          ],
+          [
+            17.9469285,
+            49.3382846
+          ],
+          [
+            17.9468816,
+            49.3383974
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "element_id": "Páska 18",
+        "name": "Páska 18",
+        "position_name": "Páska 18",
+        "contact_name": null,
+        "contact_phone": null,
+        "kind": "spectator",
+        "requires_commissioner": false,
+        "commissioner_rule": null,
+        "note": null,
+        "source_name": "Páska 18",
+        "source_style_url": "#line-F48FB1-7588-nodesc",
+        "source_layer": "Diváci",
+        "source_layer_kind": "spectator"
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            17.9458024,
+            49.3381894
+          ],
+          [
+            17.9458761,
+            49.3380784
+          ],
+          [
+            17.945624,
+            49.3378905
+          ],
+          [
+            17.9454228,
+            49.3378669
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "element_id": "Páska 19",
+        "name": "Páska 19",
+        "position_name": "Páska 19",
+        "contact_name": null,
+        "contact_phone": null,
+        "kind": "spectator",
+        "requires_commissioner": false,
+        "commissioner_rule": null,
+        "note": null,
+        "source_name": "Páska 19",
+        "source_style_url": "#line-F48FB1-7781-nodesc",
+        "source_layer": "Diváci",
+        "source_layer_kind": "spectator"
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            17.9370193,
+            49.3349239
+          ],
+          [
+            17.9371011,
+            49.3348191
+          ],
+          [
+            17.9372715,
+            49.334785
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "element_id": "Páska 20",
+        "name": "Páska 20",
+        "position_name": "Páska 20",
+        "contact_name": null,
+        "contact_phone": null,
+        "kind": "spectator",
+        "requires_commissioner": false,
+        "commissioner_rule": null,
+        "note": null,
+        "source_name": "Páska 20",
+        "source_style_url": "#line-F48FB1-7588-nodesc",
+        "source_layer": "Diváci",
+        "source_layer_kind": "spectator"
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            17.8778368,
+            49.3402218
+          ],
+          [
+            17.8777134,
+            49.3403808
+          ],
+          [
+            17.877637,
+            49.3404638
+          ],
+          [
+            17.8777349,
+            49.3405329
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "element_id": "Páska 21",
+        "name": "Páska 21",
+        "position_name": "Páska 21",
+        "contact_name": null,
+        "contact_phone": null,
+        "kind": "spectator",
+        "requires_commissioner": false,
+        "commissioner_rule": null,
+        "note": null,
+        "source_name": "Páska 21",
+        "source_style_url": "#line-F48FB1-7975-nodesc",
+        "source_layer": "Diváci",
+        "source_layer_kind": "spectator"
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            17.8708787,
+            49.3440909
+          ],
+          [
+            17.8705957,
+            49.3444002
+          ],
+          [
+            17.870404,
+            49.3445496
+          ],
+          [
+            17.8702725,
+            49.3446186
+          ],
+          [
+            17.8701894,
+            49.3446265
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "element_id": "Páska 22",
+        "name": "Páska 22",
+        "position_name": "Páska 22",
+        "contact_name": null,
+        "contact_phone": null,
+        "kind": "spectator",
+        "requires_commissioner": false,
+        "commissioner_rule": null,
+        "note": null,
+        "source_name": "Páska 22",
+        "source_style_url": "#line-F48FB1-7781-nodesc",
+        "source_layer": "Diváci",
+        "source_layer_kind": "spectator"
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            17.8705496,
+            49.355018
+          ],
+          [
+            17.8705604,
+            49.3549883
+          ],
+          [
+            17.8703471,
+            49.3549298
+          ],
+          [
+            17.8703337,
+            49.3548564
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "element_id": "Páska 23",
+        "name": "Páska 23",
+        "position_name": "Páska 23",
+        "contact_name": null,
+        "contact_phone": null,
+        "kind": "spectator",
+        "requires_commissioner": false,
+        "commissioner_rule": null,
+        "note": "+ zábrany",
+        "source_name": "Páska 23",
+        "source_style_url": "#line-F48FB1-8750",
+        "source_layer": "Diváci",
+        "source_layer_kind": "spectator"
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            17.8699797,
+            49.3547184
+          ],
+          [
+            17.8701071,
+            49.35459
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "element_id": "Páska 24",
+        "name": "Páska 24",
+        "position_name": "Páska 24",
+        "contact_name": null,
+        "contact_phone": null,
+        "kind": "spectator",
+        "requires_commissioner": false,
+        "commissioner_rule": null,
+        "note": null,
+        "source_name": "Páska 24",
+        "source_style_url": "#line-F48FB1-6813-nodesc",
+        "source_layer": "Diváci",
+        "source_layer_kind": "spectator"
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            17.8693976,
+            49.354514
+          ],
+          [
+            17.86947,
+            49.3545454
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "element_id": "Páska 25",
+        "name": "Páska 25",
+        "position_name": "Páska 25",
+        "contact_name": null,
+        "contact_phone": null,
+        "kind": "spectator",
+        "requires_commissioner": false,
+        "commissioner_rule": null,
+        "note": "+ zábrany",
+        "source_name": "Páska 25",
+        "source_style_url": "#line-F48FB1-7781",
+        "source_layer": "Diváci",
+        "source_layer_kind": "spectator"
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            17.8683816,
+            49.3542758
+          ],
+          [
+            17.8680423,
+            49.354233
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "element_id": "Páska 26",
+        "name": "Páska 26",
+        "position_name": "Páska 26",
+        "contact_name": null,
+        "contact_phone": null,
+        "kind": "spectator",
+        "requires_commissioner": false,
+        "commissioner_rule": null,
+        "note": null,
+        "source_name": "Páska 26",
+        "source_style_url": "#line-F48FB1-7781-nodesc",
+        "source_layer": "Diváci",
+        "source_layer_kind": "spectator"
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            17.8596648,
+            49.3580346
+          ],
+          [
+            17.8597238,
+            49.3581272
+          ],
+          [
+            17.8595388,
+            49.3582268
+          ],
+          [
+            17.8593081,
+            49.3582495
+          ],
+          [
+            17.8591096,
+            49.3582076
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "element_id": "Páska 27",
+        "name": "Páska 27",
+        "position_name": "Páska 27",
+        "contact_name": null,
+        "contact_phone": null,
+        "kind": "spectator",
+        "requires_commissioner": false,
+        "commissioner_rule": null,
+        "note": null,
+        "source_name": "Páska 27",
+        "source_style_url": "#line-F48FB1-7781-nodesc",
+        "source_layer": "Diváci",
+        "source_layer_kind": "spectator"
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            17.8595575,
+            49.3586426
+          ],
+          [
+            17.8595468,
+            49.3585483
+          ],
+          [
+            17.8592169,
+            49.3584924
+          ],
+          [
+            17.8591016,
+            49.3584924
+          ],
+          [
+            17.8588763,
+            49.358529
+          ],
+          [
+            17.8588307,
+            49.358585
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "element_id": "Páska 28",
+        "name": "Páska 28",
+        "position_name": "Páska 28",
+        "contact_name": null,
+        "contact_phone": null,
+        "kind": "spectator",
+        "requires_commissioner": false,
+        "commissioner_rule": null,
+        "note": null,
+        "source_name": "Páska 28",
+        "source_style_url": "#line-F48FB1-8363-nodesc",
+        "source_layer": "Diváci",
+        "source_layer_kind": "spectator"
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            17.8554286,
+            49.3603107
+          ],
+          [
+            17.855603,
+            49.3603195
+          ],
+          [
+            17.8559195,
+            49.3607213
+          ],
+          [
+            17.8558256,
+            49.3608366
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "element_id": "Páska 29",
+        "name": "Páska 29",
+        "position_name": "Páska 29",
+        "contact_name": null,
+        "contact_phone": null,
+        "kind": "spectator",
+        "requires_commissioner": false,
+        "commissioner_rule": null,
+        "note": "pokud nebude zaseto",
+        "source_name": "Páska 29",
+        "source_style_url": "#line-F48FB1-6813",
+        "source_layer": "Diváci",
+        "source_layer_kind": "spectator"
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            17.8499193,
+            49.3647768
+          ],
+          [
+            17.850091,
+            49.3647628
+          ],
+          [
+            17.8509975,
+            49.3640501
+          ],
+          [
+            17.8509493,
+            49.363851
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "element_id": "Páska 30",
+        "name": "Páska 30",
+        "position_name": "Páska 30",
+        "contact_name": null,
+        "contact_phone": null,
+        "kind": "spectator",
+        "requires_commissioner": false,
+        "commissioner_rule": null,
+        "note": null,
+        "source_name": "Páska 30",
+        "source_style_url": "#line-F48FB1-7006-nodesc",
+        "source_layer": "Diváci",
+        "source_layer_kind": "spectator"
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            17.8473048,
+            49.3693823
+          ],
+          [
+            17.8475677,
+            49.3693893
+          ],
+          [
+            17.8482275,
+            49.3689736
+          ],
+          [
+            17.8481417,
+            49.3688723
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "element_id": "Páska 31",
+        "name": "Páska 31",
+        "position_name": "Páska 31",
+        "contact_name": null,
+        "contact_phone": null,
+        "kind": "spectator",
+        "requires_commissioner": false,
+        "commissioner_rule": null,
+        "note": null,
+        "source_name": "Páska 31",
+        "source_style_url": "#line-F48FB1-7200-nodesc",
+        "source_layer": "Diváci",
+        "source_layer_kind": "spectator"
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            17.8386827,
+            49.3731996
+          ],
+          [
+            17.838672,
+            49.3733183
+          ],
+          [
+            17.8387847,
+            49.3733637
+          ],
+          [
+            17.8388973,
+            49.3733428
+          ],
+          [
+            17.8389671,
+            49.3732624
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "element_id": "Páska 32",
+        "name": "Páska 32",
+        "position_name": "Páska 32",
+        "contact_name": null,
+        "contact_phone": null,
+        "kind": "spectator",
+        "requires_commissioner": false,
+        "commissioner_rule": null,
+        "note": null,
+        "source_name": "Páska 32",
+        "source_style_url": "#line-F48FB1-6813-nodesc",
+        "source_layer": "Diváci",
+        "source_layer_kind": "spectator"
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            17.8391977,
+            49.3736746
+          ],
+          [
+            17.8390582,
+            49.3736082
+          ],
+          [
+            17.8384092,
+            49.3736955
+          ],
+          [
+            17.838318,
+            49.3737584
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "element_id": "Páska 33",
+        "name": "Páska 33",
+        "position_name": "Páska 33",
+        "contact_name": null,
+        "contact_phone": null,
+        "kind": "spectator",
+        "requires_commissioner": false,
+        "commissioner_rule": null,
+        "note": null,
+        "source_name": "Páska 33",
+        "source_style_url": "#line-F48FB1-7394-nodesc",
+        "source_layer": "Diváci",
+        "source_layer_kind": "spectator"
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            17.836208,
+            49.3713666
+          ],
+          [
+            17.836428,
+            49.3713876
+          ],
+          [
+            17.8369805,
+            49.3720373
+          ],
+          [
+            17.8368786,
+            49.3721281
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "element_id": "Páska 34",
+        "name": "Páska 34",
+        "position_name": "Páska 34",
+        "contact_name": null,
+        "contact_phone": null,
+        "kind": "spectator",
+        "requires_commissioner": false,
+        "commissioner_rule": null,
+        "note": null,
+        "source_name": "Páska 34",
+        "source_style_url": "#line-F48FB1-6231-nodesc",
+        "source_layer": "Diváci",
+        "source_layer_kind": "spectator"
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            17.8278002,
+            49.3661596
+          ],
+          [
+            17.8276339,
+            49.3661247
+          ],
+          [
+            17.8273576,
+            49.3655884
+          ],
+          [
+            17.8274166,
+            49.365543
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "element_id": "Páska 35",
+        "name": "Páska 35",
+        "position_name": "Páska 35",
+        "contact_name": null,
+        "contact_phone": null,
+        "kind": "spectator",
+        "requires_commissioner": false,
+        "commissioner_rule": null,
+        "note": null,
+        "source_name": "Páska 35",
+        "source_style_url": "#line-F48FB1-6813-nodesc",
+        "source_layer": "Diváci",
+        "source_layer_kind": "spectator"
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            17.8244013,
+            49.36056
+          ],
+          [
+            17.82453,
+            49.3604989
+          ],
+          [
+            17.8242832,
+            49.3599206
+          ],
+          [
+            17.8234665,
+            49.3588231
+          ],
+          [
+            17.8219202,
+            49.3576906
+          ],
+          [
+            17.8209586,
+            49.3571346
+          ],
+          [
+            17.8207374,
+            49.3571272
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "element_id": "Janišov 1",
+        "name": "Janišov 1",
+        "position_name": "Janišov 1",
+        "contact_name": null,
+        "contact_phone": null,
+        "kind": "commissioner",
+        "requires_commissioner": true,
+        "commissioner_rule": "ready_before_rz",
+        "note": "Zem. Š.: 17.978759<br>Zem. D.: 49.3201797<br>Jméno: <br>Příjmení: <br>Telefón: <br>E-mail: <br>Bydliště: <br>Vedoucí sk.(dohodil): <br>Popis: nikdo nesmi za točnu autobusu<br>Poznámky:",
+        "source_name": "Janišov 1",
+        "source_style_url": "#icon-1732-AFB42B",
+        "source_layer": "Zákazy lidi a SG3",
+        "source_layer_kind": "marshal_control",
+        "kml_zem_š": "17.978759",
+        "kml_zem_d": "49.3201797",
+        "kml_popis": "nikdo nesmi za točnu autobusu"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          17.978759,
+          49.3201797
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "element_id": "Janišov 2",
+        "name": "Janišov 2",
+        "position_name": "Janišov 2",
+        "contact_name": null,
+        "contact_phone": null,
+        "kind": "commissioner",
+        "requires_commissioner": true,
+        "commissioner_rule": "ready_before_rz",
+        "note": "Zem. Š.: 17.9787995<br>Zem. D.: 49.3201596<br>Jméno: <br>Příjmení: <br>Telefón: <br>E-mail: <br>Bydliště: <br>Vedoucí sk.(dohodil): <br>Popis: nikdo nesmi za točnu autobusu<br>Poznámky:",
+        "source_name": "Janišov 2",
+        "source_style_url": "#icon-1732-AFB42B",
+        "source_layer": "Zákazy lidi a SG3",
+        "source_layer_kind": "marshal_control",
+        "kml_zem_š": "17.9787995",
+        "kml_zem_d": "49.3201596",
+        "kml_popis": "nikdo nesmi za točnu autobusu"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          17.9787995,
+          49.3201596
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "element_id": "Parkoviště Kotrla",
+        "name": "Parkoviště Kotrla",
+        "position_name": "Parkoviště Kotrla",
+        "contact_name": null,
+        "contact_phone": null,
+        "kind": "commissioner",
+        "requires_commissioner": true,
+        "commissioner_rule": "ready_before_rz",
+        "note": "Zem. Š.: 17.9796503<br>Zem. D.: 49.319627<br>Jméno: <br>Příjmení: <br>Telefón: <br>E-mail: <br>Bydliště: <br>Vedoucí sk.(dohodil): <br>Popis: koordinuje parkoviště a upozorňuje na uzavření ve 21:00<br>Poznámky: měl by umět aspoň trochu anglicky",
+        "source_name": "Parkoviště Kotrla",
+        "source_style_url": "#icon-1732-AFB42B",
+        "source_layer": "Zákazy lidi a SG3",
+        "source_layer_kind": "marshal_control",
+        "kml_zem_š": "17.9796503",
+        "kml_zem_d": "49.319627",
+        "kml_popis": "koordinuje parkoviště a upozorňuje na uzavření ve 21:00",
+        "kml_poznámky": "měl by umět aspoň trochu anglicky"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          17.9796503,
+          49.319627
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "element_id": "Lhota u Vsetína",
+        "name": "Lhota u Vsetína",
+        "position_name": "Lhota u Vsetína",
+        "contact_name": null,
+        "contact_phone": null,
+        "kind": "commissioner",
+        "requires_commissioner": true,
+        "commissioner_rule": "ready_before_rz",
+        "note": "Zem. Š.: 17.956409<br>Zem. D.: 49.3037418<br>Jméno: <br>Příjmení: <br>Telefón: <br>E-mail: <br>Bydliště: <br>Vedoucí sk.(dohodil): <br>Popis: <br>Poznámky:",
+        "source_name": "Lhota u Vsetína",
+        "source_style_url": "#icon-1732-AFB42B",
+        "source_layer": "Zákazy lidi a SG3",
+        "source_layer_kind": "marshal_control",
+        "kml_zem_š": "17.956409",
+        "kml_zem_d": "49.3037418"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          17.956409,
+          49.3037418
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "element_id": "Dolní Semetín 1",
+        "name": "Dolní Semetín 1",
+        "position_name": "Dolní Semetín 1",
+        "contact_name": null,
+        "contact_phone": null,
+        "kind": "commissioner",
+        "requires_commissioner": true,
+        "commissioner_rule": "ready_before_rz",
+        "note": "Zem. Š.: 17.954032<br>Zem. D.: 49.3537081<br>Jméno: <br>Příjmení: <br>Telefón: <br>E-mail: <br>Bydliště: <br>Vedoucí sk.(dohodil): <br>Popis: <br>Poznámky:",
+        "source_name": "Dolní Semetín 1",
+        "source_style_url": "#icon-1732-AFB42B",
+        "source_layer": "Zákazy lidi a SG3",
+        "source_layer_kind": "marshal_control",
+        "kml_zem_š": "17.954032",
+        "kml_zem_d": "49.3537081"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          17.954032,
+          49.3537081
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "element_id": "Dolní Semetín 2",
+        "name": "Dolní Semetín 2",
+        "position_name": "Dolní Semetín 2",
+        "contact_name": null,
+        "contact_phone": null,
+        "kind": "commissioner",
+        "requires_commissioner": true,
+        "commissioner_rule": "ready_before_rz",
+        "note": "Zem. Š.: 17.9539851<br>Zem. D.: 49.3537002<br>Jméno: <br>Příjmení: <br>Telefón: <br>E-mail: <br>Bydliště: <br>Vedoucí sk.(dohodil): <br>Popis: <br>Poznámky:",
+        "source_name": "Dolní Semetín 2",
+        "source_style_url": "#icon-1732-AFB42B",
+        "source_layer": "Zákazy lidi a SG3",
+        "source_layer_kind": "marshal_control",
+        "kml_zem_š": "17.9539851",
+        "kml_zem_d": "49.3537002"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          17.9539851,
+          49.3537002
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "element_id": "Horní Semetín",
+        "name": "Horní Semetín",
+        "position_name": "Horní Semetín",
+        "contact_name": null,
+        "contact_phone": null,
+        "kind": "commissioner",
+        "requires_commissioner": true,
+        "commissioner_rule": "ready_before_rz",
+        "note": "Zem. Š.: 17.947231<br>Zem. D.: 49.3424163<br>Jméno: <br>Příjmení: <br>Telefón: <br>E-mail: <br>Bydliště: <br>Vedoucí sk.(dohodil): <br>Popis: točna autobusu - koordinuje<br>Poznámky:",
+        "source_name": "Horní Semetín",
+        "source_style_url": "#icon-1732-AFB42B",
+        "source_layer": "Zákazy lidi a SG3",
+        "source_layer_kind": "marshal_control",
+        "kml_zem_š": "17.947231",
+        "kml_zem_d": "49.3424163",
+        "kml_popis": "točna autobusu - koordinuje"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          17.947231,
+          49.3424163
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "element_id": "Troják",
+        "name": "Troják",
+        "position_name": "Troják",
+        "contact_name": null,
+        "contact_phone": null,
+        "kind": "commissioner",
+        "requires_commissioner": true,
+        "commissioner_rule": "ready_before_rz",
+        "note": "Zem. Š.: 17.8135128<br>Zem. D.: 49.3537953<br>Jméno: <br>Příjmení: <br>Telefón: <br>E-mail: <br>Bydliště: <br>Vedoucí sk.(dohodil): <br>Popis: hlídá parkoviště nikdo nesmi jet autem dál a volná silnice pro odjezd<br>Poznámky:",
+        "source_name": "Troják",
+        "source_style_url": "#icon-1732-AFB42B",
+        "source_layer": "Zákazy lidi a SG3",
+        "source_layer_kind": "marshal_control",
+        "kml_zem_š": "17.8135128",
+        "kml_zem_d": "49.3537953",
+        "kml_popis": "hlídá parkoviště nikdo nesmi jet autem dál a volná silnice pro odjezd"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          17.8135128,
+          49.3537953
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "element_id": "1",
+        "name": "1",
+        "position_name": "1",
+        "contact_name": null,
+        "contact_phone": null,
+        "kind": "commissioner",
+        "requires_commissioner": true,
+        "commissioner_rule": "ready_before_rz",
+        "note": "Zem. Š.: 17.974471<br>Zem. D.: 49.3411256<br>Jméno: <br>Příjmení: <br>Telefón: <br>E-mail: <br>Bydliště: <br>Vedoucí sk.(dohodil): <br>Popis: Potůčky přechod a průchod pro diváky<br>Poznámky:",
+        "source_name": "1",
+        "source_style_url": "#icon-1732-000000",
+        "source_layer": "Zákazy lidi a SG3",
+        "source_layer_kind": "marshal_control",
+        "kml_zem_š": "17.974471",
+        "kml_zem_d": "49.3411256",
+        "kml_popis": "Potůčky přechod a průchod pro diváky"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          17.974471,
+          49.3411256
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "element_id": "2",
+        "name": "2",
+        "position_name": "2",
+        "contact_name": null,
+        "contact_phone": null,
+        "kind": "commissioner",
+        "requires_commissioner": true,
+        "commissioner_rule": "ready_before_rz",
+        "note": "Zem. Š.: 17.9741907<br>Zem. D.: 49.3409246<br>Jméno: <br>Příjmení: <br>Telefón: <br>E-mail: <br>Bydliště: <br>Vedoucí sk.(dohodil): <br>Popis: Potůčky přechod a průchod pro diváky<br>Poznámky:",
+        "source_name": "2",
+        "source_style_url": "#icon-1732-000000",
+        "source_layer": "Zákazy lidi a SG3",
+        "source_layer_kind": "marshal_control",
+        "kml_zem_š": "17.9741907",
+        "kml_zem_d": "49.3409246",
+        "kml_popis": "Potůčky přechod a průchod pro diváky"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          17.9741907,
+          49.3409246
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "element_id": "3",
+        "name": "3",
+        "position_name": "3",
+        "contact_name": null,
+        "contact_phone": null,
+        "kind": "commissioner",
+        "requires_commissioner": true,
+        "commissioner_rule": "ready_before_rz",
+        "note": "Zem. Š.: 17.9479671<br>Zem. D.: 49.3397527<br>Jméno: <br>Příjmení: <br>Telefón: <br>E-mail: <br>Bydliště: <br>Vedoucí sk.(dohodil): <br>Popis: Hlídá zákaz Horní SEMETÍN<br>Poznámky:",
+        "source_name": "3",
+        "source_style_url": "#icon-1732-000000",
+        "source_layer": "Zákazy lidi a SG3",
+        "source_layer_kind": "marshal_control",
+        "kml_zem_š": "17.9479671",
+        "kml_zem_d": "49.3397527",
+        "kml_popis": "Hlídá zákaz Horní SEMETÍN"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          17.9479671,
+          49.3397527
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "element_id": "4",
+        "name": "4",
+        "position_name": "4",
+        "contact_name": null,
+        "contact_phone": null,
+        "kind": "commissioner",
+        "requires_commissioner": true,
+        "commissioner_rule": "ready_before_rz",
+        "note": "Zem. Š.: 17.8724433<br>Zem. D.: 49.3559042<br>Jméno: <br>Příjmení: <br>Telefón: <br>E-mail: <br>Bydliště: <br>Vedoucí sk.(dohodil): <br>Popis: Zákaz Hošťálková dolní konec<br>Poznámky:",
+        "source_name": "4",
+        "source_style_url": "#icon-1732-000000",
+        "source_layer": "Zákazy lidi a SG3",
+        "source_layer_kind": "marshal_control",
+        "kml_zem_š": "17.8724433",
+        "kml_zem_d": "49.3559042",
+        "kml_popis": "Zákaz Hošťálková dolní konec"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          17.8724433,
+          49.3559042
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "element_id": "5",
+        "name": "5",
+        "position_name": "5",
+        "contact_name": null,
+        "contact_phone": null,
+        "kind": "commissioner",
+        "requires_commissioner": true,
+        "commissioner_rule": "ready_before_rz",
+        "note": "Zem. Š.: 17.8639784<br>Zem. D.: 49.3533069<br>Jméno: <br>Příjmení: <br>Telefón: <br>E-mail: <br>Bydliště: <br>Vedoucí sk.(dohodil): <br>Popis: Zákaz Hošťálková horní konec<br>Poznámky:",
+        "source_name": "5",
+        "source_style_url": "#icon-1732-000000",
+        "source_layer": "Zákazy lidi a SG3",
+        "source_layer_kind": "marshal_control",
+        "kml_zem_š": "17.8639784",
+        "kml_zem_d": "49.3533069",
+        "kml_popis": "Zákaz Hošťálková horní konec"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          17.8639784,
+          49.3533069
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "element_id": "6",
+        "name": "6",
+        "position_name": "6",
+        "contact_name": null,
+        "contact_phone": null,
+        "kind": "commissioner",
+        "requires_commissioner": true,
+        "commissioner_rule": "ready_before_rz",
+        "note": "Zem. Š.: 17.9653214<br>Zem. D.: 49.3289929<br>Jméno: <br>Příjmení: <br>Telefón: <br>E-mail: <br>Bydliště: <br>Vedoucí sk.(dohodil): <br>Popis: Točna nahoře v Janišově<br>Poznámky:",
+        "source_name": "6",
+        "source_style_url": "#icon-1732-000000",
+        "source_layer": "Zákazy lidi a SG3",
+        "source_layer_kind": "marshal_control",
+        "kml_zem_š": "17.9653214",
+        "kml_zem_d": "49.3289929",
+        "kml_popis": "Točna nahoře v Janišově"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          17.9653214,
+          49.3289929
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "element_id": "7",
+        "name": "7",
+        "position_name": "7",
+        "contact_name": null,
+        "contact_phone": null,
+        "kind": "commissioner",
+        "requires_commissioner": true,
+        "commissioner_rule": "ready_before_rz",
+        "note": "Zem. Š.: 17.9649057<br>Zem. D.: 49.328867<br>Jméno: <br>Příjmení: <br>Telefón: <br>E-mail: <br>Bydliště: <br>Vedoucí sk.(dohodil): <br>Popis: Točna nahoře v Janišově<br>Poznámky:",
+        "source_name": "7",
+        "source_style_url": "#icon-1732-000000",
+        "source_layer": "Zákazy lidi a SG3",
+        "source_layer_kind": "marshal_control",
+        "kml_zem_š": "17.9649057",
+        "kml_zem_d": "49.328867",
+        "kml_popis": "Točna nahoře v Janišově"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          17.9649057,
+          49.328867
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "element_id": "8",
+        "name": "8",
+        "position_name": "8",
+        "contact_name": null,
+        "contact_phone": null,
+        "kind": "commissioner",
+        "requires_commissioner": true,
+        "commissioner_rule": "ready_before_rz",
+        "note": "Zem. Š.: 17.8289519<br>Zem. D.: 49.3588007<br>Jméno: <br>Příjmení: <br>Telefón: <br>E-mail: <br>Bydliště: <br>Vedoucí sk.(dohodil): <br>Popis: Zákaz k Marušce pod památníkem<br>Poznámky:",
+        "source_name": "8",
+        "source_style_url": "#icon-1732-000000",
+        "source_layer": "Zákazy lidi a SG3",
+        "source_layer_kind": "marshal_control",
+        "kml_zem_š": "17.8289519",
+        "kml_zem_d": "49.3588007",
+        "kml_popis": "Zákaz k Marušce pod památníkem"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          17.8289519,
+          49.3588007
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "element_id": "9",
+        "name": "9",
+        "position_name": "9",
+        "contact_name": null,
+        "contact_phone": null,
+        "kind": "commissioner",
+        "requires_commissioner": true,
+        "commissioner_rule": "ready_before_rz",
+        "note": "Zem. Š.: 17.8146267<br>Zem. D.: 49.3541172<br>Jméno: <br>Příjmení: <br>Telefón: <br>E-mail: <br>Bydliště: <br>Vedoucí sk.(dohodil): <br>Popis: Průchod pro diváky na Trojáku<br>Poznámky:",
+        "source_name": "9",
+        "source_style_url": "#icon-1732-000000",
+        "source_layer": "Zákazy lidi a SG3",
+        "source_layer_kind": "marshal_control",
+        "kml_zem_š": "17.8146267",
+        "kml_zem_d": "49.3541172",
+        "kml_popis": "Průchod pro diváky na Trojáku"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          17.8146267,
+          49.3541172
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "element_id": "10",
+        "name": "10",
+        "position_name": "10",
+        "contact_name": null,
+        "contact_phone": null,
+        "kind": "commissioner",
+        "requires_commissioner": true,
+        "commissioner_rule": "ready_before_rz",
+        "note": "Zem. Š.: 17.8144819<br>Zem. D.: 49.3546308<br>Jméno: <br>Příjmení: <br>Telefón: <br>E-mail: <br>Bydliště: <br>Vedoucí sk.(dohodil): <br>Popis: Průchod pro diváky na Trojáku<br>Poznámky:",
+        "source_name": "10",
+        "source_style_url": "#icon-1732-000000",
+        "source_layer": "Zákazy lidi a SG3",
+        "source_layer_kind": "marshal_control",
+        "kml_zem_š": "17.8144819",
+        "kml_zem_d": "49.3546308",
+        "kml_popis": "Průchod pro diváky na Trojáku"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          17.8144819,
+          49.3546308
+        ]
+      }
+    }
+  ]
+}

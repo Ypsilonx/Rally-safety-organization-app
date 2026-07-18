@@ -57,12 +57,31 @@ const AppOperationsIncidentsModule = {
             return;
         }
 
+        let forceResume = false;
         if (alertKey === 'rz_resume') {
             await app.refreshGateStatus();
             const missing = Array.isArray(app.gateMissingStations) ? app.gateMissingStations : [];
+            const offline = Array.isArray(app.lastOfflineStations) ? app.lastOfflineStations : [];
             if (app.incidentGateActive && missing.length > 0) {
-                app.showToast(`RZ nelze obnovit. Chybí READY: ${missing.join(', ')}`, 'error');
-                return;
+                const warningStations = Array.from(new Set([...missing, ...offline]));
+                const confirmed = confirm(
+                    'Jsem si vědom, že tyto stanice jsou mimo komunikaci / bez READY:\n' +
+                    `${warningStations.join(', ')}\n\n` +
+                    'Zprovoznit RZ?'
+                );
+                if (!confirmed) {
+                    app.logUiAction('rz_resume_warning_cancelled', {
+                        missing_ready: missing,
+                        offline_stations: offline,
+                    });
+                    app.showToast(`RZ čeká na READY: ${missing.join(', ')}`, 'info');
+                    return;
+                }
+                app.logUiAction('rz_resume_warning_confirmed', {
+                    missing_ready: missing,
+                    offline_stations: offline,
+                });
+                forceResume = true;
             }
         }
 
@@ -71,13 +90,23 @@ const AppOperationsIncidentsModule = {
             priority: preset.priority,
             content: preset.text,
             operation_command: alertKey,
+            force_resume: forceResume,
             created_at: new Date().toISOString(),
         };
 
         window.wsClient.sendMessage(payload);
+        app.logUiAction('operation_alert_sent', {
+            alert_key: alertKey,
+            force_resume: forceResume,
+            missing_ready: app.gateMissingStations || [],
+            offline_stations: app.lastOfflineStations || [],
+        });
 
         if (alertKey === 'rz_resume') {
-            app.showToast('Požadavek na obnovení RZ odeslán', 'success');
+            const toastMessage = forceResume
+                ? 'Požadavek na obnovení RZ odeslán (i přes warning)'
+                : 'Požadavek na obnovení RZ odeslán';
+            app.showToast(toastMessage, forceResume ? 'error' : 'success');
         } else {
             const ownMessage = {
                 message_id: `preset_${Date.now()}`,
@@ -117,6 +146,9 @@ const AppOperationsIncidentsModule = {
                 content: '✅ Stanice připravena',
                 created_at: new Date().toISOString(),
             });
+            app.logUiAction('quick_action_ready', {
+                station_id: app.user.station_id || null,
+            });
             app.requestGateStatusRefresh();
             app.showToast('Stav odeslán', 'success');
             return;
@@ -153,6 +185,10 @@ const AppOperationsIncidentsModule = {
             app.displayInfoMessage(ownMessage);
             app.applyMarkerAlertFromMessage(ownMessage);
             window.wsClient.sendMessage(payload);
+            app.logUiAction('quick_action_issue', {
+                station_id: app.user.station_id || null,
+                detail: detail.trim(),
+            });
             app.incidentGateActive = true;
             app.requestGateStatusRefresh();
             app.showToast('Incident odeslán vedení', 'error');
@@ -185,6 +221,9 @@ const AppOperationsIncidentsModule = {
             app.displayInfoMessage(ownMessage);
             app.applyMarkerAlertFromMessage(ownMessage);
             window.wsClient.sendMessage(payload);
+            app.logUiAction('quick_action_emergency', {
+                station_id: app.user.station_id || null,
+            });
             app.incidentGateActive = true;
             app.requestGateStatusRefresh();
             app.showToast('Akutní incident odeslán vedení', 'error');

@@ -42,6 +42,10 @@ class StationMessage(BaseModel):
         default=None,
         description="Station readiness update (ready, not_ready)",
     )
+    force_resume: Optional[bool] = Field(
+        default=False,
+        description="Allow RZ resume despite missing READY confirmations",
+    )
 
     @model_validator(mode="after")
     def validate_content_by_message_type(self) -> "StationMessage":

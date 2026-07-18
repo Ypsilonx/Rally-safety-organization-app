@@ -9,11 +9,13 @@ const MapTrackModule = {
      * @returns {Promise<Object>} GeoJSON FeatureCollection
      */
     async loadTrackGeoJson(mapModule) {
+        const customSource = String(mapModule.config.trackGeoJsonUrl || '').trim();
         const candidates = [
+            customSource,
             '/data/example-track.geojson',
             '../data/example-track.geojson',
             'data/example-track.geojson',
-        ];
+        ].filter(Boolean);
 
         for (const path of candidates) {
             try {

@@ -7,12 +7,17 @@ from typing import Annotated, Any
 from fastapi import APIRouter, Depends, Header, HTTPException, status
 
 from backend.core.auth import auth_manager
+from backend.core.event_logger import event_logger
 from backend.core.people_catalog import people_catalog
 from backend.core.station_registry import station_registry
 from pydantic import BaseModel, Field
 
 from backend.models.people import PeopleCsvImportRequest
-from backend.models.station import StationAssignmentRequest, StationCreateRequest
+from backend.models.station import (
+    StationAssignmentRequest,
+    StationBulkGeneratePinsRequest,
+    StationCreateRequest,
+)
 
 router = APIRouter(prefix="/api/admin", tags=["admin"])
 
@@ -79,7 +84,7 @@ async def admin_list_people(_: Annotated[dict[str, Any], Depends(require_vedeni)
 @router.post("/people/import-csv")
 async def admin_import_people_csv(
     request: PeopleCsvImportRequest,
-    _: Annotated[dict[str, Any], Depends(require_vedeni)],
+    session: Annotated[dict[str, Any], Depends(require_vedeni)],
 ) -> dict[str, Any]:
     """Import people catalog from CSV text.
 
@@ -92,6 +97,18 @@ async def admin_import_people_csv(
     result = people_catalog.import_csv(
         csv_content=request.csv_content,
         replace_existing=request.replace_existing,
+    )
+    event_logger.log_event(
+        "admin_action",
+        {
+            "action": "import_people_csv",
+            "actor": session["username"],
+            "role": session["role"].value,
+            "replace_existing": request.replace_existing,
+            "imported": result.imported,
+            "updated": result.updated,
+            "errors": len(result.errors),
+        },
     )
     return {
         "success": True,
@@ -113,10 +130,44 @@ async def admin_list_stations(_: Annotated[dict[str, Any], Depends(require_veden
     }
 
 
+@router.post("/station/bulk-generate-pins")
+async def admin_bulk_generate_station_pins(
+    request: StationBulkGeneratePinsRequest,
+    session: Annotated[dict[str, Any], Depends(require_vedeni)],
+) -> dict[str, Any]:
+    """Generate station-bound PINs from map templates in bulk.
+
+    Args:
+        request: Bulk generation options.
+
+    Returns:
+        Summary counters for created/regenerated/skipped stations.
+    """
+    summary = station_registry.bulk_generate_station_pins_from_map(
+        regenerate_existing=request.regenerate_existing,
+    )
+
+    event_logger.log_event(
+        "admin_action",
+        {
+            "action": "bulk_generate_station_pins",
+            "actor": session["username"],
+            "role": session["role"].value,
+            "regenerate_existing": request.regenerate_existing,
+            **summary,
+        },
+    )
+
+    return {
+        "success": True,
+        "summary": summary,
+    }
+
+
 @router.post("/station/create-pin")
 async def admin_create_station_pin(
     request: StationCreateRequest,
-    _: Annotated[dict[str, Any], Depends(require_vedeni)],
+    session: Annotated[dict[str, Any], Depends(require_vedeni)],
 ) -> dict[str, Any]:
     """Create a new station-bound PIN with initial assignee.
 
@@ -137,6 +188,20 @@ async def admin_create_station_pin(
             detail=str(error),
         ) from error
 
+    event_logger.log_event(
+        "admin_action",
+        {
+            "action": "create_station_pin",
+            "actor": session["username"],
+            "role": session["role"].value,
+            "station_id": request.station_id,
+            "station_name": request.station_name,
+            "station_type": request.station_type.value,
+            "assignee_name": request.name,
+            "assignee_role": request.role.value,
+        },
+    )
+
     return {
         "success": True,
         "station": station.model_dump(mode="json"),
@@ -148,7 +213,7 @@ async def admin_create_station_pin(
 async def admin_assign_station_user(
     station_id: str,
     request: StationAssignmentRequest,
-    _: Annotated[dict[str, Any], Depends(require_vedeni)],
+    session: Annotated[dict[str, Any], Depends(require_vedeni)],
 ) -> dict[str, Any]:
     """Assign or reassign a user to an existing station PIN.
 
@@ -169,6 +234,20 @@ async def admin_assign_station_user(
             status_code=status.HTTP_404_NOT_FOUND,
             detail=str(error),
         ) from error
+
+    event_logger.log_event(
+        "admin_action",
+        {
+            "action": "assign_or_reassign_station_user",
+            "actor": session["username"],
+            "role": session["role"].value,
+            "station_id": station_id,
+            "assignee_name": request.name,
+            "assignee_role": request.role.value,
+            "phone": request.phone,
+            "note": request.note,
+        },
+    )
 
     return {
         "success": True,
@@ -211,7 +290,7 @@ async def admin_station_history(
 async def admin_release_station_user(
     station_id: str,
     request: StationReleaseRequest,
-    _: Annotated[dict[str, Any], Depends(require_vedeni)],
+    session: Annotated[dict[str, Any], Depends(require_vedeni)],
 ) -> dict[str, Any]:
     """Release current user from an existing station PIN.
 
@@ -238,6 +317,17 @@ async def admin_release_station_user(
             detail=str(error),
         ) from error
 
+    event_logger.log_event(
+        "admin_action",
+        {
+            "action": "release_station_user",
+            "actor": session["username"],
+            "role": session["role"].value,
+            "station_id": station_id,
+            "note": request.note,
+        },
+    )
+
     return {
         "success": True,
         "station": station.model_dump(mode="json"),
@@ -247,7 +337,7 @@ async def admin_release_station_user(
 @router.delete("/station/{station_id}/pin")
 async def admin_delete_station_pin(
     station_id: str,
-    _: Annotated[dict[str, Any], Depends(require_vedeni)],
+    session: Annotated[dict[str, Any], Depends(require_vedeni)],
 ) -> dict[str, Any]:
     """Delete station-bound PIN record.
 
@@ -268,7 +358,61 @@ async def admin_delete_station_pin(
             detail=str(error),
         ) from error
 
+    event_logger.log_event(
+        "admin_action",
+        {
+            "action": "delete_station_pin",
+            "actor": session["username"],
+            "role": session["role"].value,
+            "station_id": station_id,
+        },
+    )
+
     return {
         "success": True,
+        "station": station.model_dump(mode="json"),
+    }
+
+
+@router.post("/station/{station_id}/regenerate-pin")
+async def admin_regenerate_station_pin(
+    station_id: str,
+    session: Annotated[dict[str, Any], Depends(require_vedeni)],
+) -> dict[str, Any]:
+    """Regenerate PIN for one station while keeping station assignment mapping.
+
+    Args:
+        station_id: Station identifier whose PIN should be rotated.
+
+    Returns:
+        Previous PIN and updated station view.
+
+    Raises:
+        HTTPException: If the station is unknown.
+    """
+    try:
+        old_pin, station = station_registry.regenerate_station_pin(station_id)
+    except KeyError as error:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=str(error),
+        ) from error
+
+    event_logger.log_event(
+        "admin_action",
+        {
+            "action": "regenerate_station_pin",
+            "actor": session["username"],
+            "role": session["role"].value,
+            "station_id": station_id,
+            "old_pin_code": old_pin,
+            "new_pin_code": station.pin_code,
+        },
+        severity="warning",
+    )
+
+    return {
+        "success": True,
+        "old_pin_code": old_pin,
         "station": station.model_dump(mode="json"),
     }

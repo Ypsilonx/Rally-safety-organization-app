@@ -32,12 +32,12 @@ class LoginVedeniResponse(BaseModel):
 
 class LoginKomisarRequest(BaseModel):
     """Login request for komisař (PIN code only)."""
-    pin_code: str = Field(..., min_length=4, max_length=4, pattern=r"^\d{4}$")
+    pin_code: str = Field(..., min_length=4, max_length=8, pattern=r"^\d{4,8}$")
     
     model_config = ConfigDict(
         json_schema_extra={
             "example": {
-                "pin_code": "1234",
+                "pin_code": "12345678",
             }
         }
     )

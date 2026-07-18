@@ -10,6 +10,7 @@ from fastapi.middleware.cors import CORSMiddleware
 
 from backend.api.auth import router as auth_router
 from backend.api.admin import router as admin_router
+from backend.api.audit import router as audit_router
 from backend.api.status import router as status_router
 from backend.core.auth import auth_manager
 from backend.core.config import get_settings
@@ -86,6 +87,7 @@ app.add_middleware(
 # Include authentication routes
 app.include_router(auth_router)
 app.include_router(admin_router)
+app.include_router(audit_router)
 app.include_router(status_router)
 
 
@@ -116,7 +118,7 @@ async def websocket_endpoint(websocket: WebSocket, auth_identifier: str):
     """WebSocket endpoint for real-time communication.
     
     Supports two authentication methods:
-    1. PIN code (4 digits) - for komisaři
+    1. PIN code (8 digits, legacy 4-digit supported) - for komisaři
     2. Session token (64 hex chars) - for vedení
     
     Args:
@@ -226,10 +228,22 @@ async def websocket_endpoint(websocket: WebSocket, auth_identifier: str):
 
                 if station_message.operation_command in {"rz_stop", "rz_hold"}:
                     await operations_state.activate_incident_mode()
+                    event_logger.log_event(
+                        "operation_action",
+                        {
+                            "command": station_message.operation_command,
+                            "actor": user_data["name"],
+                            "role": user_data["role"],
+                            "station_id": user_data["station_id"],
+                        },
+                    )
 
+                resume_with_warnings = False
+                resume_missing_stations: list[str] = []
                 if station_message.operation_command == "rz_resume":
                     can_resume, missing_stations = await operations_state.can_resume()
-                    if not can_resume:
+                    force_resume = bool(message_data.get("force_resume", False))
+                    if not can_resume and not force_resume:
                         blocked_payload = {
                             "type": "error",
                             "message": "RZ nelze obnovit: chybí READY potvrzení.",
@@ -261,7 +275,65 @@ async def websocket_endpoint(websocket: WebSocket, auth_identifier: str):
                             json.dumps(gate_notice, ensure_ascii=False),
                             ["vedouci", "zastupce"],
                         )
+                        event_logger.log_event(
+                            "operation_action",
+                            {
+                                "command": "rz_resume",
+                                "result": "blocked_missing_ready",
+                                "actor": user_data["name"],
+                                "role": user_data["role"],
+                                "missing_stations": missing_stations,
+                            },
+                            severity="warning",
+                        )
                         continue
+
+                    if not can_resume and force_resume:
+                        resume_with_warnings = True
+                        resume_missing_stations = missing_stations
+                        override_notice = {
+                            "message_id": f"gate_override_{datetime.utcnow().timestamp()}",
+                            "timestamp": datetime.utcnow().isoformat(),
+                            "sender": {
+                                "user_id": "system",
+                                "name": "Systém",
+                                "role": "system",
+                                "phone": None,
+                            },
+                            "message_type": MessageType.SYSTEM.value,
+                            "priority": MessagePriority.HIGH.value,
+                            "content": (
+                                "⚠️ RZ spuštěna i přes warning. Chybějící READY: "
+                                f"{', '.join(missing_stations) if missing_stations else 'N/A'}"
+                            ),
+                            "created_at": datetime.utcnow().isoformat(),
+                        }
+                        await connection_manager.broadcast_to_roles(
+                            json.dumps(override_notice, ensure_ascii=False),
+                            ["vedouci", "zastupce"],
+                        )
+                        event_logger.log_event(
+                            "operation_action",
+                            {
+                                "command": "rz_resume",
+                                "result": "forced_with_warnings",
+                                "actor": user_data["name"],
+                                "role": user_data["role"],
+                                "missing_stations": missing_stations,
+                            },
+                            severity="warning",
+                        )
+
+                    if can_resume:
+                        event_logger.log_event(
+                            "operation_action",
+                            {
+                                "command": "rz_resume",
+                                "result": "normal",
+                                "actor": user_data["name"],
+                                "role": user_data["role"],
+                            },
+                        )
 
                     await operations_state.resolve_incident_mode()
 
@@ -296,6 +368,8 @@ async def websocket_endpoint(websocket: WebSocket, auth_identifier: str):
                     "created_at": station_message.created_at.isoformat(),
                     "operation_command": station_message.operation_command,
                     "readiness_state": station_message.readiness_state,
+                    "resume_with_warnings": resume_with_warnings,
+                    "missing_stations": resume_missing_stations,
                 }
                 broadcast_json = json.dumps(broadcast_data, ensure_ascii=False)
 

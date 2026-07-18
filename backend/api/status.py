@@ -40,8 +40,13 @@ async def get_stations_status() -> dict[str, Any]:
         enriched_stations.append(
             {
                 "station_id": station_id,
+                "station_name": directory.station_name if directory else station_id,
                 "name": current_user.name if current_user else vitality.get("name", directory.station_name if directory else station_id),
                 "role": current_user.role if current_user else vitality.get("role"),
+                "phone": current_user.phone if current_user else None,
+                "email": current_user.email if current_user else None,
+                "address": current_user.address if current_user else None,
+                "group": current_user.group if current_user else None,
                 "station_type": directory.station_type.value if directory else None,
                 "online": bool(vitality.get("online", False)),
                 "last_seen": vitality.get("last_seen"),

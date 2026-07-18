@@ -40,9 +40,9 @@ async def test_admin_people_import_and_list(monkeypatch, tmp_path: Path) -> None
     headers = _admin_headers()
     payload = {
         "csv_content": (
-            "jmeno;telefon\n"
-            "Jan Novák;+420111222333\n"
-            "Eva Testovací;+420444555666\n"
+            "jmeno;prijmeni;telefon;email;bydliste;skupina\n"
+            "Jan;Novák;+420111222333;jan@example.com;Brno;Cibulec\n"
+            "Eva;Testovací;+420444555666;eva@example.com;Olomouc;Přerováci\n"
         ),
         "replace_existing": False,
     }
@@ -64,4 +64,6 @@ async def test_admin_people_import_and_list(monkeypatch, tmp_path: Path) -> None
     assert list_response.status_code == 200
     list_data = list_response.json()
     assert list_data["total"] == 2
-    assert [item["name"] for item in list_data["people"]] == ["Eva Testovací", "Jan Novák"]
+    assert [f"{item['first_name']} {item['last_name']}".strip() for item in list_data["people"]] == ["Eva Testovací", "Jan Novák"]
+    assert list_data["people"][0]["email"] == "eva@example.com"
+    assert list_data["people"][0]["group"] == "Přerováci"
