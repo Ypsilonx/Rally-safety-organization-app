@@ -2,13 +2,17 @@
 
 from __future__ import annotations
 
+import json
+from datetime import UTC, datetime
 from typing import Annotated, Any
 
 from fastapi import APIRouter, Depends, Header, HTTPException, status
 
 from backend.core.auth import auth_manager
+from backend.core.connection_manager import connection_manager
 from backend.core.event_logger import event_logger
 from backend.core.people_catalog import people_catalog
+from backend.core.rz_context import rz_context_manager
 from backend.core.station_registry import station_registry
 from pydantic import BaseModel, Field
 
@@ -30,6 +34,16 @@ class StationReleaseRequest(BaseModel):
     """
 
     note: str | None = Field(None, max_length=200)
+
+
+class RzConfigUpdateRequest(BaseModel):
+    """Payload for updating RZ display configuration.
+
+    Attributes:
+        rz_name: Human-readable race stage name.
+    """
+
+    rz_name: str = Field(..., min_length=1, max_length=120)
 
 
 def require_vedeni(
@@ -65,6 +79,124 @@ def require_vedeni(
             detail="Insufficient privileges",
         )
     return session
+
+
+@router.get("/rz-config")
+async def admin_get_rz_config(_: Annotated[dict[str, Any], Depends(require_vedeni)]) -> dict[str, Any]:
+    """Return current persistent RZ context for setup UI.
+
+    Returns:
+        Current RZ name and communication reset metadata.
+    """
+    context = rz_context_manager.get_context()
+    return {
+        "success": True,
+        "rz_name": context.rz_name,
+        "communication_reset_version": context.communication_reset_version,
+        "communication_reset_at": context.communication_reset_at,
+        "updated_at": context.updated_at,
+    }
+
+
+@router.post("/rz-config")
+async def admin_update_rz_config(
+    request: RzConfigUpdateRequest,
+    session: Annotated[dict[str, Any], Depends(require_vedeni)],
+) -> dict[str, Any]:
+    """Update RZ display name used by frontend and log files.
+
+    Args:
+        request: New RZ display configuration.
+
+    Returns:
+        Updated RZ context.
+    """
+    context = rz_context_manager.set_rz_name(request.rz_name)
+    event_logger.set_rz_name(context.rz_name)
+
+    event_logger.log_event(
+        "admin_action",
+        {
+            "action": "update_rz_config",
+            "actor": session["username"],
+            "role": session["role"].value,
+            "rz_name": context.rz_name,
+        },
+    )
+
+    notice = {
+        "message_id": f"rzcfg_{datetime.now(UTC).timestamp()}",
+        "created_at": datetime.now(UTC).isoformat(),
+        "sender": {
+            "user_id": "system",
+            "name": "Systém",
+            "role": "system",
+        },
+        "message_type": "system",
+        "priority": "normal",
+        "content": f"Název RZ byl nastaven na: {context.rz_name}",
+        "rz_name": context.rz_name,
+    }
+    recipients = await connection_manager.broadcast_to_all(json.dumps(notice, ensure_ascii=False))
+
+    return {
+        "success": True,
+        "rz_name": context.rz_name,
+        "communication_reset_version": context.communication_reset_version,
+        "communication_reset_at": context.communication_reset_at,
+        "updated_at": context.updated_at,
+        "notified_connections": recipients,
+    }
+
+
+@router.post("/reset-communication-history")
+async def admin_reset_communication_history(
+    session: Annotated[dict[str, Any], Depends(require_vedeni)],
+) -> dict[str, Any]:
+    """Mark global communication history reset for next RZ session.
+
+    Args:
+        session: Verified admin session.
+
+    Returns:
+        Updated communication reset metadata and delivery counters.
+    """
+    context = rz_context_manager.reset_communication_history()
+    event_logger.log_event(
+        "admin_action",
+        {
+            "action": "reset_communication_history",
+            "actor": session["username"],
+            "role": session["role"].value,
+            "communication_reset_version": context.communication_reset_version,
+        },
+        severity="warning",
+    )
+
+    reset_notice = {
+        "message_id": f"rzreset_{datetime.now(UTC).timestamp()}",
+        "created_at": datetime.now(UTC).isoformat(),
+        "sender": {
+            "user_id": "system",
+            "name": "Systém",
+            "role": "system",
+        },
+        "message_type": "system",
+        "priority": "high",
+        "content": "Komunikace byla resetována pro novou RZ.",
+        "rz_name": context.rz_name,
+        "communication_reset_version": context.communication_reset_version,
+    }
+    recipients = await connection_manager.broadcast_to_all(json.dumps(reset_notice, ensure_ascii=False))
+
+    return {
+        "success": True,
+        "rz_name": context.rz_name,
+        "communication_reset_version": context.communication_reset_version,
+        "communication_reset_at": context.communication_reset_at,
+        "updated_at": context.updated_at,
+        "notified_connections": recipients,
+    }
 
 
 @router.get("/people")
@@ -232,6 +364,11 @@ async def admin_assign_station_user(
     except KeyError as error:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
+            detail=str(error),
+        ) from error
+    except ValueError as error:
+        raise HTTPException(
+            status_code=status.HTTP_409_CONFLICT,
             detail=str(error),
         ) from error
 

@@ -87,6 +87,7 @@
                 <span id="user-name" class="user-name"></span>
             </div>
             <div class="header-center">
+                <span id="rz-name-display" class="rz-name-display">RZ: Nezadaná RZ</span>
                 <span id="rz-live-status" class="rz-status-badge running">RZ: V provozu</span>
             </div>
             <div class="header-right">
@@ -215,9 +216,31 @@
         <!-- Quick Actions (pro komisaře) -->
         <div id="quick-actions" class="quick-actions hidden">
             <div class="contact-card">
-                <strong>Vedoucí RZ:</strong>
-                <a id="vedeni-phone-link" href="tel:+420777123456">+420777123456</a>
+                <strong>Kontakty vedení RZ:</strong>
+                <div id="leadership-contacts-list" class="leadership-contacts-list">
+                    <div class="leadership-contact-row">
+                        <span class="leadership-contact-label">Vedoucí RZ:</span>
+                        <a id="vedeni-phone-link" href="tel:+420777123456">+420777123456</a>
+                    </div>
+                    <div class="leadership-contact-row">
+                        <span class="leadership-contact-label">Zástupce vedoucího RZ:</span>
+                        <a href="tel:+420777123457">+420777123457</a>
+                    </div>
+                    <div class="leadership-contact-row">
+                        <span class="leadership-contact-label">Vedoucí bezpečnosti RZ:</span>
+                        <a href="tel:+420777123458">+420777123458</a>
+                    </div>
+                    <div class="leadership-contact-row">
+                        <span class="leadership-contact-label">Zástupce vedoucího bezpečnosti RZ:</span>
+                        <a href="tel:+420777123459">+420777123459</a>
+                    </div>
+                </div>
             </div>
+            <div class="komisar-station-card">
+                <strong>Moje pozice:</strong>
+                <span id="komisar-station-label">Neurčeno</span>
+            </div>
+            <button class="btn-quick" data-action="center_station">📍 Na moji pozici</button>
             <button class="btn-quick" data-action="ready">✅ Připraven</button>
             <button class="btn-quick" data-action="issue">⚠️ Problém</button>
             <button class="btn-quick" data-action="emergency">🆘 Akutní</button>
@@ -249,6 +272,15 @@
                     Live dashboard zůstává oddělený pro provoz během RZ.
                 </p>
                 <div class="setup-map-config-grid">
+                    <div class="form-group">
+                        <label for="rz-name-input">Název RZ</label>
+                        <input type="text" id="rz-name-input" name="rz_name" maxlength="120" placeholder="Např. RZ Hošťálková">
+                    </div>
+                    <div class="station-admin-actions">
+                        <button type="button" id="btn-save-rz-name" class="btn btn-primary">Uložit název RZ</button>
+                        <button type="button" id="btn-reset-communication-history" class="btn btn-alert">Resetovat historii komunikace</button>
+                    </div>
+
                     <div class="form-group">
                         <label for="map-track-path">GeoJSON trať (volitelná cesta/URL)</label>
                         <input type="text" id="map-track-path" name="map_track_path" placeholder="/data/example-track.geojson">
@@ -321,6 +353,8 @@
                             <div class="form-group">
                                 <label for="admin-person-role">Role</label>
                                 <select id="admin-person-role" name="role" required>
+                                    <option value="vedouci">Vedoucí RZ (VRZ / VBRZ)</option>
+                                    <option value="zastupce">Zástupce vedení RZ (ZVRZ / ZVBRZ)</option>
                                     <option value="komisar_trat">Komisař tratě</option>
                                     <option value="komisar_zatacka">Komisař zatáčky</option>
                                     <option value="casomer">Časomíra</option>
@@ -409,7 +443,6 @@
     <script src="js/app-messaging.js"></script>
     <script src="js/app-operations-rz.js"></script>
     <script src="js/app-operations-incidents.js"></script>
-    <script src="js/app-operations.js"></script>
     <script src="js/app.js"></script>
 </body>
 </html>

@@ -117,14 +117,13 @@ Server běží na: `http://localhost:8000`
 ### Frontend Setup
 ```powershell
 # Spusť simple HTTP server
-python -m http.server 8080 --directory frontend
+uv run python scripts/serve_frontend.py --host 127.0.0.1 --port 8080
 ```
 
-Frontend běží na: `http://localhost:8080`
+Frontend otevři na: `http://localhost:8080/`
 
-Poznámka: při tomto režimu může log frontendu obsahovat 404 pro `/data/example-track.geojson`.
-Je to neblokující fallback (mapa použije interní vzorovou trať). Pokud chceš čistý log bez 404,
-spouštěj server z kořene repozitáře a frontend otevři přes `/frontend/index.html`.
+Tento režim zpřístupní i složku `data/` na `/data/*`, takže se načtou reálné mapové podklady
+bez 404 fallbacku na vzorovou trať.
 
 ### VS Code - One Click Start (UV)
 Pro rychlé spuštění bez ručního otevírání více terminálů použij tasky ve VS Code:
@@ -135,7 +134,7 @@ Pro rychlé spuštění bez ručního otevírání více terminálů použij tas
 
 To současně spustí:
 - backend na `http://127.0.0.1:8000`
-- frontend na `http://127.0.0.1:8080`
+- frontend na `http://127.0.0.1:8080/`
 
 Další tasky:
 - `UV: Backend` (jen backend)
@@ -151,8 +150,9 @@ Stop: `Ctrl+Shift+P` → `Tasks: Terminate Task` (nebo `Terminate All Tasks`).
 ```
 rally-safety-app/
 ├── backend/              # FastAPI WebSocket server
-│   ├── main.py          # (připraveno v Fázi 1)
-│   ├── api/             # REST & WebSocket endpoints
+│   ├── main.py          # Inicializace FastAPI, middleware, routery
+│   ├── api/             # REST & WebSocket endpointy
+│   │   └── websocket.py # WebSocket pipeline (auth, gate, broadcast)
 │   ├── core/            # Config, Connection Manager
 │   ├── models/          # Pydantic data models
 │   └── services/        # Business logic
@@ -228,7 +228,7 @@ Invoke-RestMethod http://localhost:8000/api/stations
 # Přihlášení vedení a získání session tokenu
 $login = Invoke-RestMethod -Method Post http://localhost:8000/api/auth/login-vedeni `
 	-ContentType 'application/json' `
-	-Body '{"username":"admin","password":"demo123"}'
+	-Body '{"username":"VRZ","password":"demo123"}'
 
 # Seznam stanic pro admin správu
 Invoke-RestMethod http://localhost:8000/api/admin/stations `
@@ -239,6 +239,20 @@ Invoke-RestMethod -Method Post http://localhost:8000/api/admin/station/bulk-gene
 	-Headers @{ 'X-Session-Token' = $login.session_token } `
 	-ContentType 'application/json' `
 	-Body '{"regenerate_existing":false}'
+
+# Načtení aktuální konfigurace RZ (název + verze resetu komunikace)
+Invoke-RestMethod http://localhost:8000/api/admin/rz-config `
+	-Headers @{ 'X-Session-Token' = $login.session_token }
+
+# Nastavení názvu RZ (promítne se do hlavičky aplikace a názvu log souboru)
+Invoke-RestMethod -Method Post http://localhost:8000/api/admin/rz-config `
+	-Headers @{ 'X-Session-Token' = $login.session_token } `
+	-ContentType 'application/json' `
+	-Body '{"rz_name":"RZ Hošťálková"}'
+
+# Globální reset historie komunikace pro další RZ
+Invoke-RestMethod -Method Post http://localhost:8000/api/admin/reset-communication-history `
+	-Headers @{ 'X-Session-Token' = $login.session_token }
 
 # Vytvoření nové stanice s PINem a počátečním osazením
 Invoke-RestMethod -Method Post http://localhost:8000/api/admin/station/create-pin `
@@ -293,9 +307,17 @@ Pokud chceš naplnit `data/people_catalog.json` reálnými historickými daty z 
 uv run python scripts/import_people_from_kml.py
 ```
 
+Skript teď defaultně čte lokální export `data/RZ Hošťálková FINAL.kml`.
+Vynucené stažení z URL je možné takto:
+
+```powershell
+uv run python scripts/import_people_from_kml.py --from-url
+```
+
 Bezpečnostní poznámka: `data/people_catalog.json` a `data/pins.json` jsou lokální soubory s citlivými údaji.
 Jsou nastavené v `.gitignore`, takže je aplikace používá lokálně, ale do repozitáře se necommitují.
-V repozitáři jsou pouze anonymní vzory `data/people_catalog.example.json` a `data/pins.example.json`.
+V repozitáři jsou pouze anonymní vzory `data/people_catalog.example.json`, `data/pins.example.json` a `data/rz_context.example.json`.
+Stejně tak importní zdroje `*.kml` a `*.xlsx.csv` v `data/` jsou lokální a nejsou určené pro push na GitHub.
 
 První inicializace lokálních dat ze vzorů:
 
@@ -310,6 +332,13 @@ Pro mapové podklady z téhož KML spusť:
 uv run python scripts/import_map_elements_from_kml.py
 ```
 
+I tento skript defaultně používá `data/RZ Hošťálková FINAL.kml`.
+Vynucené stažení z URL:
+
+```powershell
+uv run python scripts/import_map_elements_from_kml.py --from-url
+```
+
 Pro souřadnice traťových pozic ze speciální CSV tabulky spusť:
 
 ```powershell
@@ -319,6 +348,10 @@ uv run python scripts/import_station_positions_from_csv.py
 Tím se vygeneruje `data/station-coordinates.json`, který frontend mapy načítá automaticky při startu.
 Soubor zároveň obsahuje i `stations` se `station_id`, `suggested_role` a `suggested_station_type`
 pro přesnější seed/admin create workflow.
+
+Při admin akci `bulk-generate-pins` backend nově seeduje i bodové pozice typu
+`commissioner` / `marshal_control` z `data/example-map-elements.geojson`
+(např. parkoviště, zákazy vjezdu, průchody), aby šly standardně obsazovat lidmi.
 
 ### Frontend Testing
 - Chrome DevTools → Device Emulation
@@ -351,7 +384,8 @@ pro přesnější seed/admin create workflow.
 - Warning border mapy je renderovaný jako overlay nad Leafletem (nesmí se schovat pod mapové vrstvy)
 - Komisař: při hlášení problému musí doplnit detail incidentu
 - Komisař: má i tlačítko `🆘 Akutní` (odeslání kritického incidentu bez vstupu)
-- Komisař: na dashboardu má kontakt na vedoucího RZ (tel link)
+- Komisař: na dashboardu má 4 telefonní kontakty vedení (VRZ, ZVRZ, VBRZ, ZVBRZ)
+- PIN login komisaře je blokovaný pro pozice VRZ/ZVRZ/VBRZ/ZVBRZ (tyto pozice používají login/heslo vedení)
 - Chat tagging: napiš `@Jmeno` nebo `#Stanice` a použij našeptávač pro rychlé označení
 - Tagy se zvýrazní jen pokud odpovídají známému uživateli/stanici; klik na `#Stanice` vycentruje mapu na marker
 - Chat, info kanál a varování vedení se ukládají lokálně pro přihlášeného uživatele a po odhlášení/znovupřihlášení se obnoví

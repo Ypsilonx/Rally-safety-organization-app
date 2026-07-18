@@ -7,6 +7,7 @@ from pathlib import Path
 from typing import Any, Optional
 
 from backend.core.config import get_settings
+from backend.core.rz_context import rz_context_manager
 
 
 class EventLogger:
@@ -16,10 +17,8 @@ class EventLogger:
         self.settings = get_settings()
         self.log_dir = Path(self.settings.LOG_DIR)
         self.log_dir.mkdir(exist_ok=True)
-        
-        # Create session-specific log file
-        session_timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
-        self.log_file = self.log_dir / f"rz_session_{session_timestamp}.jsonl"
+        self.rz_name = rz_context_manager.get_context().rz_name
+        self.log_file = self._build_log_path(self.rz_name)
         
         # Standard Python logger for console output
         self.console_logger = logging.getLogger("rally_safety")
@@ -32,6 +31,41 @@ class EventLogger:
             )
             handler.setFormatter(formatter)
             self.console_logger.addHandler(handler)
+
+    def _build_log_path(self, rz_name: str) -> Path:
+        """Build current session log file path.
+
+        Args:
+            rz_name: Current race stage name.
+
+        Returns:
+            Absolute path to session JSONL log file.
+        """
+        session_timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+        rz_slug = rz_context_manager.slug_for_filename(rz_name)
+        return self.log_dir / f"rz_{rz_slug}_session_{session_timestamp}.jsonl"
+
+    def set_rz_name(self, rz_name: str) -> None:
+        """Rotate logger to new file when RZ name changes.
+
+        Args:
+            rz_name: Updated race stage name.
+        """
+        normalized = " ".join(str(rz_name or "").split())
+        if not normalized or normalized == self.rz_name:
+            return
+
+        previous_name = self.rz_name
+        self.rz_name = normalized
+        self.log_file = self._build_log_path(self.rz_name)
+        self.log_event(
+            "session_log_rotated",
+            {
+                "previous_rz_name": previous_name,
+                "new_rz_name": self.rz_name,
+            },
+            severity="info",
+        )
     
     def log_event(self, event_type: str, data: dict[str, Any], 
                   severity: str = "info") -> None:
@@ -44,6 +78,7 @@ class EventLogger:
         """
         event = {
             "timestamp": datetime.now(UTC).isoformat(),
+            "rz_name": self.rz_name,
             "event_type": event_type,
             "severity": severity,
             **data

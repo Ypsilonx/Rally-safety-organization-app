@@ -7,6 +7,7 @@ the main rally route to `data/example-track.geojson`.
 
 from __future__ import annotations
 
+import argparse
 import json
 import unicodedata
 from pathlib import Path
@@ -14,6 +15,7 @@ from urllib.request import urlopen
 from xml.etree import ElementTree as ET
 
 KML_URL = "https://www.google.com/maps/d/kml?forcekml=1&mid=15D0UVrvdZUOqNkA1rCilK7sM8FAYlLWz"
+LOCAL_KML_PATH = Path("data/RZ Hošťálková FINAL.kml")
 OUTPUT_PATH = Path("data/example-map-elements.geojson")
 TRACK_OUTPUT_PATH = Path("data/example-track.geojson")
 NAMESPACE = {"kml": "http://www.opengis.net/kml/2.2"}
@@ -26,6 +28,47 @@ LAYER_KIND_ALIASES = {
     "dulezita mista a funkce": "critical",
     "zakazy lidi a sg3": "marshal_control",
 }
+
+
+def _read_kml_bytes(input_path: Path, from_url: bool, url: str) -> bytes:
+    """Read KML source from local export by default.
+
+    Args:
+        input_path: Local KML file path.
+        from_url: Force loading from URL.
+        url: Remote KML URL.
+
+    Returns:
+        KML XML content as bytes.
+    """
+    if from_url:
+        print(f"Loading KML from URL: {url}")
+        return urlopen(url, timeout=30).read()
+
+    if input_path.exists():
+        print(f"Loading KML from local file: {input_path}")
+        return input_path.read_bytes()
+
+    print(f"Local KML not found: {input_path}. Falling back to URL: {url}")
+    return urlopen(url, timeout=30).read()
+
+
+def _resolve_network_link(root: ET.Element) -> str | None:
+    """Resolve optional NetworkLink target URL from wrapper KML export.
+
+    Args:
+        root: Parsed KML XML root element.
+
+    Returns:
+        Linked KML URL or None when no network link exists.
+    """
+    href = root.findtext(
+        ".//kml:NetworkLink/kml:Link/kml:href",
+        default="",
+        namespaces=NAMESPACE,
+    )
+    href = _clean_text(href)
+    return href or None
 
 
 def _clean_text(value: str | None) -> str:
@@ -347,11 +390,6 @@ def _extract_features(placemarks: list[tuple[ET.Element, list[str]]]) -> list[di
             "source_layer_kind": layer_kind or "unknown",
         }
 
-        for key, value in data.items():
-            if key not in {"Jméno", "Příjmení"} and value:
-                safe_key = key.lower().replace(" ", "_").replace(".", "").replace("(", "").replace(")", "")
-                properties[f"kml_{safe_key}"] = value
-
         features.append({
             "type": "Feature",
             "properties": properties,
@@ -361,7 +399,9 @@ def _extract_features(placemarks: list[tuple[ET.Element, list[str]]]) -> list[di
     return features
 
 
-def _export_track(placemarks: list[tuple[ET.Element, list[str]]]) -> dict[str, object]:
+def _export_track(
+    placemarks: list[tuple[ET.Element, list[str]]],
+) -> dict[str, object]:
     """Export the best candidate track LineString from layer-classified placemarks.
 
     Args:
@@ -411,9 +451,34 @@ def _export_track(placemarks: list[tuple[ET.Element, list[str]]]) -> dict[str, o
 
 
 def main() -> None:
-    """Download KML and write the GeoJSON map element dataset."""
-    root = ET.fromstring(urlopen(KML_URL, timeout=30).read())
+    """Read KML source and write the GeoJSON map element dataset."""
+    parser = argparse.ArgumentParser(description="Import map elements and track from Google My Maps KML")
+    parser.add_argument(
+        "--input",
+        default=str(LOCAL_KML_PATH),
+        help="Path to local KML export (default: data/RZ Hošťálková FINAL.kml)",
+    )
+    parser.add_argument(
+        "--from-url",
+        action="store_true",
+        help="Force download from Google My Maps URL instead of local file",
+    )
+    parser.add_argument(
+        "--url",
+        default=KML_URL,
+        help="Remote KML URL used with --from-url or local fallback",
+    )
+    args = parser.parse_args()
+
+    root = ET.fromstring(_read_kml_bytes(Path(args.input), args.from_url, args.url))
     placemarks = _iter_placemarks_with_layers(root)
+    if not placemarks:
+        linked_url = _resolve_network_link(root)
+        if linked_url:
+            print(f"No placemarks in local KML wrapper, following NetworkLink: {linked_url}")
+            root = ET.fromstring(urlopen(linked_url, timeout=30).read())
+            placemarks = _iter_placemarks_with_layers(root)
+
     features = _extract_features(placemarks)
     track_geojson = _export_track(placemarks)
 

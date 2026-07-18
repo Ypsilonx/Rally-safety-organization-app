@@ -16,13 +16,12 @@ uv sync
 uv run uvicorn backend.main:app --reload --host 0.0.0.0 --port 8000
 
 # 3) V druhém terminálu spusť frontend
-python -m http.server 8080 --directory frontend
+uv run python scripts/serve_frontend.py --host 127.0.0.1 --port 8080
 ```
 
-Poznámka: v tomto režimu může frontend logovat 404 pro `/data/example-track.geojson`.
-Jde o neblokující fallback (mapa použije interní vzorovou trať).
-Pokud chceš čistý log bez 404, spusť server nad kořenem repozitáře a otevři
-`http://127.0.0.1:8080/frontend/index.html`.
+Frontend pak otevři na `http://127.0.0.1:8080/`.
+V tomto režimu je dostupná i složka `data/` na `/data/*`, takže se načítají
+reálné podklady bez 404 fallbacku.
 
 Alternativa ve VS Code: `Tasks: Run Task` -> `UV: Start App`.
 

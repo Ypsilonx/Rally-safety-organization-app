@@ -4,13 +4,6 @@
 
 const AppOperationsRzModule = {
     /**
-     * Update admin stats.
-     */
-    updateStats() {
-        // Message count intentionally hidden from dashboard for better signal/noise ratio.
-    },
-
-    /**
      * Toggle admin panel collapse.
      */
     toggleAdminPanel() {

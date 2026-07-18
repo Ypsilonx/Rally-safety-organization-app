@@ -18,6 +18,9 @@ class UserRole(str, Enum):
     ADMIN = "admin"                        # System administrator
 
 
+LEADERSHIP_LOGIN_POSITIONS = ("VRZ", "ZVRZ", "VBRZ", "ZVBRZ")
+
+
 class User(BaseModel):
     """User model - represents both vedení and komisaři."""
     user_id: str = Field(..., description="Unique user ID")
@@ -129,10 +132,38 @@ class KomisarAccess(BaseModel):
 
 # Hardcoded vedení credentials for MVP (in real app, this would be in database)
 VEDENI_CREDENTIALS = {
-    "admin": {
+    "VRZ": {
         "password_hash": "$2b$12$/Hja06MPyPq3bnBF64VusuQ5OdzvYzduaqUCXWCXfqe1wGQkIwby6",  # "demo123"
         "name": "Vedoucí RZ",
         "role": UserRole.VEDOUCI,
+        "phone": "+420777123456",
+        "station_id": "VRZ",
+    },
+    "ZVRZ": {
+        "password_hash": "$2b$12$/Hja06MPyPq3bnBF64VusuQ5OdzvYzduaqUCXWCXfqe1wGQkIwby6",  # "demo123"
+        "name": "Zástupce vedoucího RZ",
+        "role": UserRole.ZASTUPCE,
+        "phone": "+420777123457",
+        "station_id": "ZVRZ",
+    },
+    "VBRZ": {
+        "password_hash": "$2b$12$/Hja06MPyPq3bnBF64VusuQ5OdzvYzduaqUCXWCXfqe1wGQkIwby6",  # "demo123"
+        "name": "Vedoucí bezpečnosti RZ",
+        "role": UserRole.VEDOUCI,
+        "phone": "+420777123458",
+        "station_id": "VBRZ",
+    },
+    "ZVBRZ": {
+        "password_hash": "$2b$12$/Hja06MPyPq3bnBF64VusuQ5OdzvYzduaqUCXWCXfqe1wGQkIwby6",  # "demo123"
+        "name": "Zástupce vedoucího bezpečnosti RZ",
+        "role": UserRole.ZASTUPCE,
+        "phone": "+420777123459",
+        "station_id": "ZVBRZ",
+    },
+    "admin": {
+        "password_hash": "$2b$12$/Hja06MPyPq3bnBF64VusuQ5OdzvYzduaqUCXWCXfqe1wGQkIwby6",  # "demo123"
+        "name": "Admin RZ",
+        "role": UserRole.ADMIN,
         "phone": "+420777123456",
     }
 }

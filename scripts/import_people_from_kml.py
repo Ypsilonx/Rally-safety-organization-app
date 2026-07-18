@@ -7,6 +7,7 @@ setup dropdown can use real historical rally data.
 
 from __future__ import annotations
 
+import argparse
 import json
 from collections.abc import Iterable
 from datetime import UTC, datetime
@@ -15,8 +16,50 @@ from urllib.request import urlopen
 from xml.etree import ElementTree as ET
 
 KML_URL = "https://www.google.com/maps/d/kml?forcekml=1&mid=15D0UVrvdZUOqNkA1rCilK7sM8FAYlLWz"
+LOCAL_KML_PATH = Path("data/RZ Hošťálková FINAL.kml")
 OUTPUT_PATH = Path("data/people_catalog.json")
 NAMESPACE = {"kml": "http://www.opengis.net/kml/2.2"}
+
+
+def _read_kml_text(input_path: Path, from_url: bool, url: str) -> str:
+    """Read KML source text from local file first, optionally remote URL.
+
+    Args:
+        input_path: Local KML file path.
+        from_url: Force loading from URL.
+        url: Remote KML URL.
+
+    Returns:
+        Decoded XML text.
+    """
+    if from_url:
+        print(f"Loading KML from URL: {url}")
+        return urlopen(url, timeout=30).read().decode("utf-8", errors="replace")
+
+    if input_path.exists():
+        print(f"Loading KML from local file: {input_path}")
+        return input_path.read_text(encoding="utf-8", errors="replace")
+
+    print(f"Local KML not found: {input_path}. Falling back to URL: {url}")
+    return urlopen(url, timeout=30).read().decode("utf-8", errors="replace")
+
+
+def _resolve_network_link(root: ET.Element) -> str | None:
+    """Resolve optional NetworkLink target URL from wrapper KML export.
+
+    Args:
+        root: Parsed KML XML root element.
+
+    Returns:
+        Linked KML URL or None when no network link is present.
+    """
+    href = root.findtext(
+        ".//kml:NetworkLink/kml:Link/kml:href",
+        default="",
+        namespaces=NAMESPACE,
+    )
+    href = _clean_text(href)
+    return href or None
 
 
 def _clean_text(value: str | None) -> str:
@@ -134,10 +177,37 @@ def _extract_people(placemarks: Iterable[ET.Element]) -> list[dict[str, str | No
 
 
 def main() -> None:
-    """Download the source KML and update the local people catalog."""
-    xml_text = urlopen(KML_URL, timeout=30).read().decode("utf-8", errors="replace")
+    """Read KML source and update the local people catalog."""
+    parser = argparse.ArgumentParser(description="Import people catalog from Google My Maps KML")
+    parser.add_argument(
+        "--input",
+        default=str(LOCAL_KML_PATH),
+        help="Path to local KML export (default: data/RZ Hošťálková FINAL.kml)",
+    )
+    parser.add_argument(
+        "--from-url",
+        action="store_true",
+        help="Force download from Google My Maps URL instead of local file",
+    )
+    parser.add_argument(
+        "--url",
+        default=KML_URL,
+        help="Remote KML URL used with --from-url or local fallback",
+    )
+    args = parser.parse_args()
+
+    xml_text = _read_kml_text(Path(args.input), args.from_url, args.url)
     root = ET.fromstring(xml_text)
     placemarks = root.findall(".//kml:Placemark", NAMESPACE)
+
+    if not placemarks:
+        linked_url = _resolve_network_link(root)
+        if linked_url:
+            print(f"No placemarks in local KML wrapper, following NetworkLink: {linked_url}")
+            xml_text = urlopen(linked_url, timeout=30).read().decode("utf-8", errors="replace")
+            root = ET.fromstring(xml_text)
+            placemarks = root.findall(".//kml:Placemark", NAMESPACE)
+
     people = _extract_people(placemarks)
 
     payload = {

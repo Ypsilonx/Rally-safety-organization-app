@@ -133,6 +133,28 @@ const AppOperationsIncidentsModule = {
      * @param {string} action
      */
     handleQuickAction(app, action) {
+        if (action === 'center_station') {
+            const stationId = String(app.user?.station_id || '').trim();
+            if (!stationId) {
+                app.showToast('Tvoje pozice zatím není přiřazena', 'info');
+                return;
+            }
+
+            if (!window.MapModule?.isInitialized) {
+                app.showToast('Mapa se ještě inicializuje', 'info');
+                return;
+            }
+
+            const focused = window.MapModule.focusStation(stationId);
+            if (!focused) {
+                app.showToast(`Pozice ${stationId} není na mapě`, 'error');
+                return;
+            }
+
+            app.showToast(`Vycentrováno na ${stationId}`, 'success');
+            return;
+        }
+
         if (action === 'ready') {
             app.incidentGateActive = false;
             if (app.user.station_id) {

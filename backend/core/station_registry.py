@@ -3,16 +3,44 @@
 from __future__ import annotations
 
 import json
+import re
+from html import unescape
 from pathlib import Path
+import unicodedata
 
 from backend.core.auth import auth_manager
 from backend.models.station import AssignedUser, StationAccess, StationAssignmentRequest, StationCreateRequest, StationType
+from backend.models.user import UserRole
 
 
 class StationRegistry:
     """Provides station-first access and mutation helpers for admin flows."""
 
     STATION_TEMPLATE_PATH = Path("data/station-coordinates.json")
+    MAP_ELEMENTS_TEMPLATE_PATH = Path("data/example-map-elements.geojson")
+    RESERVED_VEDENI_STATION_IDS = {"VRZ", "ZVRZ", "VBRZ", "ZVBRZ"}
+
+    def _is_vedeni_station(self, station_id: str) -> bool:
+        """Return true when station is one of reserved leadership positions."""
+        return str(station_id or "").strip().upper() in self.RESERVED_VEDENI_STATION_IDS
+
+    def _validate_station_role(self, station_id: str, role: UserRole) -> None:
+        """Validate allowed role for station-specific constraints.
+
+        Args:
+            station_id: Station identifier being assigned.
+            role: Requested assigned role.
+
+        Raises:
+            ValueError: If role is not allowed for the station.
+        """
+        if not self._is_vedeni_station(station_id):
+            return
+
+        if role not in {UserRole.VEDOUCI, UserRole.ZASTUPCE}:
+            raise ValueError(
+                f"Station '{station_id}' je vyhrazena vedení RZ (role vedouci nebo zastupce)."
+            )
 
     def _infer_station_type(self, station_id: str, fallback: str | None) -> StationType:
         """Infer station type from stored value or station identifier prefix.
@@ -55,11 +83,156 @@ class StationRegistry:
             name=history_entry.name,
             role=history_entry.role,
             phone=history_entry.phone,
+            email=history_entry.email,
+            address=history_entry.address,
+            group=history_entry.group,
             assigned_at=history_entry.assigned_at,
             assigned_until=history_entry.assigned_until,
             is_active=history_entry.is_active,
             note=history_entry.note,
         )
+
+    def _clean_text(self, value: object) -> str:
+        """Normalize one text value.
+
+        Args:
+            value: Raw source value.
+
+        Returns:
+            Trimmed text with collapsed whitespace.
+        """
+        if value is None:
+            return ""
+        return " ".join(str(value).split())
+
+    def _slugify(self, value: str) -> str:
+        """Convert one label to filesystem-safe uppercase slug.
+
+        Args:
+            value: Input label.
+
+        Returns:
+            ASCII slug with underscore separators.
+        """
+        normalized = unicodedata.normalize("NFKD", value)
+        ascii_only = "".join(char for char in normalized if not unicodedata.combining(char))
+        slug = re.sub(r"[^A-Za-z0-9]+", "_", ascii_only).strip("_")
+        return slug.upper() or "MAP_POINT"
+
+    def _strip_html(self, value: str) -> str:
+        """Strip basic HTML tags from imported notes.
+
+        Args:
+            value: Raw note text that may include HTML tags.
+
+        Returns:
+            Plain text without tags.
+        """
+        text = unescape(value)
+        text = re.sub(r"<br\s*/?>", "\n", text, flags=re.IGNORECASE)
+        text = re.sub(r"<[^>]+>", "", text)
+        lines = [self._clean_text(line) for line in text.splitlines()]
+        return "\n".join(line for line in lines if line)
+
+    def _infer_map_control_type(self, name: str, note: str) -> str:
+        """Infer station type for map control points.
+
+        Args:
+            name: Map control name.
+            note: Plain text note.
+
+        Returns:
+            Suggested station type string.
+        """
+        haystack = f"{name} {note}".lower()
+        if "park" in haystack:
+            return "parking"
+        if "start" in haystack or "cil" in haystack or "cíl" in haystack:
+            return "start_finish"
+        if "zdrav" in haystack:
+            return "medical"
+        return "other"
+
+    def _load_map_control_templates(self) -> list[dict[str, str | int | float]]:
+        """Load additional station templates from map control points.
+
+        Returns:
+            Template records derived from commissioner map elements.
+        """
+        if not self.MAP_ELEMENTS_TEMPLATE_PATH.exists():
+            return []
+
+        payload = json.loads(self.MAP_ELEMENTS_TEMPLATE_PATH.read_text(encoding="utf-8"))
+        raw_features = payload.get("features", []) if isinstance(payload, dict) else []
+        if not isinstance(raw_features, list):
+            return []
+
+        templates: list[dict[str, str | int | float]] = []
+        seen_ids: set[str] = set()
+
+        for feature in raw_features:
+            if not isinstance(feature, dict):
+                continue
+
+            properties = feature.get("properties", {})
+            geometry = feature.get("geometry", {})
+            if not isinstance(properties, dict) or not isinstance(geometry, dict):
+                continue
+
+            geometry_type = str(geometry.get("type", "")).strip()
+            if geometry_type != "Point":
+                continue
+
+            kind = str(properties.get("kind", "")).strip().lower()
+            layer_kind = str(properties.get("source_layer_kind", "")).strip().lower()
+            if not (kind == "commissioner" or layer_kind == "marshal_control"):
+                continue
+
+            coordinates = geometry.get("coordinates")
+            if not isinstance(coordinates, list) or len(coordinates) < 2:
+                continue
+
+            longitude = coordinates[0]
+            latitude = coordinates[1]
+            if not isinstance(latitude, (int, float)) or not isinstance(longitude, (int, float)):
+                continue
+
+            station_name = self._clean_text(
+                properties.get("position_name")
+                or properties.get("name")
+                or properties.get("element_id")
+                or "Map point"
+            )
+
+            station_id = station_name[:50]
+            if station_id in seen_ids:
+                base = station_name[:44]
+                suffix = 2
+                while f"{base} ({suffix})" in seen_ids:
+                    suffix += 1
+                station_id = f"{base} ({suffix})"
+            seen_ids.add(station_id)
+
+            note = self._strip_html(self._clean_text(properties.get("note")))
+            station_type = self._infer_map_control_type(station_name, note)
+            description = "Auto-generated from map control points"
+            if note:
+                description = f"{description}: {note}"
+
+            templates.append(
+                {
+                    "csv_code": f"MAP:{self._slugify(station_name)}",
+                    "station_id": station_id,
+                    "station_name": station_name,
+                    "suggested_role": "komisar_trat",
+                    "suggested_station_type": station_type,
+                    "latitude": float(latitude),
+                    "longitude": float(longitude),
+                    "description": description,
+                }
+            )
+
+        return templates
 
     def _to_station_access(self, station_access) -> StationAccess:
         """Convert persisted PIN record to station-centric response model.
@@ -92,18 +265,17 @@ class StationRegistry:
         Returns:
             Deduplicated station template records keyed by station_id.
         """
-        if not self.STATION_TEMPLATE_PATH.exists():
-            return []
+        raw_templates: list[dict[str, str | int | float]] = []
+        if self.STATION_TEMPLATE_PATH.exists():
+            payload = json.loads(self.STATION_TEMPLATE_PATH.read_text(encoding="utf-8"))
+            csv_templates = payload.get("stations", [])
+            if isinstance(csv_templates, list):
+                raw_templates.extend(item for item in csv_templates if isinstance(item, dict))
 
-        payload = json.loads(self.STATION_TEMPLATE_PATH.read_text(encoding="utf-8"))
-        raw_templates = payload.get("stations", [])
-        if not isinstance(raw_templates, list):
-            return []
+        raw_templates.extend(self._load_map_control_templates())
 
         deduplicated: dict[str, dict[str, str | int | float]] = {}
         for item in raw_templates:
-            if not isinstance(item, dict):
-                continue
             station_id = str(item.get("station_id", "")).strip()
             if not station_id:
                 continue
@@ -148,6 +320,8 @@ class StationRegistry:
         Raises:
             KeyError: If the station does not exist.
         """
+        self._validate_station_role(station_id, request.role)
+
         record = auth_manager.assign_user_to_station(
             station_id=station_id,
             name=request.name,
@@ -206,6 +380,8 @@ class StationRegistry:
         Raises:
             ValueError: If the station already exists.
         """
+        self._validate_station_role(request.station_id, request.role)
+
         record = auth_manager.create_station_pin(
             station_id=request.station_id,
             station_name=request.station_name,
@@ -267,12 +443,16 @@ class StationRegistry:
 
             station_name = str(item.get("station_name", station_id)).strip() or station_id
             station_type = str(item.get("suggested_station_type", "other")).strip() or "other"
+            description = str(
+                item.get("description")
+                or "Auto-generated from map station templates"
+            ).strip()
             auth_manager.create_station_pin_unassigned(
                 station_id=station_id,
                 station_name=station_name,
                 station_type=station_type,
                 capacity=1,
-                description="Auto-generated from map station templates",
+                description=description,
             )
             created += 1
 

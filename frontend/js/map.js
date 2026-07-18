@@ -178,6 +178,78 @@ const MapModule = {
                     ...this.stationCoordinates,
                     ...incoming,
                 };
+                break;
+            } catch (_error) {
+                // Continue with next candidate path.
+            }
+        }
+
+        await this.loadCommissionerCoordinates();
+    },
+
+    /**
+     * Enrich station coordinates with commissioner points from map elements.
+     *
+     * @returns {Promise<void>}
+     */
+    async loadCommissionerCoordinates() {
+        const candidates = [
+            '/data/example-map-elements.geojson',
+            '../data/example-map-elements.geojson',
+            'data/example-map-elements.geojson',
+        ];
+
+        for (const path of candidates) {
+            try {
+                const response = await fetch(path);
+                if (!response.ok) {
+                    continue;
+                }
+
+                const payload = await response.json();
+                const features = Array.isArray(payload?.features) ? payload.features : [];
+                const incoming = {};
+
+                features.forEach((feature) => {
+                    const properties = feature?.properties || {};
+                    const geometry = feature?.geometry || {};
+                    const kind = String(properties.kind || '').toLowerCase();
+                    const layerKind = String(properties.source_layer_kind || '').toLowerCase();
+                    if (!(kind === 'commissioner' || layerKind === 'marshal_control')) {
+                        return;
+                    }
+
+                    if (geometry.type !== 'Point') {
+                        return;
+                    }
+
+                    const coordinates = geometry.coordinates;
+                    if (!Array.isArray(coordinates) || coordinates.length < 2) {
+                        return;
+                    }
+
+                    const longitude = Number(coordinates[0]);
+                    const latitude = Number(coordinates[1]);
+                    if (!Number.isFinite(latitude) || !Number.isFinite(longitude)) {
+                        return;
+                    }
+
+                    const key = String(
+                        properties.position_name || properties.name || properties.element_id || ''
+                    ).trim();
+                    if (!key) {
+                        return;
+                    }
+
+                    if (!this.stationCoordinates[key]) {
+                        incoming[key] = [latitude, longitude];
+                    }
+                });
+
+                this.stationCoordinates = {
+                    ...this.stationCoordinates,
+                    ...incoming,
+                };
                 return;
             } catch (_error) {
                 // Continue with next candidate path.

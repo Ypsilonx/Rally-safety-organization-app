@@ -32,10 +32,12 @@ htmlcov/
 # Logs
 *.log
 logs/rz_session_*.jsonl
+logs/rz_*_session_*.jsonl
 
 # Local sensitive data (PII) - keep only on local machine
 data/people_catalog.json
 data/pins.json
+data/rz_context.json
 data/*.kml
 data/*.xlsx.csv
 

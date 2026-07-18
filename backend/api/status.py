@@ -5,11 +5,29 @@ from typing import Any
 
 from fastapi import APIRouter
 
+from backend.core.rz_context import rz_context_manager
 from backend.services.operations_state import operations_state
 from backend.services.vitality import vitality_monitor
 from backend.core.station_registry import station_registry
 
 router = APIRouter(prefix="/api/stations", tags=["stations"])
+
+
+@router.get("/rz-context")
+async def get_rz_context() -> dict[str, Any]:
+    """Return public RZ context used by all clients.
+
+    Returns:
+        Current RZ name and communication reset metadata.
+    """
+    context = rz_context_manager.get_context()
+    return {
+        "generated_at": datetime.now(UTC).isoformat(),
+        "rz_name": context.rz_name,
+        "communication_reset_version": context.communication_reset_version,
+        "communication_reset_at": context.communication_reset_at,
+        "updated_at": context.updated_at,
+    }
 
 
 @router.get("/status")

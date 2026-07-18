@@ -2534,10 +2534,7 @@
         "source_name": "Janišov 1",
         "source_style_url": "#icon-1732-AFB42B",
         "source_layer": "Zákazy lidi a SG3",
-        "source_layer_kind": "marshal_control",
-        "kml_zem_š": "17.978759",
-        "kml_zem_d": "49.3201797",
-        "kml_popis": "nikdo nesmi za točnu autobusu"
+        "source_layer_kind": "marshal_control"
       },
       "geometry": {
         "type": "Point",
@@ -2562,10 +2559,7 @@
         "source_name": "Janišov 2",
         "source_style_url": "#icon-1732-AFB42B",
         "source_layer": "Zákazy lidi a SG3",
-        "source_layer_kind": "marshal_control",
-        "kml_zem_š": "17.9787995",
-        "kml_zem_d": "49.3201596",
-        "kml_popis": "nikdo nesmi za točnu autobusu"
+        "source_layer_kind": "marshal_control"
       },
       "geometry": {
         "type": "Point",
@@ -2590,11 +2584,7 @@
         "source_name": "Parkoviště Kotrla",
         "source_style_url": "#icon-1732-AFB42B",
         "source_layer": "Zákazy lidi a SG3",
-        "source_layer_kind": "marshal_control",
-        "kml_zem_š": "17.9796503",
-        "kml_zem_d": "49.319627",
-        "kml_popis": "koordinuje parkoviště a upozorňuje na uzavření ve 21:00",
-        "kml_poznámky": "měl by umět aspoň trochu anglicky"
+        "source_layer_kind": "marshal_control"
       },
       "geometry": {
         "type": "Point",
@@ -2619,9 +2609,7 @@
         "source_name": "Lhota u Vsetína",
         "source_style_url": "#icon-1732-AFB42B",
         "source_layer": "Zákazy lidi a SG3",
-        "source_layer_kind": "marshal_control",
-        "kml_zem_š": "17.956409",
-        "kml_zem_d": "49.3037418"
+        "source_layer_kind": "marshal_control"
       },
       "geometry": {
         "type": "Point",
@@ -2646,9 +2634,7 @@
         "source_name": "Dolní Semetín 1",
         "source_style_url": "#icon-1732-AFB42B",
         "source_layer": "Zákazy lidi a SG3",
-        "source_layer_kind": "marshal_control",
-        "kml_zem_š": "17.954032",
-        "kml_zem_d": "49.3537081"
+        "source_layer_kind": "marshal_control"
       },
       "geometry": {
         "type": "Point",
@@ -2673,9 +2659,7 @@
         "source_name": "Dolní Semetín 2",
         "source_style_url": "#icon-1732-AFB42B",
         "source_layer": "Zákazy lidi a SG3",
-        "source_layer_kind": "marshal_control",
-        "kml_zem_š": "17.9539851",
-        "kml_zem_d": "49.3537002"
+        "source_layer_kind": "marshal_control"
       },
       "geometry": {
         "type": "Point",
@@ -2700,10 +2684,7 @@
         "source_name": "Horní Semetín",
         "source_style_url": "#icon-1732-AFB42B",
         "source_layer": "Zákazy lidi a SG3",
-        "source_layer_kind": "marshal_control",
-        "kml_zem_š": "17.947231",
-        "kml_zem_d": "49.3424163",
-        "kml_popis": "točna autobusu - koordinuje"
+        "source_layer_kind": "marshal_control"
       },
       "geometry": {
         "type": "Point",
@@ -2728,10 +2709,7 @@
         "source_name": "Troják",
         "source_style_url": "#icon-1732-AFB42B",
         "source_layer": "Zákazy lidi a SG3",
-        "source_layer_kind": "marshal_control",
-        "kml_zem_š": "17.8135128",
-        "kml_zem_d": "49.3537953",
-        "kml_popis": "hlídá parkoviště nikdo nesmi jet autem dál a volná silnice pro odjezd"
+        "source_layer_kind": "marshal_control"
       },
       "geometry": {
         "type": "Point",
@@ -2756,10 +2734,7 @@
         "source_name": "1",
         "source_style_url": "#icon-1732-000000",
         "source_layer": "Zákazy lidi a SG3",
-        "source_layer_kind": "marshal_control",
-        "kml_zem_š": "17.974471",
-        "kml_zem_d": "49.3411256",
-        "kml_popis": "Potůčky přechod a průchod pro diváky"
+        "source_layer_kind": "marshal_control"
       },
       "geometry": {
         "type": "Point",
@@ -2784,10 +2759,7 @@
         "source_name": "2",
         "source_style_url": "#icon-1732-000000",
         "source_layer": "Zákazy lidi a SG3",
-        "source_layer_kind": "marshal_control",
-        "kml_zem_š": "17.9741907",
-        "kml_zem_d": "49.3409246",
-        "kml_popis": "Potůčky přechod a průchod pro diváky"
+        "source_layer_kind": "marshal_control"
       },
       "geometry": {
         "type": "Point",
@@ -2812,10 +2784,7 @@
         "source_name": "3",
         "source_style_url": "#icon-1732-000000",
         "source_layer": "Zákazy lidi a SG3",
-        "source_layer_kind": "marshal_control",
-        "kml_zem_š": "17.9479671",
-        "kml_zem_d": "49.3397527",
-        "kml_popis": "Hlídá zákaz Horní SEMETÍN"
+        "source_layer_kind": "marshal_control"
       },
       "geometry": {
         "type": "Point",
@@ -2840,10 +2809,7 @@
         "source_name": "4",
         "source_style_url": "#icon-1732-000000",
         "source_layer": "Zákazy lidi a SG3",
-        "source_layer_kind": "marshal_control",
-        "kml_zem_š": "17.8724433",
-        "kml_zem_d": "49.3559042",
-        "kml_popis": "Zákaz Hošťálková dolní konec"
+        "source_layer_kind": "marshal_control"
       },
       "geometry": {
         "type": "Point",
@@ -2868,10 +2834,7 @@
         "source_name": "5",
         "source_style_url": "#icon-1732-000000",
         "source_layer": "Zákazy lidi a SG3",
-        "source_layer_kind": "marshal_control",
-        "kml_zem_š": "17.8639784",
-        "kml_zem_d": "49.3533069",
-        "kml_popis": "Zákaz Hošťálková horní konec"
+        "source_layer_kind": "marshal_control"
       },
       "geometry": {
         "type": "Point",
@@ -2896,10 +2859,7 @@
         "source_name": "6",
         "source_style_url": "#icon-1732-000000",
         "source_layer": "Zákazy lidi a SG3",
-        "source_layer_kind": "marshal_control",
-        "kml_zem_š": "17.9653214",
-        "kml_zem_d": "49.3289929",
-        "kml_popis": "Točna nahoře v Janišově"
+        "source_layer_kind": "marshal_control"
       },
       "geometry": {
         "type": "Point",
@@ -2924,10 +2884,7 @@
         "source_name": "7",
         "source_style_url": "#icon-1732-000000",
         "source_layer": "Zákazy lidi a SG3",
-        "source_layer_kind": "marshal_control",
-        "kml_zem_š": "17.9649057",
-        "kml_zem_d": "49.328867",
-        "kml_popis": "Točna nahoře v Janišově"
+        "source_layer_kind": "marshal_control"
       },
       "geometry": {
         "type": "Point",
@@ -2952,10 +2909,7 @@
         "source_name": "8",
         "source_style_url": "#icon-1732-000000",
         "source_layer": "Zákazy lidi a SG3",
-        "source_layer_kind": "marshal_control",
-        "kml_zem_š": "17.8289519",
-        "kml_zem_d": "49.3588007",
-        "kml_popis": "Zákaz k Marušce pod památníkem"
+        "source_layer_kind": "marshal_control"
       },
       "geometry": {
         "type": "Point",
@@ -2980,10 +2934,7 @@
         "source_name": "9",
         "source_style_url": "#icon-1732-000000",
         "source_layer": "Zákazy lidi a SG3",
-        "source_layer_kind": "marshal_control",
-        "kml_zem_š": "17.8146267",
-        "kml_zem_d": "49.3541172",
-        "kml_popis": "Průchod pro diváky na Trojáku"
+        "source_layer_kind": "marshal_control"
       },
       "geometry": {
         "type": "Point",
@@ -3008,10 +2959,7 @@
         "source_name": "10",
         "source_style_url": "#icon-1732-000000",
         "source_layer": "Zákazy lidi a SG3",
-        "source_layer_kind": "marshal_control",
-        "kml_zem_š": "17.8144819",
-        "kml_zem_d": "49.3546308",
-        "kml_popis": "Průchod pro diváky na Trojáku"
+        "source_layer_kind": "marshal_control"
       },
       "geometry": {
         "type": "Point",

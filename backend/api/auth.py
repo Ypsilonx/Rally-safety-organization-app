@@ -4,6 +4,7 @@ from fastapi import APIRouter, HTTPException, status
 
 from backend.core.auth import auth_manager
 from backend.core.event_logger import event_logger
+from backend.core.rz_context import rz_context_manager
 from backend.models.auth import (
     LoginVedeniRequest,
     LoginVedeniResponse,
@@ -46,10 +47,11 @@ async def login_vedeni(request: LoginVedeniRequest):
     
     # Create session
     session_token = auth_manager.create_session(
-        username=request.username,
+        username=user_data["username"],
         name=user_data["name"],
         role=user_data["role"],
         phone=user_data.get("phone"),
+        station_id=user_data.get("station_id"),
     )
     
     event_logger.log_login(
@@ -60,13 +62,17 @@ async def login_vedeni(request: LoginVedeniRequest):
         success=True
     )
     
+    context = rz_context_manager.get_context()
+
     return LoginVedeniResponse(
         success=True,
         session_token=session_token,
-        user_id=request.username,
+        user_id=user_data["username"],
         name=user_data["name"],
         role=user_data["role"].value,
+        station_id=user_data.get("station_id"),
         phone=user_data.get("phone"),
+        rz_name=context.rz_name,
         message="Login successful"
     )
 
@@ -108,6 +114,11 @@ async def login_komisar(request: LoginKomisarRequest):
         success=True
     )
     
+    context = rz_context_manager.get_context()
+
+    contacts = auth_manager.get_leadership_contacts()
+    primary_contact = next((item for item in contacts if item.get("station_id") == "VRZ"), None)
+
     return LoginKomisarResponse(
         success=True,
         user_id=request.pin_code,
@@ -115,8 +126,10 @@ async def login_komisar(request: LoginKomisarRequest):
         name=komisar.name,
         role=komisar.role.value,
         station_id=komisar.station_id,
-        vedeni_name="Vedoucí RZ",
-        vedeni_phone="+420777123456",
+        vedeni_name=(primary_contact or {}).get("name") or "Vedoucí RZ",
+        vedeni_phone=(primary_contact or {}).get("phone") or "+420777123456",
+        leadership_contacts=contacts,
+        rz_name=context.rz_name,
         message="Login successful"
     )
 

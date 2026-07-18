@@ -8,13 +8,20 @@ from typing import Optional
 
 import bcrypt
 
-from backend.models.user import AssignmentHistoryEntry, KomisarAccess, VEDENI_CREDENTIALS, UserRole
+from backend.models.user import (
+    AssignmentHistoryEntry,
+    KomisarAccess,
+    LEADERSHIP_LOGIN_POSITIONS,
+    VEDENI_CREDENTIALS,
+    UserRole,
+)
 
 
 class AuthManager:
     """Manages authentication for both vedení and komisaři."""
 
     PIN_LENGTH = 8
+    RESERVED_VEDENI_STATION_IDS = set(LEADERSHIP_LOGIN_POSITIONS)
     
     def __init__(self, pins_file: str = "data/pins.json"):
         """Initialize auth manager with persistent PIN storage.
@@ -193,22 +200,42 @@ class AuthManager:
         Returns:
             User data dict if valid, None otherwise
         """
-        if username not in VEDENI_CREDENTIALS:
+        raw_username = str(username or "").strip()
+        lookup_key = raw_username
+        if lookup_key not in VEDENI_CREDENTIALS:
+            uppercase_key = raw_username.upper()
+            lowercase_key = raw_username.lower()
+            if uppercase_key in VEDENI_CREDENTIALS:
+                lookup_key = uppercase_key
+            elif lowercase_key in VEDENI_CREDENTIALS:
+                lookup_key = lowercase_key
+            else:
+                return None
+
+        if lookup_key not in VEDENI_CREDENTIALS:
             return None
-        
-        user_data = VEDENI_CREDENTIALS[username]
+
+        user_data = VEDENI_CREDENTIALS[lookup_key]
         stored_hash = user_data["password_hash"].encode('utf-8')
         
         if bcrypt.checkpw(password.encode('utf-8'), stored_hash):
             return {
-                "username": username,
+                "username": lookup_key,
                 "name": user_data["name"],
                 "role": user_data["role"],
                 "phone": user_data.get("phone"),
+                "station_id": user_data.get("station_id"),
             }
         return None
     
-    def create_session(self, username: str, name: str, role: UserRole, phone: Optional[str] = None) -> str:
+    def create_session(
+        self,
+        username: str,
+        name: str,
+        role: UserRole,
+        phone: Optional[str] = None,
+        station_id: Optional[str] = None,
+    ) -> str:
         """Create session token for vedení user.
         
         Args:
@@ -225,6 +252,7 @@ class AuthManager:
             "name": name,
             "role": role,
             "phone": phone,
+            "station_id": station_id,
             "created_at": datetime.now(UTC)
         }
         return session_token
@@ -262,9 +290,52 @@ class AuthManager:
         access = self.komisar_pins.get(pin_code)
         if access is None:
             return None
+        if str(access.station_id or "").upper() in self.RESERVED_VEDENI_STATION_IDS:
+            return None
         if not self._has_active_assignment(access):
             return None
         return access
+
+    def get_leadership_contacts(self) -> list[dict[str, str | None]]:
+        """Return leadership contacts used on commissioner dashboard.
+
+        Returns:
+            Ordered contacts for VRZ, ZVRZ, VBRZ and ZVBRZ.
+        """
+        labels = {
+            "VRZ": "Vedoucí RZ",
+            "ZVRZ": "Zástupce vedoucího RZ",
+            "VBRZ": "Vedoucí bezpečnosti RZ",
+            "ZVBRZ": "Zástupce vedoucího bezpečnosti RZ",
+        }
+
+        contacts: list[dict[str, str | None]] = []
+        for station_id in LEADERSHIP_LOGIN_POSITIONS:
+            defaults = VEDENI_CREDENTIALS.get(station_id, {})
+            access = self.find_pin_by_station_id(station_id)
+            active_assignment = access is not None and self._has_active_assignment(access)
+
+            if active_assignment:
+                name = access.name
+                phone = access.phone or defaults.get("phone")
+                role = access.role.value
+            else:
+                name = str(defaults.get("name") or labels.get(station_id, station_id))
+                phone = defaults.get("phone")
+                role_value = defaults.get("role")
+                role = role_value.value if isinstance(role_value, UserRole) else str(role_value or "vedouci")
+
+            contacts.append(
+                {
+                    "station_id": station_id,
+                    "label": labels.get(station_id, station_id),
+                    "role": role,
+                    "name": name,
+                    "phone": phone,
+                }
+            )
+
+        return contacts
     
     def generate_pin(self, name: str, role: UserRole, phone: Optional[str] = None,
                      email: Optional[str] = None,

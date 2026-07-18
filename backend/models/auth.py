@@ -26,8 +26,20 @@ class LoginVedeniResponse(BaseModel):
     user_id: str
     name: str
     role: str
+    station_id: Optional[str] = None
     phone: Optional[str] = None
+    rz_name: Optional[str] = None
     message: str = "Login successful"
+
+
+class LeadershipContact(BaseModel):
+    """One leadership contact entry for commissioner quick actions."""
+
+    station_id: str
+    label: str
+    role: str
+    name: Optional[str] = None
+    phone: Optional[str] = None
 
 
 class LoginKomisarRequest(BaseModel):
@@ -53,6 +65,8 @@ class LoginKomisarResponse(BaseModel):
     station_id: Optional[str] = None
     vedeni_name: Optional[str] = None
     vedeni_phone: Optional[str] = None
+    leadership_contacts: list[LeadershipContact] = Field(default_factory=list)
+    rz_name: Optional[str] = None
     message: str = "Login successful"
 
 

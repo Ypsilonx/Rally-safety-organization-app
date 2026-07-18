@@ -62,6 +62,12 @@ const AppMessagingModule = {
 
         app.applyRzStateFromMessage(normalized);
         app.applyMarkerAlertFromMessage(normalized);
+        if (normalized.rz_name) {
+            app.applyRzName(normalized.rz_name);
+        }
+        if (normalized.communication_reset_version !== undefined) {
+            app.applyCommunicationResetVersion(normalized.communication_reset_version, true);
+        }
         app.registerSenderForTagging(normalized);
         app.displayMessage(normalized);
 

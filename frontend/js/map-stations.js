@@ -293,9 +293,22 @@ const MapStationsModule = {
 
         onlineEl.textContent = `${online}/${total}`;
         offlineEl.textContent = String(offlineStations.length);
-        offlineListEl.textContent = offlineStations.length
-            ? offlineStations.map((item) => item.station_id || 'N/A').join(', ')
-            : '-';
+
+        if (!offlineStations.length) {
+            offlineListEl.classList.remove('status-chip-list');
+            offlineListEl.textContent = '-';
+            return;
+        }
+
+        offlineListEl.classList.add('status-chip-list');
+        offlineListEl.innerHTML = '';
+
+        offlineStations.forEach((item) => {
+            const chip = document.createElement('span');
+            chip.className = 'status-station-chip';
+            chip.textContent = item.station_id || 'N/A';
+            offlineListEl.appendChild(chip);
+        });
     },
 
     /**

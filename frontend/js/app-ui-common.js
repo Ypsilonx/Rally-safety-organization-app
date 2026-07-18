@@ -173,14 +173,56 @@ const AppUiCommonModule = {
      * @param {Object} app
      */
     updateVedeniContact(app) {
-        const link = document.getElementById('vedeni-phone-link');
-        if (!link) {
+        const list = document.getElementById('leadership-contacts-list');
+        if (!list) {
             return;
         }
 
-        const phone = app.user?.vedeni_phone || '+420777123456';
-        link.href = `tel:${phone}`;
-        link.textContent = phone;
+        const fallbackContacts = [
+            {
+                station_id: 'VRZ',
+                label: 'Vedoucí RZ',
+                phone: app.user?.vedeni_phone || '+420777123456',
+            },
+            {
+                station_id: 'ZVRZ',
+                label: 'Zástupce vedoucího RZ',
+                phone: '+420777123457',
+            },
+            {
+                station_id: 'VBRZ',
+                label: 'Vedoucí bezpečnosti RZ',
+                phone: '+420777123458',
+            },
+            {
+                station_id: 'ZVBRZ',
+                label: 'Zástupce vedoucího bezpečnosti RZ',
+                phone: '+420777123459',
+            },
+        ];
+
+        const contacts = Array.isArray(app.user?.leadership_contacts) && app.user.leadership_contacts.length
+            ? app.user.leadership_contacts
+            : fallbackContacts;
+
+        list.innerHTML = '';
+        contacts.forEach((contact) => {
+            const row = document.createElement('div');
+            row.className = 'leadership-contact-row';
+
+            const label = document.createElement('span');
+            label.className = 'leadership-contact-label';
+            label.textContent = `${contact.label || contact.station_id || 'Vedení'}:`;
+
+            const link = document.createElement('a');
+            const phone = String(contact.phone || 'neuvedeno').trim();
+            link.href = phone.startsWith('+') || /^\d/.test(phone) ? `tel:${phone}` : '#';
+            link.textContent = phone;
+
+            row.appendChild(label);
+            row.appendChild(link);
+            list.appendChild(row);
+        });
     },
 
     /**

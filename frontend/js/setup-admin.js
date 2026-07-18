@@ -4,6 +4,17 @@
  */
 
 const SetupAdminModule = {
+    RESERVED_VEDENI_STATION_IDS: new Set(['VRZ', 'ZVRZ', 'VBRZ', 'ZVBRZ']),
+
+    /**
+     * Return true when station id is one of leadership positions.
+     * @param {string} stationId
+     * @returns {boolean}
+     */
+    isVedeniStation(stationId) {
+        return this.RESERVED_VEDENI_STATION_IDS.has(String(stationId || '').trim().toUpperCase());
+    },
+
     /**
      * Return local storage key for setup map configuration.
      * @returns {string}
@@ -103,6 +114,23 @@ const SetupAdminModule = {
     },
 
     /**
+     * Return default role suggested by station id and station type.
+     * @param {string} stationId
+     * @param {string} stationType
+     * @returns {string}
+     */
+    getDefaultRoleForStationSelection(stationId, stationType) {
+        const normalized = String(stationId || '').trim().toUpperCase();
+        if (normalized === 'VRZ' || normalized === 'VBRZ') {
+            return 'vedouci';
+        }
+        if (normalized === 'ZVRZ' || normalized === 'ZVBRZ') {
+            return 'zastupce';
+        }
+        return this.getDefaultRoleForStation(stationType);
+    },
+
+    /**
      * Return headers for admin API requests.
      * @param {Object} app
      * @returns {Object}
@@ -117,6 +145,30 @@ const SetupAdminModule = {
             : {
                 'Content-Type': 'application/json',
             };
+    },
+
+    /**
+     * Execute setup/admin API request with shared auth handling.
+     * @param {Object} app
+     * @param {string} url
+     * @param {Object} options
+     * @returns {Promise<Response|null>}
+     */
+    async adminFetch(app, url, options = {}) {
+        const response = await fetch(url, {
+            ...options,
+            headers: {
+                ...this.getAdminHeaders(app),
+                ...(options.headers || {}),
+            },
+        });
+
+        if (response.status === 401) {
+            window.Auth.handleUnauthorized();
+            return null;
+        }
+
+        return response;
     },
 
     /**
@@ -144,12 +196,126 @@ const SetupAdminModule = {
         this.applyStoredMapConfig(app);
 
         Promise.all([
-            app.loadAdminStations(),
-            app.loadAdminPeople(),
+            this.loadAdminStations(app),
+            this.loadAdminPeople(app),
+            this.loadRzConfig(app),
         ]).catch((error) => {
             console.error('Setup load failed:', error);
             app.showToast('Setup data se nepodařilo načíst', 'error');
         });
+    },
+
+    /**
+     * Load current RZ config for setup controls.
+     * @param {Object} app
+     * @param {boolean} announceRefresh
+     * @returns {Promise<void>}
+     */
+    async loadRzConfig(app, announceRefresh = false) {
+        if (!app.isVedeniUser()) {
+            return;
+        }
+
+        const response = await this.adminFetch(app, 'http://localhost:8000/api/admin/rz-config');
+        if (!response) {
+            return;
+        }
+
+        if (!response.ok) {
+            throw new Error('RZ config load failed');
+        }
+
+        const payload = await response.json();
+        const input = document.getElementById('rz-name-input');
+        if (input) {
+            input.value = String(payload.rz_name || app.rzName || '');
+        }
+
+        app.applyRzName(payload.rz_name || app.rzName);
+        app.applyCommunicationResetVersion(payload.communication_reset_version || 0, false);
+
+        if (announceRefresh) {
+            app.showToast('Konfigurace RZ načtena', 'success');
+        }
+    },
+
+    /**
+     * Save RZ name from setup controls and sync active clients.
+     * @param {Object} app
+     * @returns {Promise<void>}
+     */
+    async saveRzConfig(app) {
+        if (!app.isVedeniUser()) {
+            return;
+        }
+
+        const input = document.getElementById('rz-name-input');
+        const rzName = String(input?.value || '').trim();
+        if (!rzName) {
+            app.showToast('Zadej název RZ', 'info');
+            return;
+        }
+
+        const response = await this.adminFetch(app, 'http://localhost:8000/api/admin/rz-config', {
+            method: 'POST',
+            body: JSON.stringify({ rz_name: rzName }),
+        });
+
+        if (!response) {
+            return;
+        }
+
+        if (!response.ok) {
+            app.showToast('Název RZ se nepodařilo uložit', 'error');
+            return;
+        }
+
+        const payload = await response.json();
+        app.applyRzName(payload.rz_name || rzName);
+        app.logUiAction('setup_rz_name_updated', {
+            rz_name: payload.rz_name || rzName,
+            notified_connections: Number(payload.notified_connections || 0),
+        });
+        app.showToast('Název RZ uložen', 'success');
+    },
+
+    /**
+     * Request global communication history reset for next RZ.
+     * @param {Object} app
+     * @returns {Promise<void>}
+     */
+    async resetCommunicationHistory(app) {
+        if (!app.isVedeniUser()) {
+            return;
+        }
+
+        const confirmed = confirm(
+            'Resetovat historii komunikace pro všechny klienty?\nPoužij před další RZ, aby se neukazovaly staré zprávy.',
+        );
+        if (!confirmed) {
+            return;
+        }
+
+        const response = await this.adminFetch(app, 'http://localhost:8000/api/admin/reset-communication-history', {
+            method: 'POST',
+        });
+
+        if (!response) {
+            return;
+        }
+
+        if (!response.ok) {
+            app.showToast('Reset komunikace se nepodařil', 'error');
+            return;
+        }
+
+        const payload = await response.json();
+        app.applyCommunicationResetVersion(payload.communication_reset_version || 0, true);
+        app.logUiAction('setup_reset_communication_history', {
+            communication_reset_version: Number(payload.communication_reset_version || 0),
+            notified_connections: Number(payload.notified_connections || 0),
+        });
+        app.showToast('Historie komunikace resetována', 'success');
     },
 
     /**
@@ -163,12 +329,8 @@ const SetupAdminModule = {
             return;
         }
 
-        const response = await fetch('http://localhost:8000/api/admin/people', {
-            headers: this.getAdminHeaders(app),
-        });
-
-        if (response.status === 401) {
-            window.Auth.handleUnauthorized();
+        const response = await this.adminFetch(app, 'http://localhost:8000/api/admin/people');
+        if (!response) {
             return;
         }
 
@@ -196,9 +358,23 @@ const SetupAdminModule = {
             return;
         }
 
+        const normalizeName = (value) => String(value || '').trim().replace(/\s+/g, ' ').toLowerCase();
+        const preferredKey = normalizeName(preferredName);
+        const assignedNames = new Set(
+            (app.adminStations || [])
+                .map((station) => station?.current_user?.name)
+                .filter(Boolean)
+                .map(normalizeName)
+                .filter((nameKey) => nameKey && nameKey !== preferredKey),
+        );
+
         select.innerHTML = '<option value="">Ruční zadání</option>';
         app.adminPeople.forEach((person) => {
             const displayName = [person.first_name, person.last_name].filter(Boolean).join(' ').trim() || 'Neznámá osoba';
+            if (assignedNames.has(normalizeName(displayName))) {
+                return;
+            }
+
             const option = document.createElement('option');
             option.value = displayName;
             const pieces = [displayName];
@@ -289,6 +465,34 @@ const SetupAdminModule = {
     },
 
     /**
+     * Refresh station markers when map is initialized.
+     * @returns {Promise<void>}
+     */
+    async refreshMapStationsSafe() {
+        if (!window.MapModule?.isInitialized) {
+            return;
+        }
+
+        try {
+            await window.MapModule.refreshStationMarkers();
+        } catch (error) {
+            console.error('Map refresh after station update failed:', error);
+        }
+    },
+
+    /**
+     * Broadcast station directory update side effects to the app.
+     * @param {Object} app
+     * @param {string} stationId
+     */
+    notifyStationDirectoryChanged(app, stationId) {
+        window.dispatchEvent(new CustomEvent('admin:station-directory-updated', {
+            detail: { stationId },
+        }));
+        app.requestGateStatusRefresh();
+    },
+
+    /**
      * Load station directory for setup screen.
      * @param {Object} app
      * @param {boolean} announceRefresh
@@ -299,12 +503,8 @@ const SetupAdminModule = {
             return;
         }
 
-        const response = await fetch('http://localhost:8000/api/admin/stations', {
-            headers: this.getAdminHeaders(app),
-        });
-
-        if (response.status === 401) {
-            window.Auth.handleUnauthorized();
+        const response = await this.adminFetch(app, 'http://localhost:8000/api/admin/stations');
+        if (!response) {
             return;
         }
 
@@ -426,7 +626,7 @@ const SetupAdminModule = {
         document.getElementById('admin-station-id').value = station.station_id || '';
         document.getElementById('admin-person-name').value = station.current_user?.name || '';
         document.getElementById('admin-person-role').value = station.current_user?.role
-            || this.getDefaultRoleForStation(station.station_type);
+            || this.getDefaultRoleForStationSelection(station.station_id, station.station_type);
         document.getElementById('admin-person-phone').value = station.current_user?.phone || '';
         document.getElementById('admin-person-email').value = station.current_user?.email || '';
         document.getElementById('admin-person-address').value = station.current_user?.address || '';
@@ -599,6 +799,9 @@ const SetupAdminModule = {
                     <strong>${app.escapeHtml(entry.name || 'Neznámý')}</strong> · ${app.escapeHtml(entry.role || '-')}
                     <div>${stateLabel}: od ${app.formatDateTime(entry.assigned_at)} ${until}</div>
                     <div>Telefon: ${app.escapeHtml(entry.phone || 'neuvedeno')}</div>
+                    <div>E-mail: ${app.escapeHtml(entry.email || 'neuvedeno')}</div>
+                    <div>Bydliště: ${app.escapeHtml(entry.address || 'neuvedeno')}</div>
+                    <div>SKUPINA: ${app.escapeHtml(entry.group || 'neuvedeno')}</div>
                     <div>Poznámka: ${app.escapeHtml(entry.note || '-')}</div>
                 </div>
             `;
@@ -625,14 +828,21 @@ const SetupAdminModule = {
             return;
         }
 
-        const response = await fetch(`http://localhost:8000/api/admin/station/${encodeURIComponent(stationId)}/reassign-user`, {
-            method: 'POST',
-            headers: this.getAdminHeaders(app),
-            body: JSON.stringify({ name, role, phone, email, address, group, note }),
-        });
+        if (this.isVedeniStation(stationId) && role !== 'vedouci' && role !== 'zastupce') {
+            app.showToast('Pozice VRZ/ZVRZ/VBRZ/ZVBRZ musí mít roli vedení RZ', 'error');
+            return;
+        }
 
-        if (response.status === 401) {
-            window.Auth.handleUnauthorized();
+        const response = await this.adminFetch(
+            app,
+            `http://localhost:8000/api/admin/station/${encodeURIComponent(stationId)}/reassign-user`,
+            {
+                method: 'POST',
+                body: JSON.stringify({ name, role, phone, email, address, group, note }),
+            },
+        );
+
+        if (!response) {
             return;
         }
 
@@ -642,15 +852,8 @@ const SetupAdminModule = {
         }
 
         await this.loadAdminStations(app);
-        if (window.MapModule?.isInitialized) {
-            window.MapModule.refreshStationMarkers().catch((error) => {
-                console.error('Map refresh after assignment failed:', error);
-            });
-        }
-        window.dispatchEvent(new CustomEvent('admin:station-directory-updated', {
-            detail: { stationId },
-        }));
-        app.requestGateStatusRefresh();
+        await this.refreshMapStationsSafe();
+        this.notifyStationDirectoryChanged(app, stationId);
         app.logUiAction('setup_assignment_saved', {
             station_id: stationId,
             name,
@@ -683,14 +886,16 @@ const SetupAdminModule = {
             return;
         }
 
-        const response = await fetch(`http://localhost:8000/api/admin/station/${encodeURIComponent(stationId)}/release-user`, {
-            method: 'POST',
-            headers: this.getAdminHeaders(app),
-            body: JSON.stringify({ note }),
-        });
+        const response = await this.adminFetch(
+            app,
+            `http://localhost:8000/api/admin/station/${encodeURIComponent(stationId)}/release-user`,
+            {
+                method: 'POST',
+                body: JSON.stringify({ note }),
+            },
+        );
 
-        if (response.status === 401) {
-            window.Auth.handleUnauthorized();
+        if (!response) {
             return;
         }
 
@@ -700,15 +905,8 @@ const SetupAdminModule = {
         }
 
         await this.loadAdminStations(app);
-        if (window.MapModule?.isInitialized) {
-            window.MapModule.refreshStationMarkers().catch((error) => {
-                console.error('Map refresh after release failed:', error);
-            });
-        }
-        window.dispatchEvent(new CustomEvent('admin:station-directory-updated', {
-            detail: { stationId },
-        }));
-        app.requestGateStatusRefresh();
+        await this.refreshMapStationsSafe();
+        this.notifyStationDirectoryChanged(app, stationId);
         app.logUiAction('setup_assignment_released', {
             station_id: stationId,
             note,
@@ -745,14 +943,12 @@ const SetupAdminModule = {
             return;
         }
 
-        const response = await fetch('http://localhost:8000/api/admin/station/bulk-generate-pins', {
+        const response = await this.adminFetch(app, 'http://localhost:8000/api/admin/station/bulk-generate-pins', {
             method: 'POST',
-            headers: this.getAdminHeaders(app),
             body: JSON.stringify({ regenerate_existing: regenerateExisting }),
         });
 
-        if (response.status === 401) {
-            window.Auth.handleUnauthorized();
+        if (!response) {
             return;
         }
 
@@ -841,16 +1037,15 @@ const SetupAdminModule = {
             return;
         }
 
-        const response = await fetch(
+        const response = await this.adminFetch(
+            app,
             `http://localhost:8000/api/admin/station/${encodeURIComponent(stationId)}/regenerate-pin`,
             {
                 method: 'POST',
-                headers: this.getAdminHeaders(app),
             },
         );
 
-        if (response.status === 401) {
-            window.Auth.handleUnauthorized();
+        if (!response) {
             return;
         }
 

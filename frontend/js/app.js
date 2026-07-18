@@ -34,6 +34,8 @@ const App = {
     gateRefreshTimer: null,
     gateRefreshQueued: false,
     rzState: 'running',
+    rzName: 'Nezadaná RZ',
+    communicationResetVersion: 0,
     adminStations: [],
     adminPeople: [],
     selectedAdminStationId: null,
@@ -56,11 +58,16 @@ const App = {
 
         // Setup UI based on role
         this.setupUI();
+        this.rzName = this.user.rz_name || this.rzName;
+        this.applyRzName(this.rzName);
 
         this.loadPersistedState();
         this.restorePersistedUiState();
         this.loadRzState();
         this.applyRzStateUi();
+        this.refreshRzContext().catch((error) => {
+            console.error('RZ context refresh failed:', error);
+        });
 
         if (window.SetupAdminModule?.applyStoredMapConfig) {
             window.SetupAdminModule.applyStoredMapConfig(this);
@@ -154,6 +161,112 @@ const App = {
         }
 
         this.updateVedeniContact();
+        this.updateKomisarStationLabel();
+    },
+
+    /**
+     * Update quick-action label with current komisař station.
+     */
+    updateKomisarStationLabel() {
+        const label = document.getElementById('komisar-station-label');
+        if (!label) {
+            return;
+        }
+
+        const stationId = String(this.user?.station_id || '').trim();
+        label.textContent = stationId || 'Neurčeno';
+    },
+
+    /**
+     * Apply RZ name in header and browser title.
+     * @param {string} rzName
+     */
+    applyRzName(rzName) {
+        const normalized = String(rzName || '').trim() || 'Nezadaná RZ';
+        this.rzName = normalized;
+
+        const badge = document.getElementById('rz-name-display');
+        if (badge) {
+            badge.textContent = `RZ: ${normalized}`;
+        }
+
+        document.title = `Rally Safety - ${normalized}`;
+
+        if (this.user) {
+            this.user.rz_name = normalized;
+            window.Auth.saveUser(this.user);
+        }
+    },
+
+    /**
+     * Fetch latest RZ context from backend and apply it locally.
+     * @returns {Promise<void>}
+     */
+    async refreshRzContext() {
+        const response = await fetch('http://localhost:8000/api/stations/rz-context');
+        if (!response.ok) {
+            return;
+        }
+
+        const payload = await response.json();
+        this.applyRzName(payload.rz_name || this.rzName);
+        this.applyCommunicationResetVersion(payload.communication_reset_version || 0, false);
+    },
+
+    /**
+     * Apply global communication reset version and clear persisted history when it changes.
+     * @param {number} version
+     * @param {boolean} announce
+     */
+    applyCommunicationResetVersion(version, announce = true) {
+        const incoming = Number(version || 0);
+        if (!Number.isFinite(incoming) || incoming < 0) {
+            return;
+        }
+
+        const key = 'rally_comm_reset_version';
+        const stored = Number(localStorage.getItem(key) || 0);
+
+        if (incoming > stored) {
+            this.clearPersistedCommunicationHistory();
+            if (announce) {
+                this.showToast('Historie komunikace byla resetována pro novou RZ', 'info');
+            }
+        }
+
+        localStorage.setItem(key, String(Math.max(stored, incoming)));
+        this.communicationResetVersion = Math.max(stored, incoming);
+    },
+
+    /**
+     * Clear all locally persisted communication history and reset UI feeds.
+     */
+    clearPersistedCommunicationHistory() {
+        Object.keys(localStorage).forEach((storageKey) => {
+            if (storageKey.startsWith('rally_state_')) {
+                localStorage.removeItem(storageKey);
+            }
+        });
+
+        this.persistedState.chat = [];
+        this.persistedState.info = [];
+        this.persistedState.incidents = [];
+        this.lastOfflineStations = [];
+
+        const messages = document.getElementById('messages');
+        if (messages) {
+            messages.innerHTML = '<div class="welcome-message"><p>Připraveno k příjmu zpráv...</p></div>';
+        }
+
+        const infoFeed = document.getElementById('info-feed');
+        if (infoFeed) {
+            infoFeed.innerHTML = '<div class="welcome-message"><p>Zatím žádná systémová nebo incident zpráva.</p></div>';
+        }
+
+        const incidentFeed = document.getElementById('incident-feed');
+        if (incidentFeed) {
+            incidentFeed.innerHTML = '<p class="incident-empty">Zatím žádný aktivní incident.</p>';
+        }
     },
 
     /**
@@ -190,8 +303,8 @@ const App = {
 
         // Register event handlers
         window.wsClient.on('onMessage', (message) => this.handleMessage(message));
-        window.wsClient.on('onStatusChange', (status) => this.handleStatusChange(status));
-        window.wsClient.on('onError', (error) => this.handleError(error));
+        window.wsClient.on('onStatusChange', (status) => window.AppUiCommonModule.handleStatusChange(this, status));
+        window.wsClient.on('onError', (error) => window.AppUiCommonModule.handleError(this, error));
         
         // Connect
         window.wsClient.connect(authIdentifier);
@@ -201,6 +314,16 @@ const App = {
      * Setup event listeners for UI elements
      */
     setupEventListeners() {
+        this.bindCoreEventListeners();
+        this.bindSetupAdminEventListeners();
+        this.bindMessageAndTagEventListeners();
+        this.bindStationStatusEventListeners();
+    },
+
+    /**
+     * Bind shared dashboard/header controls.
+     */
+    bindCoreEventListeners() {
         // Message form
         document.getElementById('message-form').addEventListener('submit', (e) => {
             e.preventDefault();
@@ -214,36 +337,36 @@ const App = {
 
         const openCommsBtn = document.getElementById('open-comms-btn');
         if (openCommsBtn) {
-            openCommsBtn.addEventListener('click', () => this.openCommsPanel());
+            openCommsBtn.addEventListener('click', () => window.AppMessagingModule.openCommsPanel());
         }
 
         const openSetupBtn = document.getElementById('open-setup-btn');
         if (openSetupBtn) {
             openSetupBtn.addEventListener('click', () => {
-                this.openSetupScreen();
+                window.SetupAdminModule.openSetupScreen(this);
             });
         }
 
         const backToDashboardBtn = document.getElementById('back-to-dashboard-btn');
         if (backToDashboardBtn) {
             backToDashboardBtn.addEventListener('click', () => {
-                this.openDashboardScreen();
+                window.SetupAdminModule.openDashboardScreen(this);
             });
         }
 
         const closeCommsBtn = document.getElementById('close-comms-btn');
         if (closeCommsBtn) {
-            closeCommsBtn.addEventListener('click', () => this.closeCommsPanel());
+            closeCommsBtn.addEventListener('click', () => window.AppMessagingModule.closeCommsPanel());
         }
 
         const commsOverlay = document.getElementById('comms-overlay');
         if (commsOverlay) {
-            commsOverlay.addEventListener('click', () => this.closeCommsPanel());
+            commsOverlay.addEventListener('click', () => window.AppMessagingModule.closeCommsPanel());
         }
 
         document.querySelectorAll('.comms-tab').forEach((tabBtn) => {
             tabBtn.addEventListener('click', () => {
-                this.switchCommsTab(tabBtn.dataset.tab || 'chat');
+                window.AppMessagingModule.switchCommsTab(this, tabBtn.dataset.tab || 'chat');
             });
         });
 
@@ -260,121 +383,6 @@ const App = {
         if (broadcastBtn) {
             broadcastBtn.addEventListener('click', () => {
                 this.sendBroadcast();
-            });
-        }
-
-        const refreshStationsBtn = document.getElementById('btn-refresh-stations');
-        if (refreshStationsBtn) {
-            refreshStationsBtn.addEventListener('click', () => {
-                this.loadAdminStations(true).catch((error) => {
-                    console.error('Admin station refresh failed:', error);
-                    this.showToast('Seznam pozic se nepodařilo obnovit', 'error');
-                });
-            });
-        }
-
-        const bulkGeneratePinsBtn = document.getElementById('btn-bulk-generate-pins');
-        if (bulkGeneratePinsBtn) {
-            bulkGeneratePinsBtn.addEventListener('click', () => {
-                this.bulkGeneratePinsFromMap().catch((error) => {
-                    console.error('Bulk PIN generation failed:', error);
-                    this.showToast('Hromadné generování PINů selhalo', 'error');
-                });
-            });
-        }
-
-        const refreshPeopleBtn = document.getElementById('btn-refresh-people');
-        if (refreshPeopleBtn) {
-            refreshPeopleBtn.addEventListener('click', () => {
-                this.loadAdminPeople(true).catch((error) => {
-                    console.error('Admin people refresh failed:', error);
-                    this.showToast('Katalog osob se nepodařilo načíst', 'error');
-                });
-            });
-        }
-
-        const peopleSelect = document.getElementById('admin-person-catalog');
-        if (peopleSelect) {
-            peopleSelect.addEventListener('change', () => {
-                this.applySelectedCatalogPerson();
-            });
-        }
-
-        const stationForm = document.getElementById('station-admin-form');
-        if (stationForm) {
-            stationForm.addEventListener('submit', (event) => {
-                event.preventDefault();
-                this.submitAdminStationAssignment();
-            });
-        }
-
-        const releaseBtn = document.getElementById('btn-release-station');
-        if (releaseBtn) {
-            releaseBtn.addEventListener('click', () => {
-                this.releaseAdminStation();
-            });
-        }
-
-        const regeneratePinBtn = document.getElementById('btn-regenerate-station-pin');
-        if (regeneratePinBtn) {
-            regeneratePinBtn.addEventListener('click', () => {
-                this.regenerateSelectedStationPin().catch((error) => {
-                    console.error('Station PIN regeneration failed:', error);
-                    this.showToast('Regenerace PINu selhala', 'error');
-                });
-            });
-        }
-
-        const closeBulkSummaryBtn = document.getElementById('btn-close-pin-bulk-summary');
-        if (closeBulkSummaryBtn) {
-            closeBulkSummaryBtn.addEventListener('click', () => {
-                window.SetupAdminModule.hideBulkPinSummaryModal();
-            });
-        }
-
-        const bulkSummaryModal = document.getElementById('pin-bulk-summary-modal');
-        if (bulkSummaryModal) {
-            bulkSummaryModal.addEventListener('click', (event) => {
-                if (event.target === bulkSummaryModal) {
-                    window.SetupAdminModule.hideBulkPinSummaryModal();
-                }
-            });
-        }
-
-        const applyTrackBtn = document.getElementById('btn-map-track-apply');
-        if (applyTrackBtn) {
-            applyTrackBtn.addEventListener('click', () => {
-                this.applySetupTrackSource().catch((error) => {
-                    console.error('Track source apply failed:', error);
-                    this.showToast('Podklad trati se nepodařilo použít', 'error');
-                });
-            });
-        }
-
-        const loadCoordsBtn = document.getElementById('btn-map-station-load');
-        if (loadCoordsBtn) {
-            loadCoordsBtn.addEventListener('click', () => {
-                this.loadSelectedSetupStationCoordinate();
-            });
-        }
-
-        const saveCoordsBtn = document.getElementById('btn-map-station-save');
-        if (saveCoordsBtn) {
-            saveCoordsBtn.addEventListener('click', () => {
-                this.saveSelectedSetupStationCoordinate().catch((error) => {
-                    console.error('Station coordinate save failed:', error);
-                    this.showToast('Souřadnice se nepodařilo uložit', 'error');
-                });
-            });
-        }
-
-        const resetMapConfigBtn = document.getElementById('btn-map-config-reset');
-        if (resetMapConfigBtn) {
-            resetMapConfigBtn.addEventListener('click', () => {
-                this.resetSetupMapConfig().catch((error) => {
-                    console.error('Map config reset failed:', error);
-                    this.showToast('Reset map config se nepodařil', 'error');
-                });
             });
         }
 
@@ -401,7 +409,153 @@ const App = {
                 this.handleQuickAction(action);
             });
         });
+    },
 
+    /**
+     * Bind setup/admin screen controls.
+     */
+    bindSetupAdminEventListeners() {
+
+        const refreshStationsBtn = document.getElementById('btn-refresh-stations');
+        if (refreshStationsBtn) {
+            refreshStationsBtn.addEventListener('click', () => {
+                window.SetupAdminModule.loadAdminStations(this, true).catch((error) => {
+                    console.error('Admin station refresh failed:', error);
+                    this.showToast('Seznam pozic se nepodařilo obnovit', 'error');
+                });
+            });
+        }
+
+        const bulkGeneratePinsBtn = document.getElementById('btn-bulk-generate-pins');
+        if (bulkGeneratePinsBtn) {
+            bulkGeneratePinsBtn.addEventListener('click', () => {
+                window.SetupAdminModule.bulkGeneratePinsFromMap(this).catch((error) => {
+                    console.error('Bulk PIN generation failed:', error);
+                    this.showToast('Hromadné generování PINů selhalo', 'error');
+                });
+            });
+        }
+
+        const refreshPeopleBtn = document.getElementById('btn-refresh-people');
+        if (refreshPeopleBtn) {
+            refreshPeopleBtn.addEventListener('click', () => {
+                window.SetupAdminModule.loadAdminPeople(this, true).catch((error) => {
+                    console.error('Admin people refresh failed:', error);
+                    this.showToast('Katalog osob se nepodařilo načíst', 'error');
+                });
+            });
+        }
+
+        const peopleSelect = document.getElementById('admin-person-catalog');
+        if (peopleSelect) {
+            peopleSelect.addEventListener('change', () => {
+                window.SetupAdminModule.applySelectedCatalogPerson(this);
+            });
+        }
+
+        const stationForm = document.getElementById('station-admin-form');
+        if (stationForm) {
+            stationForm.addEventListener('submit', (event) => {
+                event.preventDefault();
+                window.SetupAdminModule.submitAdminStationAssignment(this);
+            });
+        }
+
+        const releaseBtn = document.getElementById('btn-release-station');
+        if (releaseBtn) {
+            releaseBtn.addEventListener('click', () => {
+                window.SetupAdminModule.releaseAdminStation(this);
+            });
+        }
+
+        const regeneratePinBtn = document.getElementById('btn-regenerate-station-pin');
+        if (regeneratePinBtn) {
+            regeneratePinBtn.addEventListener('click', () => {
+                window.SetupAdminModule.regenerateSelectedStationPin(this).catch((error) => {
+                    console.error('Station PIN regeneration failed:', error);
+                    this.showToast('Regenerace PINu selhala', 'error');
+                });
+            });
+        }
+
+        const closeBulkSummaryBtn = document.getElementById('btn-close-pin-bulk-summary');
+        if (closeBulkSummaryBtn) {
+            closeBulkSummaryBtn.addEventListener('click', () => {
+                window.SetupAdminModule.hideBulkPinSummaryModal();
+            });
+        }
+
+        const bulkSummaryModal = document.getElementById('pin-bulk-summary-modal');
+        if (bulkSummaryModal) {
+            bulkSummaryModal.addEventListener('click', (event) => {
+                if (event.target === bulkSummaryModal) {
+                    window.SetupAdminModule.hideBulkPinSummaryModal();
+                }
+            });
+        }
+
+        const applyTrackBtn = document.getElementById('btn-map-track-apply');
+        if (applyTrackBtn) {
+            applyTrackBtn.addEventListener('click', () => {
+                window.SetupAdminModule.applySetupTrackSource(this).catch((error) => {
+                    console.error('Track source apply failed:', error);
+                    this.showToast('Podklad trati se nepodařilo použít', 'error');
+                });
+            });
+        }
+
+        const saveRzNameBtn = document.getElementById('btn-save-rz-name');
+        if (saveRzNameBtn) {
+            saveRzNameBtn.addEventListener('click', () => {
+                window.SetupAdminModule.saveRzConfig(this).catch((error) => {
+                    console.error('RZ config save failed:', error);
+                    this.showToast('Název RZ se nepodařilo uložit', 'error');
+                });
+            });
+        }
+
+        const resetHistoryBtn = document.getElementById('btn-reset-communication-history');
+        if (resetHistoryBtn) {
+            resetHistoryBtn.addEventListener('click', () => {
+                window.SetupAdminModule.resetCommunicationHistory(this).catch((error) => {
+                    console.error('Communication reset failed:', error);
+                    this.showToast('Reset komunikace selhal', 'error');
+                });
+            });
+        }
+
+        const loadCoordsBtn = document.getElementById('btn-map-station-load');
+        if (loadCoordsBtn) {
+            loadCoordsBtn.addEventListener('click', () => {
+                window.SetupAdminModule.loadSelectedSetupStationCoordinate(this);
+            });
+        }
+
+        const saveCoordsBtn = document.getElementById('btn-map-station-save');
+        if (saveCoordsBtn) {
+            saveCoordsBtn.addEventListener('click', () => {
+                window.SetupAdminModule.saveSelectedSetupStationCoordinate(this).catch((error) => {
+                    console.error('Station coordinate save failed:', error);
+                    this.showToast('Souřadnice se nepodařilo uložit', 'error');
+                });
+            });
+        }
+
+        const resetMapConfigBtn = document.getElementById('btn-map-config-reset');
+        if (resetMapConfigBtn) {
+            resetMapConfigBtn.addEventListener('click', () => {
+                window.SetupAdminModule.resetSetupMapConfig(this).catch((error) => {
+                    console.error('Map config reset failed:', error);
+                    this.showToast('Reset map config se nepodařil', 'error');
+                });
+            });
+        }
+    },
+
+    /**
+     * Bind message list, tagging and input handlers.
+     */
+    bindMessageAndTagEventListeners() {
         const messages = document.getElementById('messages');
         if (messages) {
             messages.addEventListener('click', (event) => this.handleTagClick(event));
@@ -420,7 +574,12 @@ const App = {
                 setTimeout(() => this.hideTagSuggestions(), 120);
             });
         }
+    },
 
+    /**
+     * Bind station status update events from map/status modules.
+     */
+    bindStationStatusEventListeners() {
         window.addEventListener('stations:update', (event) => {
             const stations = event.detail?.stations || [];
             this.lastOfflineStations = stations
@@ -493,36 +652,6 @@ const App = {
     },
 
     /**
-     * Switch between chat and info tabs in communication panel.
-     * @param {string} tabName
-     */
-    switchCommsTab(tabName) {
-        return window.AppMessagingModule.switchCommsTab(this, tabName);
-    },
-
-    /**
-     * Open communication drawer on mobile.
-     */
-    openCommsPanel() {
-        return window.AppMessagingModule.openCommsPanel();
-    },
-
-    /**
-     * Close communication drawer on mobile.
-     */
-    closeCommsPanel() {
-        return window.AppMessagingModule.closeCommsPanel();
-    },
-
-    /**
-     * Handle connection status change
-     * @param {string} status - 'online', 'offline', 'reconnecting', 'failed'
-     */
-    handleStatusChange(status) {
-        return window.AppUiCommonModule.handleStatusChange(this, status);
-    },
-
-    /**
      * Redirect to login after communication/auth failures.
      * @param {string} reason
      */
@@ -531,32 +660,17 @@ const App = {
     },
 
     /**
-     * Handle WebSocket error
-     * @param {Error} error
-     */
-    handleError(error) {
-        return window.AppUiCommonModule.handleError(this, error);
-    },
-
-    /**
-     * Update admin stats
-     */
-    updateStats() {
-        return window.AppOperationsModule.updateStats();
-    },
-
-    /**
      * Toggle admin panel collapse
      */
     toggleAdminPanel() {
-        return window.AppOperationsModule.toggleAdminPanel();
+        return window.AppOperationsRzModule.toggleAdminPanel();
     },
 
     /**
      * Send broadcast message (admin only)
      */
     async sendBroadcast() {
-        return window.AppOperationsModule.sendBroadcast(this);
+        return window.AppOperationsIncidentsModule.sendBroadcast(this);
     },
 
     /**
@@ -564,7 +678,7 @@ const App = {
      * @param {string} alertKey
      */
     sendAlertPreset(alertKey) {
-        return window.AppOperationsModule.sendAlertPreset(this, alertKey);
+        return window.AppOperationsIncidentsModule.sendAlertPreset(this, alertKey);
     },
 
     /**
@@ -594,7 +708,7 @@ const App = {
      * Update top badge + map border according to current RZ state.
      */
     applyRzStateUi() {
-        return window.AppOperationsModule.applyRzStateUi(this);
+        return window.AppOperationsRzModule.applyRzStateUi(this);
     },
 
     /**
@@ -602,7 +716,7 @@ const App = {
      * @param {string} command
      */
     applyRzStateFromCommand(command) {
-        return window.AppOperationsModule.applyRzStateFromCommand(this, command);
+        return window.AppOperationsRzModule.applyRzStateFromCommand(this, command);
     },
 
     /**
@@ -610,7 +724,7 @@ const App = {
      * @param {Object} message
      */
     applyRzStateFromMessage(message) {
-        return window.AppOperationsModule.applyRzStateFromMessage(this, message);
+        return window.AppOperationsRzModule.applyRzStateFromMessage(this, message);
     },
 
     /**
@@ -618,14 +732,14 @@ const App = {
      * @param {string} action
      */
     handleQuickAction(action) {
-        return window.AppOperationsModule.handleQuickAction(this, action);
+        return window.AppOperationsIncidentsModule.handleQuickAction(this, action);
     },
 
     /**
      * Refresh readiness gate state from backend for admin dashboard.
      */
     startGateStatusRefresh() {
-        return window.AppOperationsModule.startGateStatusRefresh(this);
+        return window.AppOperationsRzModule.startGateStatusRefresh(this);
     },
 
     /**
@@ -633,14 +747,14 @@ const App = {
      * @returns {Promise<void>}
      */
     async refreshGateStatus() {
-        return window.AppOperationsModule.refreshGateStatus(this);
+        return window.AppOperationsRzModule.refreshGateStatus(this);
     },
 
     /**
      * Queue immediate gate refresh (debounced) for event-driven updates.
      */
     requestGateStatusRefresh() {
-        return window.AppOperationsModule.requestGateStatusRefresh(this);
+        return window.AppOperationsRzModule.requestGateStatusRefresh(this);
     },
 
     /**
@@ -648,7 +762,7 @@ const App = {
      * @returns {boolean}
      */
     isVedeniUser() {
-        return window.AppOperationsModule.isVedeniUser(this);
+        return window.AppOperationsRzModule.isVedeniUser(this);
     },
 
     /**
@@ -657,7 +771,7 @@ const App = {
      * @returns {boolean}
      */
     isIncidentForDashboard(message) {
-        return window.AppOperationsModule.isIncidentForDashboard(message);
+        return window.AppOperationsIncidentsModule.isIncidentForDashboard(message);
     },
 
     /**
@@ -665,7 +779,7 @@ const App = {
      * @param {Object} message
      */
     addIncidentWarning(message, persist = true) {
-        return window.AppOperationsModule.addIncidentWarning(this, message, persist);
+        return window.AppOperationsIncidentsModule.addIncidentWarning(this, message, persist);
     },
 
     /**
@@ -705,150 +819,6 @@ const App = {
      */
     updateVedeniContact() {
         return window.AppUiCommonModule.updateVedeniContact(this);
-    },
-
-    /**
-     * Return headers for admin API requests.
-     * @returns {Object}
-     */
-    getAdminHeaders() {
-        return window.SetupAdminModule.getAdminHeaders(this);
-    },
-
-    /**
-     * Switch to dedicated setup screen for positions and map configuration.
-     */
-    openSetupScreen() {
-        return window.SetupAdminModule.openSetupScreen(this);
-    },
-
-    /**
-     * Return from setup screen back to live dashboard.
-     */
-    openDashboardScreen() {
-        return window.SetupAdminModule.openDashboardScreen(this);
-    },
-
-    /**
-     * Load station directory for admin panel.
-     * @param {boolean} announceRefresh
-     * @returns {Promise<void>}
-     */
-    async loadAdminStations(announceRefresh = false) {
-        return window.SetupAdminModule.loadAdminStations(this, announceRefresh);
-    },
-
-    /**
-     * Load people catalog for setup dropdown.
-     * @param {boolean} announceRefresh
-     * @returns {Promise<void>}
-     */
-    async loadAdminPeople(announceRefresh = false) {
-        return window.SetupAdminModule.loadAdminPeople(this, announceRefresh);
-    },
-
-    /**
-     * Render station selector list in admin panel.
-     */
-    renderAdminStationList() {
-        return window.SetupAdminModule.renderAdminStationList(this);
-    },
-
-    /**
-     * Find selected station record in loaded admin directory.
-     * @returns {Object|null}
-     */
-    getSelectedAdminStation() {
-        return window.SetupAdminModule.getSelectedAdminStation(this);
-    },
-
-    /**
-     * Render detail, form and history for selected station.
-     */
-    renderSelectedAdminStation() {
-        return window.SetupAdminModule.renderSelectedAdminStation(this);
-    },
-
-    /**
-     * Render people dropdown options in setup assignment form.
-     * @param {string} preferredName
-     */
-    renderAdminPeopleOptions(preferredName = '') {
-        return window.SetupAdminModule.renderAdminPeopleOptions(this, preferredName);
-    },
-
-    /**
-     * Prefill assignment form from selected person in catalog.
-     */
-    applySelectedCatalogPerson() {
-        return window.SetupAdminModule.applySelectedCatalogPerson(this);
-    },
-
-    /**
-     * Render assignment history for selected station.
-     * @param {Array<Object>} entries
-     */
-    renderAdminHistory(entries) {
-        return window.SetupAdminModule.renderAdminHistory(this, entries);
-    },
-
-    /**
-     * Submit assign/reassign form for selected station.
-     */
-    async submitAdminStationAssignment() {
-        return window.SetupAdminModule.submitAdminStationAssignment(this);
-    },
-
-    /**
-     * Release currently assigned person from selected station.
-     */
-    async releaseAdminStation() {
-        return window.SetupAdminModule.releaseAdminStation(this);
-    },
-
-    /**
-     * Bulk-generate missing station PINs from map templates.
-     */
-    async bulkGeneratePinsFromMap() {
-        return window.SetupAdminModule.bulkGeneratePinsFromMap(this);
-    },
-
-    /**
-     * Regenerate PIN for currently selected station.
-     */
-    async regenerateSelectedStationPin() {
-        return window.SetupAdminModule.regenerateSelectedStationPin(this);
-    },
-
-    /**
-     * Apply custom track source from setup map configuration.
-     * @returns {Promise<void>}
-     */
-    async applySetupTrackSource() {
-        return window.SetupAdminModule.applySetupTrackSource(this);
-    },
-
-    /**
-     * Load selected station coordinates into setup map form.
-     */
-    loadSelectedSetupStationCoordinate() {
-        return window.SetupAdminModule.loadSelectedSetupStationCoordinate(this);
-    },
-
-    /**
-     * Save selected station coordinates from setup map form.
-     * @returns {Promise<void>}
-     */
-    async saveSelectedSetupStationCoordinate() {
-        return window.SetupAdminModule.saveSelectedSetupStationCoordinate(this);
-    },
-
-    /**
-     * Reset setup map configuration to defaults.
-     * @returns {Promise<void>}
-     */
-    async resetSetupMapConfig() {
-        return window.SetupAdminModule.resetSetupMapConfig(this);
     },
 
     /**
