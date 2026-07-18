@@ -33,6 +33,12 @@ htmlcov/
 *.log
 logs/rz_session_*.jsonl
 
+# Local sensitive data (PII) - keep only on local machine
+data/people_catalog.json
+data/pins.json
+data/*.kml
+data/*.xlsx.csv
+
 # Frontend
 node_modules/
 dist/

@@ -1,0 +1,29 @@
+{
+  "updated_at": "2026-07-18T00:00:00+00:00",
+  "people": [
+    {
+      "first_name": "Jan",
+      "last_name": "Testovaci",
+      "phone": "+420000111222",
+      "email": "jan.testovaci@example.test",
+      "address": "Testovaci 1, 100 00 Praha",
+      "group": "Ukazkova skupina A"
+    },
+    {
+      "first_name": "Eva",
+      "last_name": "Ukazkova",
+      "phone": "+420000333444",
+      "email": "eva.ukazkova@example.test",
+      "address": "Modelova 12, 602 00 Brno",
+      "group": "Ukazkova skupina B"
+    },
+    {
+      "first_name": "Petr",
+      "last_name": "Demo",
+      "phone": null,
+      "email": null,
+      "address": null,
+      "group": "Ukazkova skupina A"
+    }
+  ]
+}

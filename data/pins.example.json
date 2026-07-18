@@ -1,0 +1,70 @@
+{
+  "12345678": {
+    "name": "Jan Testovaci",
+    "role": "komisar_trat",
+    "phone": "+420000111222",
+    "email": "jan.testovaci@example.test",
+    "address": "Testovaci 1, 100 00 Praha",
+    "group": "Ukazkova skupina A",
+    "station_id": "TK-01",
+    "station_name": "Tratovy bod 01",
+    "station_type": "track_point",
+    "station_capacity": 1,
+    "station_description": "Ukazkova pozice",
+    "created_at": "2026-07-18T00:00:00+00:00",
+    "assignment_history": [
+      {
+        "name": "Jan Testovaci",
+        "role": "komisar_trat",
+        "phone": "+420000111222",
+        "email": "jan.testovaci@example.test",
+        "address": "Testovaci 1, 100 00 Praha",
+        "group": "Ukazkova skupina A",
+        "assigned_at": "2026-07-18T00:00:00+00:00",
+        "assigned_until": null,
+        "is_active": true,
+        "note": null
+      }
+    ]
+  },
+  "87654321": {
+    "name": "Eva Ukazkova",
+    "role": "zdravotnik",
+    "phone": "+420000333444",
+    "email": "eva.ukazkova@example.test",
+    "address": "Modelova 12, 602 00 Brno",
+    "group": "Ukazkova skupina B",
+    "station_id": "ZT-05",
+    "station_name": "Zdravotnicky bod 05",
+    "station_type": "medical",
+    "station_capacity": 1,
+    "station_description": "Ukazkova zdravotnicka pozice",
+    "created_at": "2026-07-18T00:00:00+00:00",
+    "assignment_history": [
+      {
+        "name": "Petr Demo",
+        "role": "komisar_zatacka",
+        "phone": null,
+        "email": null,
+        "address": null,
+        "group": "Ukazkova skupina A",
+        "assigned_at": "2026-07-17T22:00:00+00:00",
+        "assigned_until": "2026-07-18T00:00:00+00:00",
+        "is_active": false,
+        "note": "Predani smeny"
+      },
+      {
+        "name": "Eva Ukazkova",
+        "role": "zdravotnik",
+        "phone": "+420000333444",
+        "email": "eva.ukazkova@example.test",
+        "address": "Modelova 12, 602 00 Brno",
+        "group": "Ukazkova skupina B",
+        "assigned_at": "2026-07-18T00:00:00+00:00",
+        "assigned_until": null,
+        "is_active": true,
+        "note": null
+      }
+    ]
+  }
+}

@@ -42,6 +42,10 @@ Rally Safety App zajišťuje real-time přehled o situaci na trati a stavu jedno
 - ⏳ **GPS tracking** komisařů v reálném čase
 - ✅ **Station-first backend API** (`/api/stations`, `/api/admin/stations`, create/delete, history, release, assign/reassign)
 - 🔄 **Samostatná setup obrazovka pro správu pozic** (seznam, detail, historie, release, assign/reassign)
+- ✅ **Setup map config (minimum)**: vlastní cesta k GeoJSON trati + ruční souřadnice vybrané pozice
+- ✅ **Map data model**: trať jako `LineString`, ostatní prvky jako `Point`/`LineString` s `properties.kind` a `requires_commissioner`
+- ✅ **Map podklad**: viditelný badge v hlavičce mapy ukazuje `OpenStreetMap + vlastní vrstva`
+- ✅ **Offline kontakt**: každá pozice v pop-upu ukazuje jméno, název pozice, telefonní číslo a email
 - ✅ **Frontend modularizace (iterace 2)**: rozdělení operations/map logiky do menších JS modulů
 - ✅ **Setup assignment dropdown**: výběr osoby z people katalogu s předvyplněním role/telefonu
 - ⏳ **Rozšířená setup obrazovka** (create/delete pozice, pohodlnější přesun osoby, nastavení mapy a podkladů)
@@ -230,11 +234,21 @@ $login = Invoke-RestMethod -Method Post http://localhost:8000/api/auth/login-ved
 Invoke-RestMethod http://localhost:8000/api/admin/stations `
 	-Headers @{ 'X-Session-Token' = $login.session_token }
 
+# Hromadné vygenerování PINů podle mapových pozic (PIN je vázaný na pozici, ne na jméno)
+Invoke-RestMethod -Method Post http://localhost:8000/api/admin/station/bulk-generate-pins `
+	-Headers @{ 'X-Session-Token' = $login.session_token } `
+	-ContentType 'application/json' `
+	-Body '{"regenerate_existing":false}'
+
 # Vytvoření nové stanice s PINem a počátečním osazením
 Invoke-RestMethod -Method Post http://localhost:8000/api/admin/station/create-pin `
 	-Headers @{ 'X-Session-Token' = $login.session_token } `
 	-ContentType 'application/json' `
 	-Body '{"station_id":"PK-10","station_name":"Parkoviště 10","station_type":"parking","capacity":2,"description":"Příjezdové parkoviště","name":"Alena Testovací","role":"parkovani","phone":"+420555444333","note":"První osazení"}'
+
+# Regenerace PINu konkrétní pozice (starý PIN se okamžitě zneplatní)
+Invoke-RestMethod -Method Post http://localhost:8000/api/admin/station/TK-01/regenerate-pin `
+	-Headers @{ 'X-Session-Token' = $login.session_token }
 
 # Historie obsazení stanice
 Invoke-RestMethod http://localhost:8000/api/admin/station/TK-01/history `
@@ -256,11 +270,11 @@ Invoke-RestMethod -Method Post http://localhost:8000/api/admin/station/TK-01/rea
 Invoke-RestMethod -Method Delete http://localhost:8000/api/admin/station/PK-10/pin `
 	-Headers @{ 'X-Session-Token' = $login.session_token }
 
-# Import katalogu lidí z CSV textu (name/jmeno, phone/telefon)
+# Import katalogu lidí z CSV textu (first_name/jmeno, last_name/prijmeni, phone/telefon, email/mail, address/bydliště, group/skupina)
 $csv = @"
-jmeno;telefon
-Jan Novák;+420111222333
-Eva Testovací;+420444555666
+jmeno;prijmeni;telefon;mail;bydliště;skupina
+Jan;Novák;+420111222333;jan.novak@example.com;Praha;RZ
+Eva;Testovací;+420444555666;eva@example.com;Brno;TZ
 "@
 
 Invoke-RestMethod -Method Post http://localhost:8000/api/admin/people/import-csv `
@@ -273,12 +287,46 @@ Invoke-RestMethod http://localhost:8000/api/admin/people `
 	-Headers @{ 'X-Session-Token' = $login.session_token }
 ```
 
+Pokud chceš naplnit `data/people_catalog.json` reálnými historickými daty z Google My Maps KML, spusť:
+
+```powershell
+uv run python scripts/import_people_from_kml.py
+```
+
+Bezpečnostní poznámka: `data/people_catalog.json` a `data/pins.json` jsou lokální soubory s citlivými údaji.
+Jsou nastavené v `.gitignore`, takže je aplikace používá lokálně, ale do repozitáře se necommitují.
+V repozitáři jsou pouze anonymní vzory `data/people_catalog.example.json` a `data/pins.example.json`.
+
+První inicializace lokálních dat ze vzorů:
+
+```powershell
+Copy-Item data/people_catalog.example.json data/people_catalog.json
+Copy-Item data/pins.example.json data/pins.json
+```
+
+Pro mapové podklady z téhož KML spusť:
+
+```powershell
+uv run python scripts/import_map_elements_from_kml.py
+```
+
+Pro souřadnice traťových pozic ze speciální CSV tabulky spusť:
+
+```powershell
+uv run python scripts/import_station_positions_from_csv.py
+```
+
+Tím se vygeneruje `data/station-coordinates.json`, který frontend mapy načítá automaticky při startu.
+Soubor zároveň obsahuje i `stations` se `station_id`, `suggested_role` a `suggested_station_type`
+pro přesnější seed/admin create workflow.
+
 ### Frontend Testing
 - Chrome DevTools → Device Emulation
 - Network tab → Offline mode testing
 - Real device testing (Android/iOS)
 - Ověř mapu: po loginu se zobrazí Leaflet mapa s červeně vykreslenou tratí
-- Ověř markery: mapa načte stav ze `/api/stations/status` a markery mění barvu online/offline
+- Ověř markery: mapa načte stav ze `/api/stations/status` a barvy jsou: offline červená, online + not ready žlutá, online + ready zelená
+- Pokud stanice během `RZ: V provozu` přejde do offline, vedení dostane varování v chatu/info s ID pozice a telefonem (bez automatického zastavení RZ)
 - Incident na stanici: marker přepne do alert režimu (červený pulz + vlaječka `!`)
 - Klik na marker zobrazí detail stanice (ID, role, počet připojení, poslední aktivita)
 - Desktop: komunikační panel je stabilně vpravo vedle mapy
@@ -289,7 +337,15 @@ Invoke-RestMethod http://localhost:8000/api/admin/people `
 - Dashboard vedení: metrika je online/total stanic (např. 12/18), ne počet zpráv
 - Dashboard vedení: předdefinované krizové akce (`RZ zastavena`, `Pozor problém`, `RZ pozastavena`, `RZ opět v provozu`)
 - `RZ opět v provozu` je blokováno, pokud incident gate nemá READY potvrzení ze stanic
+- Vedoucí může potvrdit `Spustit i přes warning` a vynutit `RZ opět v provozu` i s chybějícími READY stanicemi
+- Potvrzení obsahuje explicitní seznam žlutých/červených pozic; lze jen potvrdit zprovoznění nebo zrušit a vrátit se k řešení situace
 - Dashboard vedení: incident gate ukazuje i konkrétní seznam stanic, kterým chybí READY
+- Setup obrazovka: změna GeoJSON cesty se po tlačítku "Použít podklad trati" projeví okamžitě na mapě
+- Setup obrazovka: u vybrané pozice lze uložit souřadnice (lat/lon) a marker se hned přesune
+- Mapové prvky: divácká místa, uzavírky, retardéry, zdravotníci, hasiči, start/cíl a časomíra jsou načtené z GeoJSON a zobrazí se v mapě
+- Komisařské pozice mají v datech flag `requires_commissioner` a jejich popisek popisuje, zda podléhají pravidlům READY/online
+- V hlavičce mapy je viditelný štítek s podkladem `OpenStreetMap + vlastní vrstva`
+- Každá pozice v mapové vrstvě zobrazuje jméno, název pozice a telefonní číslo, aby šlo volat i v offline režimu
 - Horní lišta aplikace zobrazuje stav RZ (`V provozu`, `Pozastavena`, `Zastavena`)
 - Při stavu `Pozastavena`/`Zastavena` má mapa červený warning border
 - Warning border mapy je renderovaný jako overlay nad Leafletem (nesmí se schovat pod mapové vrstvy)
@@ -300,6 +356,7 @@ Invoke-RestMethod http://localhost:8000/api/admin/people `
 - Tagy se zvýrazní jen pokud odpovídají známému uživateli/stanici; klik na `#Stanice` vycentruje mapu na marker
 - Chat, info kanál a varování vedení se ukládají lokálně pro přihlášeného uživatele a po odhlášení/znovupřihlášení se obnoví
 - Toast notifikace se zobrazují na středu nad mapou (ne v pravém horním rohu)
+- Audit log obsahuje nejen komunikaci, ale i klíčové UI kroky (potvrzení/zrušení warningů, změny RZ stavu, setup změny lidí a map config)
 
 ### Map Module - Manual Checklist (Fáze 4)
 - Na mapě jsou vidět markery stanic se symbolem role (S/F/T/C/P/B/Z/V/+)
@@ -327,7 +384,7 @@ Invoke-RestMethod http://localhost:8000/api/admin/people `
 - **IndexedDB** - Local data persistence
 
 ### Architecture
-- **Auth:** 2-tier (password hash + PIN codes)
+- **Auth:** 2-tier (password hash + PIN codes; nové PINy mají 8 číslic, legacy 4místné jsou podporované)
 - **Scalability:** 160+ concurrent connections
 - **Storage:** In-memory (MVP phase)
 - **No database** until production phase
