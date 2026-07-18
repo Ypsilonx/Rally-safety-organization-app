@@ -105,15 +105,46 @@ const AppOperationsRzModule = {
      * @param {Object} app
      */
     startGateStatusRefresh(app) {
+        if (!app.isVedeniUser()) {
+            return;
+        }
+
+        if (app.gateRefreshTimer) {
+            clearInterval(app.gateRefreshTimer);
+            app.gateRefreshTimer = null;
+        }
+
         app.refreshGateStatus().catch((error) => {
             console.error('Gate status refresh failed:', error);
         });
 
-        setInterval(() => {
+        app.gateRefreshTimer = setInterval(() => {
             app.refreshGateStatus().catch((error) => {
                 console.error('Gate status refresh failed:', error);
             });
         }, 12000);
+    },
+
+    /**
+     * Queue immediate gate refresh, while collapsing burst updates.
+     * @param {Object} app
+     */
+    requestGateStatusRefresh(app) {
+        if (!app.isVedeniUser()) {
+            return;
+        }
+
+        if (app.gateRefreshQueued) {
+            return;
+        }
+
+        app.gateRefreshQueued = true;
+        setTimeout(() => {
+            app.gateRefreshQueued = false;
+            app.refreshGateStatus().catch((error) => {
+                console.error('Gate status refresh failed:', error);
+            });
+        }, 250);
     },
 
     /**
@@ -146,6 +177,7 @@ const AppOperationsRzModule = {
                 .map((station) => station.station_id || 'N/A')
             : [];
         app.incidentGateActive = incidentActive;
+        app.gateMissingStations = missingStations;
 
         if (!incidentActive) {
             gateLabel.textContent = 'Gate: otevřeno';

@@ -44,7 +44,7 @@ const AppOperationsIncidentsModule = {
      * @param {Object} app
      * @param {string} alertKey
      */
-    sendAlertPreset(app, alertKey) {
+    async sendAlertPreset(app, alertKey) {
         const presets = {
             rz_stop: { text: '🛑 RZ zastavena - okamžitě zajistit trať.', priority: 'critical' },
             track_problem: { text: '⚠️ Pozor problém na trati - zvýšená opatrnost.', priority: 'high' },
@@ -57,6 +57,15 @@ const AppOperationsIncidentsModule = {
             return;
         }
 
+        if (alertKey === 'rz_resume') {
+            await app.refreshGateStatus();
+            const missing = Array.isArray(app.gateMissingStations) ? app.gateMissingStations : [];
+            if (app.incidentGateActive && missing.length > 0) {
+                app.showToast(`RZ nelze obnovit. Chybí READY: ${missing.join(', ')}`, 'error');
+                return;
+            }
+        }
+
         const payload = {
             message_type: 'broadcast',
             priority: preset.priority,
@@ -65,22 +74,28 @@ const AppOperationsIncidentsModule = {
             created_at: new Date().toISOString(),
         };
 
-        const ownMessage = {
-            message_id: `preset_${Date.now()}`,
-            sender: {
-                user_id: app.user.user_id,
-                name: app.user.name,
-                role: app.user.role,
-                station_id: app.user.station_id || null,
-            },
-            ...payload,
-        };
-
-        app.displayMessage(ownMessage);
-        app.displayInfoMessage(ownMessage);
-        app.applyRzStateFromCommand(alertKey);
         window.wsClient.sendMessage(payload);
-        app.showToast('Předdefinované hlášení odesláno', 'success');
+
+        if (alertKey === 'rz_resume') {
+            app.showToast('Požadavek na obnovení RZ odeslán', 'success');
+        } else {
+            const ownMessage = {
+                message_id: `preset_${Date.now()}`,
+                sender: {
+                    user_id: app.user.user_id,
+                    name: app.user.name,
+                    role: app.user.role,
+                    station_id: app.user.station_id || null,
+                },
+                ...payload,
+            };
+            app.displayMessage(ownMessage);
+            app.displayInfoMessage(ownMessage);
+            app.applyRzStateFromCommand(alertKey);
+            app.showToast('Předdefinované hlášení odesláno', 'success');
+        }
+
+        app.requestGateStatusRefresh();
     },
 
     /**
@@ -102,6 +117,7 @@ const AppOperationsIncidentsModule = {
                 content: '✅ Stanice připravena',
                 created_at: new Date().toISOString(),
             });
+            app.requestGateStatusRefresh();
             app.showToast('Stav odeslán', 'success');
             return;
         }
@@ -138,6 +154,7 @@ const AppOperationsIncidentsModule = {
             app.applyMarkerAlertFromMessage(ownMessage);
             window.wsClient.sendMessage(payload);
             app.incidentGateActive = true;
+            app.requestGateStatusRefresh();
             app.showToast('Incident odeslán vedení', 'error');
             return;
         }
@@ -169,6 +186,7 @@ const AppOperationsIncidentsModule = {
             app.applyMarkerAlertFromMessage(ownMessage);
             window.wsClient.sendMessage(payload);
             app.incidentGateActive = true;
+            app.requestGateStatusRefresh();
             app.showToast('Akutní incident odeslán vedení', 'error');
         }
     },

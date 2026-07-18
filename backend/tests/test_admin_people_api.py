@@ -2,7 +2,8 @@
 
 from pathlib import Path
 
-from fastapi.testclient import TestClient
+import pytest
+from httpx import ASGITransport, AsyncClient
 
 from backend.api import admin as admin_api
 from backend.core.auth import auth_manager
@@ -21,20 +22,21 @@ def _admin_headers() -> dict[str, str]:
     return {"X-Session-Token": token}
 
 
-def test_admin_people_requires_auth() -> None:
+@pytest.mark.asyncio
+async def test_admin_people_requires_auth() -> None:
     """People endpoints should reject requests without session token."""
-    client = TestClient(app)
+    async with AsyncClient(transport=ASGITransport(app=app), base_url="http://testserver") as client:
+        response = await client.get("/api/admin/people")
 
-    response = client.get("/api/admin/people")
     assert response.status_code == 401
 
 
-def test_admin_people_import_and_list(monkeypatch, tmp_path: Path) -> None:
+@pytest.mark.asyncio
+async def test_admin_people_import_and_list(monkeypatch, tmp_path: Path) -> None:
     """Admin should import people CSV and get them back from list endpoint."""
     catalog = PeopleCatalog(storage_file=str(tmp_path / "people_catalog.json"))
     monkeypatch.setattr(admin_api, "people_catalog", catalog)
 
-    client = TestClient(app)
     headers = _admin_headers()
     payload = {
         "csv_content": (
@@ -45,14 +47,20 @@ def test_admin_people_import_and_list(monkeypatch, tmp_path: Path) -> None:
         "replace_existing": False,
     }
 
-    import_response = client.post("/api/admin/people/import-csv", json=payload, headers=headers)
+    async with AsyncClient(transport=ASGITransport(app=app), base_url="http://testserver") as client:
+        import_response = await client.post(
+            "/api/admin/people/import-csv",
+            json=payload,
+            headers=headers,
+        )
     assert import_response.status_code == 200
     import_data = import_response.json()["result"]
     assert import_data["imported"] == 2
     assert import_data["updated"] == 0
     assert import_data["errors"] == []
 
-    list_response = client.get("/api/admin/people", headers=headers)
+    async with AsyncClient(transport=ASGITransport(app=app), base_url="http://testserver") as client:
+        list_response = await client.get("/api/admin/people", headers=headers)
     assert list_response.status_code == 200
     list_data = list_response.json()
     assert list_data["total"] == 2

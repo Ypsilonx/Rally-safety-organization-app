@@ -2,7 +2,7 @@
 
 from enum import Enum
 from typing import Optional
-from pydantic import BaseModel, Field, field_validator
+from pydantic import BaseModel, ConfigDict, Field, field_validator
 
 from backend.models.user import UserRole
 
@@ -40,8 +40,8 @@ class Station(BaseModel):
             raise ValueError(f"Assigned PINs ({len(v)}) exceed capacity ({capacity})")
         return v
     
-    class Config:
-        json_schema_extra = {
+    model_config = ConfigDict(
+        json_schema_extra={
             "example": {
                 "station_id": "TK-01",
                 "name": "Zatáčka u lesa",
@@ -50,9 +50,10 @@ class Station(BaseModel):
                 "longitude": 14.4378,
                 "capacity": 2,
                 "assigned_pins": ["1234", "5678"],
-                "description": "Ostrá pravá zatáčka"
+                "description": "Ostrá pravá zatáčka",
             }
         }
+    )
 
 
 class AssignedUser(BaseModel):

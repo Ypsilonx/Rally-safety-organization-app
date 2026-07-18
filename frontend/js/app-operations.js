@@ -88,6 +88,14 @@ const AppOperationsModule = {
     },
 
     /**
+     * Queue immediate gate refresh (debounced).
+     * @param {Object} app
+     */
+    requestGateStatusRefresh(app) {
+        return window.AppOperationsRzModule.requestGateStatusRefresh(app);
+    },
+
+    /**
      * Return true when current user is vedeni role.
      * @param {Object} app
      * @returns {boolean}

@@ -294,6 +294,11 @@ _Details in [ROADMAP.md](ROADMAP.md)_
 - ✅ UX: toast notifikace přesunuty doprostřed nad mapu
 - ✅ Incident feed: nejnovější varování je připnuté nahoře, historie je scroll pod ním
 - ✅ Perzistence UI: chat/info/varování se obnoví po odhlášení a znovupřihlášení
+- ✅ Gate UX: odstraněna optimistická změna `RZ opět v provozu`, stav se bere z autoritativní odpovědi serveru
+- ✅ Gate sync: dashboard READY gate se obnovuje okamžitě na relevantní události (nejen periodický interval)
+- ✅ Setup live sync: změna role/osoby na pozici okamžitě refreshne mapu + dashboard statusy
+- ✅ Maintenance: odstraněny Python/FastAPI deprecation warningy (Pydantic `ConfigDict`, FastAPI `lifespan`)
+- ✅ Testy: admin API integrační test přepsán z `TestClient` na `httpx.AsyncClient` (`ASGITransport`)
 
 ## 💡 Backlog nápadů
 

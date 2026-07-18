@@ -30,6 +30,9 @@ const App = {
         candidates: [],
     },
     incidentGateActive: false,
+    gateMissingStations: [],
+    gateRefreshTimer: null,
+    gateRefreshQueued: false,
     rzState: 'running',
     adminStations: [],
     adminPeople: [],
@@ -299,7 +302,10 @@ const App = {
 
         document.querySelectorAll('.btn-alert').forEach((btn) => {
             btn.addEventListener('click', () => {
-                this.sendAlertPreset(btn.dataset.alert);
+                this.sendAlertPreset(btn.dataset.alert).catch((error) => {
+                    console.error('Alert preset failed:', error);
+                    this.showToast('Operační hlášení se nepodařilo odeslat', 'error');
+                });
             });
         });
 
@@ -542,6 +548,13 @@ const App = {
      */
     async refreshGateStatus() {
         return window.AppOperationsModule.refreshGateStatus(this);
+    },
+
+    /**
+     * Queue immediate gate refresh (debounced) for event-driven updates.
+     */
+    requestGateStatusRefresh() {
+        return window.AppOperationsModule.requestGateStatusRefresh(this);
     },
 
     /**

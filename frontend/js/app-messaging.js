@@ -54,6 +54,9 @@ const AppMessagingModule = {
                 : '';
             const detailText = missing ? ` Chybí: ${missing}` : '';
             app.showToast(`${normalized.message || 'Chyba komunikace'}${detailText}`, 'error');
+            if (missing) {
+                app.requestGateStatusRefresh();
+            }
             return;
         }
 
@@ -72,6 +75,10 @@ const AppMessagingModule = {
 
         if (normalized.message_type === 'incident' || normalized.message_type === 'broadcast') {
             app.showToast(normalized.content, 'error');
+        }
+
+        if (normalized.operation_command || normalized.readiness_state || normalized.message_type === 'incident') {
+            app.requestGateStatusRefresh();
         }
     },
 

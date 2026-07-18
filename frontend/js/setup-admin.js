@@ -391,6 +391,15 @@ const SetupAdminModule = {
         }
 
         await this.loadAdminStations(app);
+        if (window.MapModule?.isInitialized) {
+            window.MapModule.refreshStationMarkers().catch((error) => {
+                console.error('Map refresh after assignment failed:', error);
+            });
+        }
+        window.dispatchEvent(new CustomEvent('admin:station-directory-updated', {
+            detail: { stationId },
+        }));
+        app.requestGateStatusRefresh();
         app.showToast(`Pozice ${stationId} aktualizována`, 'success');
     },
 
@@ -431,6 +440,15 @@ const SetupAdminModule = {
         }
 
         await this.loadAdminStations(app);
+        if (window.MapModule?.isInitialized) {
+            window.MapModule.refreshStationMarkers().catch((error) => {
+                console.error('Map refresh after release failed:', error);
+            });
+        }
+        window.dispatchEvent(new CustomEvent('admin:station-directory-updated', {
+            detail: { stationId },
+        }));
+        app.requestGateStatusRefresh();
         app.showToast(`Pozice ${stationId} uvolněna`, 'success');
     },
 };

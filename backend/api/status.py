@@ -19,15 +19,38 @@ async def get_stations_status() -> dict[str, Any]:
     Returns:
         Timestamped snapshot of all known station vitality records.
     """
-    stations = await vitality_monitor.get_station_statuses()
+    vitality_stations = await vitality_monitor.get_station_statuses()
+    station_directory = {station.station_id: station for station in station_registry.list_stations()}
+    vitality_by_station = {
+        str(station.get("station_id")): station
+        for station in vitality_stations
+        if station.get("station_id")
+    }
+
+    all_station_ids = sorted(set(station_directory.keys()) | set(vitality_by_station.keys()))
+
     incident_active, ready_map = await operations_state.get_station_ready_map()
-    enriched_stations = [
-        {
-            **station,
-            "ready": ready_map.get(str(station.get("station_id")), not incident_active),
-        }
-        for station in stations
-    ]
+    enriched_stations = []
+
+    for station_id in all_station_ids:
+        vitality = vitality_by_station.get(station_id, {})
+        directory = station_directory.get(station_id)
+        current_user = directory.current_user if directory else None
+
+        enriched_stations.append(
+            {
+                "station_id": station_id,
+                "name": current_user.name if current_user else vitality.get("name", directory.station_name if directory else station_id),
+                "role": current_user.role if current_user else vitality.get("role"),
+                "station_type": directory.station_type.value if directory else None,
+                "online": bool(vitality.get("online", False)),
+                "last_seen": vitality.get("last_seen"),
+                "seconds_since_last_seen": vitality.get("seconds_since_last_seen", 0),
+                "active_connections": vitality.get("active_connections", 0),
+                "ready": ready_map.get(station_id, not incident_active),
+            }
+        )
+
     return {
         "generated_at": datetime.now(UTC).isoformat(),
         "total_stations": len(enriched_stations),

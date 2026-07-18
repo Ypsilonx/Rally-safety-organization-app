@@ -1,6 +1,7 @@
 """Rally Safety App - FastAPI Backend."""
 
 import json
+from contextlib import asynccontextmanager
 from datetime import datetime
 from typing import Optional
 
@@ -19,12 +20,58 @@ from backend.models.message import MessageType
 from backend.services.operations_state import operations_state
 from backend.services.vitality import vitality_monitor
 
+async def _startup() -> None:
+    """Load existing PINs and start background services."""
+    await vitality_monitor.start()
+
+    # Load existing PINs from data/pins.json (persistent storage)
+    all_pins = auth_manager.list_all_pins()
+
+    print("=" * 60)
+    print("🔐 PŘIHLAŠOVACÍ ÚDAJE")
+    print("=" * 60)
+    print("\n📋 VEDENÍ RZ (Username + Password):")
+    print("   Username: admin")
+    print("   Password: demo123")
+
+    if all_pins:
+        print("\n📋 KOMISAŘI (PIN kód):")
+        for komisar in all_pins:
+            print(f"\n   {komisar.name}")
+            print(f"   PIN: {komisar.pin_code}")
+            print(f"   Role: {komisar.role.value}")
+            print(f"   Stanice: {komisar.station_id or 'Nepřiřazena'}")
+    else:
+        print("\n⚠️  ŽÁDNÉ KOMISAŘ PINy - použij Admin Panel pro generování")
+
+    print("\n" + "=" * 60)
+    print(f"✅ Server běží na http://{settings.HOST}:{settings.PORT}")
+    print(f"📊 Načteno PINů: {len(all_pins)}")
+    print("=" * 60)
+
+
+async def _shutdown() -> None:
+    """Gracefully stop background services."""
+    await vitality_monitor.stop()
+
+
+@asynccontextmanager
+async def lifespan(_app: FastAPI):
+    """Manage FastAPI startup/shutdown lifecycle."""
+    await _startup()
+    try:
+        yield
+    finally:
+        await _shutdown()
+
+
 # Initialize FastAPI app
 settings = get_settings()
 app = FastAPI(
     title=settings.APP_NAME,
     version=settings.APP_VERSION,
-    debug=settings.DEBUG
+    debug=settings.DEBUG,
+    lifespan=lifespan,
 )
 
 # CORS middleware - allow frontend to connect
@@ -40,43 +87,6 @@ app.add_middleware(
 app.include_router(auth_router)
 app.include_router(admin_router)
 app.include_router(status_router)
-
-
-@app.on_event("startup")
-async def startup_event():
-    """Load existing PINs and display credentials on server startup."""
-    await vitality_monitor.start()
-
-    # Load existing PINs from data/pins.json (persistent storage)
-    all_pins = auth_manager.list_all_pins()
-    
-    print("=" * 60)
-    print("🔐 PŘIHLAŠOVACÍ ÚDAJE")
-    print("=" * 60)
-    print("\n📋 VEDENÍ RZ (Username + Password):")
-    print("   Username: admin")
-    print("   Password: demo123")
-    
-    if all_pins:
-        print("\n📋 KOMISAŘI (PIN kód):")
-        for komisar in all_pins:
-            print(f"\n   {komisar.name}")
-            print(f"   PIN: {komisar.pin_code}")
-            print(f"   Role: {komisar.role.value}")
-            print(f"   Stanice: {komisar.station_id or 'Nepřiřazena'}")
-    else:
-        print("\n⚠️  ŽÁDNÉ KOMISAŘ PINy - použij Admin Panel pro generování")
-    
-    print("\n" + "=" * 60)
-    print(f"✅ Server běží na http://{settings.HOST}:{settings.PORT}")
-    print(f"📊 Načteno PINů: {len(all_pins)}")
-    print("=" * 60)
-
-
-@app.on_event("shutdown")
-async def shutdown_event():
-    """Gracefully stop background services."""
-    await vitality_monitor.stop()
 
 
 @app.get("/")
@@ -288,25 +298,28 @@ async def websocket_endpoint(websocket: WebSocket, auth_identifier: str):
                     "readiness_state": station_message.readiness_state,
                 }
                 broadcast_json = json.dumps(broadcast_data, ensure_ascii=False)
+
+                # Operation commands must be echoed back to sender as authoritative state.
+                exclude_pin = None if station_message.operation_command else user_data["auth_id"]
                 
                 # Selective broadcast based on target_roles and priority
                 if station_message.priority == MessagePriority.CRITICAL:
-                    # Critical messages go to everyone (except sender - they see it via optimistic update)
-                    await connection_manager.broadcast_critical(broadcast_json, exclude_pin=user_data["auth_id"])
+                    # Critical messages go to everyone.
+                    await connection_manager.broadcast_critical(broadcast_json, exclude_pin=exclude_pin)
                 
                 elif station_message.target_roles:
                     # Send to specific roles only
                     await connection_manager.broadcast_to_roles(
                         broadcast_json,
                         station_message.target_roles,
-                        exclude_pin=user_data["auth_id"]
+                        exclude_pin=exclude_pin
                     )
                 
                 else:
                     # Normal broadcast to all
                     await connection_manager.broadcast_to_all(
                         broadcast_json,
-                        exclude_pin=user_data["auth_id"]
+                        exclude_pin=exclude_pin
                     )
             
             except json.JSONDecodeError:

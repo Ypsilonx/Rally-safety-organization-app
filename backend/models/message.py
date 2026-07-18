@@ -3,7 +3,7 @@
 from datetime import datetime
 from enum import Enum
 from typing import Optional
-from pydantic import BaseModel, Field, model_validator
+from pydantic import BaseModel, ConfigDict, Field, model_validator
 
 
 class MessagePriority(str, Enum):
@@ -60,8 +60,8 @@ class StationMessage(BaseModel):
             raise ValueError("readiness_state must be 'ready' or 'not_ready'")
         return self
     
-    class Config:
-        json_schema_extra = {
+    model_config = ConfigDict(
+        json_schema_extra={
             "example": {
                 "message_id": "msg_123456",
                 "sender_pin": "1234",
@@ -69,6 +69,7 @@ class StationMessage(BaseModel):
                 "message_type": "chat",
                 "priority": "normal",
                 "content": "Traťový úsek OK",
-                "target_roles": None
+                "target_roles": None,
             }
         }
+    )

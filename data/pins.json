@@ -1,7 +1,7 @@
 {
   "1234": {
     "name": "Alena Novotna",
-    "role": "komisar_trat",
+    "role": "zdravotnik",
     "phone": "+420555111222",
     "station_id": "TK-01",
     "station_name": null,
@@ -24,6 +24,15 @@
         "role": "komisar_trat",
         "phone": "+420555111222",
         "assigned_at": "2026-07-15T17:16:55.993632+00:00",
+        "assigned_until": "2026-07-18T08:40:36.470829+00:00",
+        "is_active": false,
+        "note": null
+      },
+      {
+        "name": "Alena Novotna",
+        "role": "zdravotnik",
+        "phone": "+420555111222",
+        "assigned_at": "2026-07-18T08:40:36.470829+00:00",
         "assigned_until": null,
         "is_active": true,
         "note": null

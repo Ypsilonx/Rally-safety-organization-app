@@ -1,7 +1,7 @@
 """Authentication models for Rally Safety App."""
 
 from typing import Optional
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, ConfigDict, Field
 
 
 class LoginVedeniRequest(BaseModel):
@@ -9,13 +9,14 @@ class LoginVedeniRequest(BaseModel):
     username: str = Field(..., min_length=3, max_length=50)
     password: str = Field(..., min_length=6, max_length=100)
     
-    class Config:
-        json_schema_extra = {
+    model_config = ConfigDict(
+        json_schema_extra={
             "example": {
                 "username": "admin",
-                "password": "demo123"
+                "password": "demo123",
             }
         }
+    )
 
 
 class LoginVedeniResponse(BaseModel):
@@ -33,12 +34,13 @@ class LoginKomisarRequest(BaseModel):
     """Login request for komisař (PIN code only)."""
     pin_code: str = Field(..., min_length=4, max_length=4, pattern=r"^\d{4}$")
     
-    class Config:
-        json_schema_extra = {
+    model_config = ConfigDict(
+        json_schema_extra={
             "example": {
-                "pin_code": "1234"
+                "pin_code": "1234",
             }
         }
+    )
 
 
 class LoginKomisarResponse(BaseModel):

@@ -113,6 +113,12 @@ const MapModule = {
             this.clearAllStationAlerts();
         });
 
+        window.addEventListener('admin:station-directory-updated', () => {
+            this.refreshStationMarkers().catch((error) => {
+                console.error('Station refresh after admin update failed:', error);
+            });
+        });
+
         await window.MapStationsModule.refreshStationMarkers(this);
         this.startStationRefresh();
 
