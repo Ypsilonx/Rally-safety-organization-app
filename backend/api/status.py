@@ -1,16 +1,52 @@
 """Station status API endpoints."""
 
 from datetime import UTC, datetime
-from typing import Any
+from typing import Annotated, Any
 
-from fastapi import APIRouter
+from fastapi import APIRouter, Depends, Header, HTTPException, status
 
+from backend.core.auth import auth_manager
 from backend.core.rz_context import rz_context_manager
 from backend.services.operations_state import operations_state
 from backend.services.vitality import vitality_monitor
 from backend.core.station_registry import station_registry
 
 router = APIRouter(prefix="/api/stations", tags=["stations"])
+
+
+def require_vedeni_or_admin(
+    session_token: Annotated[str | None, Header(alias="X-Session-Token")] = None,
+) -> dict[str, Any]:
+    """Require valid vedení/admin session (not a komisař PIN) for this router.
+
+    Args:
+        session_token: Session token provided in request header.
+
+    Returns:
+        Verified session data.
+
+    Raises:
+        HTTPException: If the header is missing, invalid, or lacks privileges.
+    """
+    if not session_token:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Missing X-Session-Token header",
+        )
+
+    session = auth_manager.verify_session(session_token)
+    if not session:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Session expired or invalid",
+        )
+
+    if session["role"].value not in {"vedouci", "zastupce", "admin"}:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Insufficient privileges",
+        )
+    return session
 
 
 @router.get("/rz-context")
@@ -92,6 +128,21 @@ async def get_readiness_status() -> dict[str, Any]:
     snapshot = await operations_state.get_snapshot()
     snapshot["generated_at"] = datetime.now(UTC).isoformat()
     return snapshot
+
+
+@router.get("/pins")
+async def get_station_pins(
+    _: Annotated[dict[str, Any], Depends(require_vedeni_or_admin)],
+) -> dict[str, str]:
+    """Return PIN codes for all stations - visible only to vedení/admin.
+
+    Komisaři autentizovaní přes PIN (ne session token) touto branou
+    neprojdou - `verify_session` jejich PIN nikdy neuzná jako platný token.
+
+    Returns:
+        Mapping station_id -> pin_code.
+    """
+    return {station.station_id: station.pin_code for station in station_registry.list_stations()}
 
 
 @router.get("")
