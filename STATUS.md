@@ -1,6 +1,6 @@
 # Project Status & Progress Tracking
 
-**Last Updated:** 15. července 2026  
+**Last Updated:** 18. července 2026  
 **Current Phase:** Fáze 4 + Fáze 5 backend slice 🔄 IN PROGRESS  
 **Next Phase:** Dokončení station-first backend API + napojení admin UI
 
@@ -211,6 +211,18 @@ _Details in [ROADMAP.md](ROADMAP.md)_
 ---
 
 ## 📝 Recent Changes
+
+### 2026-07-18 (Fáze 4/5 - backend + frontend refaktor)
+- ✅ Backend: `api/` rozdělené na samostatné routery (`admin.py`, `audit.py`, `auth.py`, `status.py`, `websocket.py`); `main.py` zeštíhlen na inicializaci a lifespan
+- ✅ Backend: nový `backend/core/rz_context.py` pro správu názvu RZ a resetu historie komunikace
+- ✅ Frontend: `styles.css` rozdělen na `base.css`, `app-shell.css`, `communication.css`, `responsive.css` (`styles.css` zůstává jen jako zbytkový soubor)
+- ✅ Frontend: `app-operations.js` úplně zrušen, logika je jen v `app-operations-rz.js` a `app-operations-incidents.js`
+- ✅ Validace: backend test suite 17/17 passing, `data/pins.json`/`people_catalog.json`/`rz_context.json` zůstávají mimo git
+
+### 2026-08-30 (údržba)
+- ✅ Frontend: sjednoceny hardcoded `http://localhost:8000` volání na centrální konstantu `API_BASE_URL` (14 míst v `app.js`, `map.js`, `setup-admin.js`, `app-operations-*.js`) — appka teď jde nasadit na jiný host/port bez zásahu do kódu
+- ✅ Git: odstraněny z trackování testovací session logy (`logs/rz_session_202602*.jsonl`), které se do repa dostaly ještě před přidáním `.gitignore` pravidla; obsahovaly jen fiktivní jména z vývojového testování
+- 📝 Dokumentace (README/STATUS) zarovnána se skutečnou strukturou backend/frontend souborů
 
 ### 2026-07-15 (Fáze 5 - frontend iterace 2)
 - ✅ Frontend: setup formulář má dropdown `Katalog osob` napojený na `GET /api/admin/people`

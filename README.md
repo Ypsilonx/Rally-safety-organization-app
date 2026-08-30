@@ -16,7 +16,7 @@
 **Další fáze:** Dokončení backendového station-first API a napojení admin UI  
 **Celkový pokrok:** 50% (5/10 fází dokončeno)
 
-### Stav implementace k 15.7.2026
+### Stav implementace k 18.7.2026
 
 - ✅ Hotovo: Fáze 0, 1, 2, 3
 - 🔄 Rozpracováno: Fáze 4 (mapa + desktop/mobile UX refinements)
@@ -150,18 +150,22 @@ Stop: `Ctrl+Shift+P` → `Tasks: Terminate Task` (nebo `Terminate All Tasks`).
 ```
 rally-safety-app/
 ├── backend/              # FastAPI WebSocket server
-│   ├── main.py          # Inicializace FastAPI, middleware, routery
-│   ├── api/             # REST & WebSocket endpointy
-│   │   └── websocket.py # WebSocket pipeline (auth, gate, broadcast)
-│   ├── core/            # Config, Connection Manager
-│   ├── models/          # Pydantic data models
-│   └── services/        # Business logic
-├── frontend/            # PWA aplikace
-│   ├── index.html       # (připraveno v Fázi 2)
-│   ├── js/              # Client-side logika
-│   └── css/             # Mobile-first styly
-├── data/                # Sample GeoJSON tratě
-└── docs/                # Dokumentace
+│   ├── main.py          # Inicializace FastAPI, middleware, lifespan
+│   ├── api/              # REST & WebSocket endpointy (routery)
+│   │   ├── auth.py       # Login vedení/komisař
+│   │   ├── admin.py      # Správa stanic, PINů a katalogu lidí
+│   │   ├── audit.py      # Audit log frontend eventů
+│   │   ├── status.py     # Stav stanic, RZ context, readiness gate
+│   │   └── websocket.py  # WebSocket pipeline (auth, gate, broadcast)
+│   ├── core/             # Config, auth, connection manager, station registry, rz_context
+│   ├── models/           # Pydantic data models
+│   └── services/         # Business logic (vitality, operations state)
+├── frontend/             # PWA aplikace
+│   ├── index.html
+│   ├── js/               # Client-side logika (auth, websocket, map, app moduly)
+│   └── css/              # base/app-shell/communication/responsive (mobile-first)
+├── data/                 # Sample GeoJSON tratě + lokální (gitignored) provozní data
+└── docs/                 # (zatím prázdné, připraveno pro budoucí dokumentaci)
 ```
 
 ---
@@ -464,5 +468,5 @@ MIT License. Viz [LICENSE](LICENSE).
 
 ---
 
-**Poslední aktualizace:** 12. července 2026  
+**Poslední aktualizace:** 30. srpna 2026  
 **Verze dokumentace:** v0.5-dev (Fáze 4 in progress)

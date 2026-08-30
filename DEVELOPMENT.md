@@ -162,22 +162,22 @@ async function sendMessage(messageType, payload) {
 
 ### Backend Testing
 ```python
-# pytest for all tests
-# Test file: test_*.py or *_test.py
+# pytest for all tests (asyncio_mode = "auto", viz pyproject.toml)
+# Test file: test_*.py
 
 import pytest
-from fastapi.testclient import TestClient
-from main import app
+from httpx import ASGITransport, AsyncClient
+from backend.main import app
 
 @pytest.fixture
-def client():
-    return TestClient(app)
+async def client():
+    transport = ASGITransport(app=app)
+    async with AsyncClient(transport=transport, base_url="http://test") as ac:
+        yield ac
 
-def test_websocket_connection(client):
-    with client.websocket_connect("/ws/ST-01") as websocket:
-        websocket.send_json({"type": "heartbeat"})
-        data = websocket.receive_json()
-        assert data["status"] == "ok"
+async def test_health_check(client):
+    response = await client.get("/health")
+    assert response.json()["status"] == "healthy"
 ```
 
 ### Frontend Testing
