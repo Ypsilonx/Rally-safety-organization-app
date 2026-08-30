@@ -42,7 +42,7 @@ async def _resolve_user(auth_identifier: str) -> dict[str, Any] | None:
         return {
             "name": session_data["name"],
             "role": session_data["role"].value,
-            "station_id": None,
+            "station_id": session_data.get("station_id"),
             "auth_id": auth_identifier,
             "phone": session_data.get("phone"),
         }
