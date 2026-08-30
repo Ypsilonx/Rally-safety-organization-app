@@ -97,3 +97,72 @@ async def test_station_pins_returns_map_for_admin_session(monkeypatch, tmp_path:
 
     assert response.status_code == 200
     assert "TK-01" in response.json()
+
+
+@pytest.mark.asyncio
+async def test_station_directory_requires_auth(monkeypatch, tmp_path: Path) -> None:
+    """GET /api/stations (root) must reject requests without a session token."""
+    monkeypatch.setattr(station_registry_module, "auth_manager", _isolated_auth_manager(tmp_path))
+
+    async with AsyncClient(transport=ASGITransport(app=app), base_url="http://testserver") as client:
+        response = await client.get("/api/stations")
+
+    assert response.status_code == 401
+
+
+@pytest.mark.asyncio
+async def test_station_directory_returns_data_for_vedeni_session(monkeypatch, tmp_path: Path) -> None:
+    """GET /api/stations (root) should return station data for a vedení session."""
+    isolated = _isolated_auth_manager(tmp_path)
+    monkeypatch.setattr(station_registry_module, "auth_manager", isolated)
+
+    token = auth_manager.create_session(
+        username="VRZ",
+        name="Vedouci RZ",
+        role=UserRole.VEDOUCI,
+    )
+
+    async with AsyncClient(transport=ASGITransport(app=app), base_url="http://testserver") as client:
+        response = await client.get(
+            "/api/stations",
+            headers={"X-Session-Token": token},
+        )
+
+    assert response.status_code == 200
+    data = response.json()
+    station_ids = [station["station_id"] for station in data["stations"]]
+    assert "TK-01" in station_ids
+
+
+@pytest.mark.asyncio
+async def test_station_detail_requires_auth(monkeypatch, tmp_path: Path) -> None:
+    """GET /api/stations/{station_id} must reject requests without a session token."""
+    monkeypatch.setattr(station_registry_module, "auth_manager", _isolated_auth_manager(tmp_path))
+
+    async with AsyncClient(transport=ASGITransport(app=app), base_url="http://testserver") as client:
+        response = await client.get("/api/stations/TK-01")
+
+    assert response.status_code == 401
+
+
+@pytest.mark.asyncio
+async def test_station_detail_returns_data_for_admin_session(monkeypatch, tmp_path: Path) -> None:
+    """GET /api/stations/{station_id} should return station data for an admin session."""
+    isolated = _isolated_auth_manager(tmp_path)
+    monkeypatch.setattr(station_registry_module, "auth_manager", isolated)
+
+    token = auth_manager.create_session(
+        username="admin",
+        name="Admin RZ",
+        role=UserRole.ADMIN,
+    )
+
+    async with AsyncClient(transport=ASGITransport(app=app), base_url="http://testserver") as client:
+        response = await client.get(
+            "/api/stations/TK-01",
+            headers={"X-Session-Token": token},
+        )
+
+    assert response.status_code == 200
+    data = response.json()
+    assert data["station"]["station_id"] == "TK-01"

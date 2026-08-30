@@ -146,7 +146,9 @@ async def get_station_pins(
 
 
 @router.get("")
-async def list_station_directory() -> dict[str, Any]:
+async def list_station_directory(
+    _: Annotated[dict[str, Any], Depends(require_vedeni_or_admin)],
+) -> dict[str, Any]:
     """Return station-centric directory derived from persistent PIN storage.
 
     Returns:
@@ -161,7 +163,10 @@ async def list_station_directory() -> dict[str, Any]:
 
 
 @router.get("/{station_id}")
-async def get_station_detail(station_id: str) -> dict[str, Any]:
+async def get_station_detail(
+    station_id: str,
+    _: Annotated[dict[str, Any], Depends(require_vedeni_or_admin)],
+) -> dict[str, Any]:
     """Return one station record including assignment history.
 
     Args:
