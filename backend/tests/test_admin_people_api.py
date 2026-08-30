@@ -16,8 +16,8 @@ def _admin_headers() -> dict[str, str]:
     """Create valid admin headers for test requests."""
     token = auth_manager.create_session(
         username="admin",
-        name="Vedouci RZ",
-        role=UserRole.VEDOUCI,
+        name="Admin RZ",
+        role=UserRole.ADMIN,
     )
     return {"X-Session-Token": token}
 
@@ -67,3 +67,18 @@ async def test_admin_people_import_and_list(monkeypatch, tmp_path: Path) -> None
     assert [f"{item['first_name']} {item['last_name']}".strip() for item in list_data["people"]] == ["Eva Testovací", "Jan Novák"]
     assert list_data["people"][0]["email"] == "eva@example.com"
     assert list_data["people"][0]["group"] == "Přerováci"
+
+
+@pytest.mark.asyncio
+async def test_admin_people_rejects_vedouci_role() -> None:
+    """Vedení role should be rejected - only ADMIN may manage people."""
+    token = auth_manager.create_session(
+        username="VRZ",
+        name="Vedouci RZ",
+        role=UserRole.VEDOUCI,
+    )
+
+    async with AsyncClient(transport=ASGITransport(app=app), base_url="http://testserver") as client:
+        response = await client.get("/api/admin/people", headers={"X-Session-Token": token})
+
+    assert response.status_code == 403

@@ -46,10 +46,14 @@ class RzConfigUpdateRequest(BaseModel):
     rz_name: str = Field(..., min_length=1, max_length=120)
 
 
-def require_vedeni(
+def require_admin(
     session_token: Annotated[str | None, Header(alias="X-Session-Token")] = None,
 ) -> dict[str, Any]:
-    """Require valid vedení session for admin endpoints.
+    """Require valid ADMIN session for station/people/map admin endpoints.
+
+    Vedení RZ (vedouci/zastupce) na tyto endpointy záměrně nemá přístup -
+    přiřazování osob na pozice, mazání/regenerace PINů a konfigurace mapy
+    je výhradně v rukou ADMINa (viz design doc pro odůvodnění).
 
     Args:
         session_token: Session token provided in request header.
@@ -73,7 +77,7 @@ def require_vedeni(
             detail="Session expired or invalid",
         )
 
-    if session["role"].value not in {"vedouci", "zastupce", "admin"}:
+    if session["role"].value != "admin":
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
             detail="Insufficient privileges",
@@ -82,7 +86,7 @@ def require_vedeni(
 
 
 @router.get("/rz-config")
-async def admin_get_rz_config(_: Annotated[dict[str, Any], Depends(require_vedeni)]) -> dict[str, Any]:
+async def admin_get_rz_config(_: Annotated[dict[str, Any], Depends(require_admin)]) -> dict[str, Any]:
     """Return current persistent RZ context for setup UI.
 
     Returns:
@@ -101,7 +105,7 @@ async def admin_get_rz_config(_: Annotated[dict[str, Any], Depends(require_veden
 @router.post("/rz-config")
 async def admin_update_rz_config(
     request: RzConfigUpdateRequest,
-    session: Annotated[dict[str, Any], Depends(require_vedeni)],
+    session: Annotated[dict[str, Any], Depends(require_admin)],
 ) -> dict[str, Any]:
     """Update RZ display name used by frontend and log files.
 
@@ -151,7 +155,7 @@ async def admin_update_rz_config(
 
 @router.post("/reset-communication-history")
 async def admin_reset_communication_history(
-    session: Annotated[dict[str, Any], Depends(require_vedeni)],
+    session: Annotated[dict[str, Any], Depends(require_admin)],
 ) -> dict[str, Any]:
     """Mark global communication history reset for next RZ session.
 
@@ -200,7 +204,7 @@ async def admin_reset_communication_history(
 
 
 @router.get("/people")
-async def admin_list_people(_: Annotated[dict[str, Any], Depends(require_vedeni)]) -> dict[str, Any]:
+async def admin_list_people(_: Annotated[dict[str, Any], Depends(require_admin)]) -> dict[str, Any]:
     """Return catalog of people for setup assignment dropdown.
 
     Returns:
@@ -216,7 +220,7 @@ async def admin_list_people(_: Annotated[dict[str, Any], Depends(require_vedeni)
 @router.post("/people/import-csv")
 async def admin_import_people_csv(
     request: PeopleCsvImportRequest,
-    session: Annotated[dict[str, Any], Depends(require_vedeni)],
+    session: Annotated[dict[str, Any], Depends(require_admin)],
 ) -> dict[str, Any]:
     """Import people catalog from CSV text.
 
@@ -249,7 +253,7 @@ async def admin_import_people_csv(
 
 
 @router.get("/stations")
-async def admin_list_stations(_: Annotated[dict[str, Any], Depends(require_vedeni)]) -> dict[str, Any]:
+async def admin_list_stations(_: Annotated[dict[str, Any], Depends(require_admin)]) -> dict[str, Any]:
     """Return all stations for admin management.
 
     Returns:
@@ -265,7 +269,7 @@ async def admin_list_stations(_: Annotated[dict[str, Any], Depends(require_veden
 @router.post("/station/bulk-generate-pins")
 async def admin_bulk_generate_station_pins(
     request: StationBulkGeneratePinsRequest,
-    session: Annotated[dict[str, Any], Depends(require_vedeni)],
+    session: Annotated[dict[str, Any], Depends(require_admin)],
 ) -> dict[str, Any]:
     """Generate station-bound PINs from map templates in bulk.
 
@@ -299,7 +303,7 @@ async def admin_bulk_generate_station_pins(
 @router.post("/station/create-pin")
 async def admin_create_station_pin(
     request: StationCreateRequest,
-    session: Annotated[dict[str, Any], Depends(require_vedeni)],
+    session: Annotated[dict[str, Any], Depends(require_admin)],
 ) -> dict[str, Any]:
     """Create a new station-bound PIN with initial assignee.
 
@@ -345,7 +349,7 @@ async def admin_create_station_pin(
 async def admin_assign_station_user(
     station_id: str,
     request: StationAssignmentRequest,
-    session: Annotated[dict[str, Any], Depends(require_vedeni)],
+    session: Annotated[dict[str, Any], Depends(require_admin)],
 ) -> dict[str, Any]:
     """Assign or reassign a user to an existing station PIN.
 
@@ -395,7 +399,7 @@ async def admin_assign_station_user(
 @router.get("/station/{station_id}/history")
 async def admin_station_history(
     station_id: str,
-    _: Annotated[dict[str, Any], Depends(require_vedeni)],
+    _: Annotated[dict[str, Any], Depends(require_admin)],
 ) -> dict[str, Any]:
     """Return assignment history for one station.
 
@@ -427,7 +431,7 @@ async def admin_station_history(
 async def admin_release_station_user(
     station_id: str,
     request: StationReleaseRequest,
-    session: Annotated[dict[str, Any], Depends(require_vedeni)],
+    session: Annotated[dict[str, Any], Depends(require_admin)],
 ) -> dict[str, Any]:
     """Release current user from an existing station PIN.
 
@@ -474,7 +478,7 @@ async def admin_release_station_user(
 @router.delete("/station/{station_id}/pin")
 async def admin_delete_station_pin(
     station_id: str,
-    session: Annotated[dict[str, Any], Depends(require_vedeni)],
+    session: Annotated[dict[str, Any], Depends(require_admin)],
 ) -> dict[str, Any]:
     """Delete station-bound PIN record.
 
@@ -514,7 +518,7 @@ async def admin_delete_station_pin(
 @router.post("/station/{station_id}/regenerate-pin")
 async def admin_regenerate_station_pin(
     station_id: str,
-    session: Annotated[dict[str, Any], Depends(require_vedeni)],
+    session: Annotated[dict[str, Any], Depends(require_admin)],
 ) -> dict[str, Any]:
     """Regenerate PIN for one station while keeping station assignment mapping.
 
