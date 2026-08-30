@@ -2,17 +2,10 @@
 
 import sys
 from contextlib import asynccontextmanager
-from datetime import datetime
+from datetime import UTC, datetime
 
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
-
-# Windows konzole/přesměrovaný výstup mohou mít jiné kódování než UTF-8
-# (např. cp1250 v cmd.exe) - bez tohoto by print() s emoji v _startup()
-# shodil celý server na UnicodeEncodeError hned při startu.
-for _stream in (sys.stdout, sys.stderr):
-    if hasattr(_stream, "reconfigure"):
-        _stream.reconfigure(encoding="utf-8", errors="replace")
 
 from backend.api.auth import router as auth_router
 from backend.api.admin import router as admin_router
@@ -23,6 +16,13 @@ from backend.core.auth import auth_manager
 from backend.core.config import get_settings
 from backend.core.connection_manager import connection_manager
 from backend.services.vitality import vitality_monitor
+
+# Windows konzole/přesměrovaný výstup mohou mít jiné kódování než UTF-8
+# (např. cp1250 v cmd.exe) - bez tohoto by print() s emoji v _startup()
+# shodil celý server na UnicodeEncodeError hned při startu.
+for _stream in (sys.stdout, sys.stderr):
+    if hasattr(_stream, "reconfigure"):
+        _stream.reconfigure(encoding="utf-8", errors="replace")
 
 async def _startup() -> None:
     """Load existing PINs and start background services."""
@@ -125,7 +125,7 @@ async def health_check():
     """Health check endpoint."""
     return {
         "status": "healthy",
-        "timestamp": datetime.utcnow().isoformat(),
+        "timestamp": datetime.now(UTC).isoformat(),
         "active_connections": connection_manager.get_active_count(),
         "max_connections": settings.WS_MAX_CONNECTIONS
     }
@@ -141,7 +141,7 @@ async def get_stats():
     return {
         "active_connections": connection_manager.get_active_count(),
         "max_connections": settings.WS_MAX_CONNECTIONS,
-        "timestamp": datetime.utcnow().isoformat()
+        "timestamp": datetime.now(UTC).isoformat()
     }
 
 

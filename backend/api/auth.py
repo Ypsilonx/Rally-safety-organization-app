@@ -10,7 +10,6 @@ from backend.models.auth import (
     LoginVedeniResponse,
     LoginKomisarRequest,
     LoginKomisarResponse,
-    AuthError
 )
 
 router = APIRouter(prefix="/api/auth", tags=["authentication"])

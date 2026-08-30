@@ -4,7 +4,6 @@ from typing import Optional
 from fastapi import WebSocket
 
 from backend.core.event_logger import event_logger
-from backend.models.user import UserRole
 
 
 class ConnectionManager:
