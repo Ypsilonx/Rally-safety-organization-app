@@ -69,14 +69,12 @@ Plný plán a checklisty jednotlivých fází jsou v [ROADMAP.md](ROADMAP.md).
   (`backend/models/user.py`) — ty dva zdroje pravdy se můžou rozejít
   (mapa ukáže jiné jméno, než jaké se reálně přihlásí a píše v chatu).
   Řešení čeká na návrh (mění vztah auth/station_registry/vitality).
-- 🔒 Bezpečnostní dluh: `GET /api/stations/status`, `/api/stations`,
-  `/api/stations/{id}` a `/api/stations/{id}/users` (`backend/api/status.py`)
-  nemají žádnou autentizaci — kdokoliv s přístupem na server vidí jméno,
-  telefon, e-mail, adresu a skupinu ke každé pozici bez přihlášení. Zjištěno
-  při návrhu PIN endpointu (viz
-  `docs/superpowers/specs/2026-08-30-rz-admin-permissions-design.md`),
-  vědomě odloženo mimo scope tohoto designu — řešit jako samostatný úkol
-  (Fáze 10 "Security Basics" v ROADMAP.md).
+- 🔒 Bezpečnostní dluh: `GET /api/stations/status` a `/api/stations/{id}/users`
+  (`backend/api/status.py`) nemají žádnou autentizaci — kdokoliv s přístupem
+  na server vidí jméno, telefon, e-mail, adresu a skupinu ke každé pozici
+  bez přihlášení (PIN mezi nimi není — ten po opravě 30.8. už žádná veřejná
+  route nevrací). Vědomě odloženo — řešit jako samostatný úkol (Fáze 10
+  "Security Basics" v ROADMAP.md).
 
 ---
 
@@ -103,6 +101,16 @@ Plný plán a checklisty jednotlivých fází jsou v [ROADMAP.md](ROADMAP.md).
   readiness gate)
 - ✅ Frontend: mapový popup stanice ukazuje PIN, jen když je přihlášený
   uživatel admin/vedení - komisařům se PIN cizí stanice nezobrazí
+- 🔒 Backend: doplněn nálezem ze závěrečného review - `GET /api/stations` a
+  `/api/stations/{id}` vracely PIN kód úplně bez autentizace (sourozenecké
+  routy k nově postavenému `/pins`) - zagateováno stejnou
+  `require_vedeni_or_admin` závislostí, doplněny regresní testy
+- 🐛 Frontend: oprava vedlejšího efektu nového landing screenu - ADMIN po
+  přistání na Setup dostával rozbitý zoom mapy při návratu na dashboard
+  (mapa se inicializovala, dokud byla skrytá); inicializace mapy je pro
+  admina teď odložená až na první otevření dashboardu
+- 📝 Oprava README smoke testu - přihlášení na `/api/admin/stations` už
+  musí být jako `admin`, ne `VRZ` (ten na tuhle routu po zpřísnění nemá přístup)
 - 📄 Detail viz `docs/superpowers/specs/2026-08-30-rz-admin-permissions-design.md`
 
 ### 2026-08-30 (opravy: admin gate, vitality vedení, popup poznámka)
