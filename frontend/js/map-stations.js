@@ -4,6 +4,33 @@
 
 const MapStationsModule = {
     /**
+     * Fetch PIN codes for all stations - jen pro přihlášené admin/vedení
+     * (komisaři nemají session token, dostanou 401 a dostanou prázdnou
+     * mapu). Selhání se tiše ignoruje - PIN v popupu je bonus, ne kritická
+     * cesta.
+     * @returns {Promise<Object<string, string>>}
+     */
+    async fetchStationPins() {
+        const isVedeni = window.App?.isVedeniUser?.();
+        const sessionToken = window.App?.user?.session_token;
+        if (!isVedeni || !sessionToken) {
+            return {};
+        }
+
+        try {
+            const response = await fetch(`${API_BASE_URL}/api/stations/pins`, {
+                headers: { 'X-Session-Token': sessionToken },
+            });
+            if (!response.ok) {
+                return {};
+            }
+            return await response.json();
+        } catch (_error) {
+            return {};
+        }
+    },
+
+    /**
      * Fetch status API and render station markers.
      * @param {Object} mapModule
      * @returns {Promise<void>}
@@ -14,13 +41,22 @@ const MapStationsModule = {
         }
 
         try {
-            const response = await fetch(mapModule.config.statusApiUrl);
+            const [response, pinsByStation] = await Promise.all([
+                fetch(mapModule.config.statusApiUrl),
+                this.fetchStationPins(),
+            ]);
             if (!response.ok) {
                 throw new Error(`Status API ${response.status}`);
             }
 
             const payload = await response.json();
             const stations = Array.isArray(payload.stations) ? payload.stations : [];
+            stations.forEach((station) => {
+                const pinCode = pinsByStation[station.station_id];
+                if (pinCode) {
+                    station.pin_code = pinCode;
+                }
+            });
             this.emitOfflineTransitions(mapModule, stations);
             this.renderStationMarkers(mapModule, stations);
             this.updateStatusFromStations(mapModule, stations);
@@ -218,6 +254,9 @@ const MapStationsModule = {
             : 'Nedostupné';
         const name = this.escapeHtml(station.name || 'Neznámé jméno');
         const positionName = this.escapeHtml(station.station_name || station.station_id || 'neuvedeno');
+        const pinLine = station.pin_code
+            ? `<p><strong>PIN:</strong> ${this.escapeHtml(station.pin_code)}</p>`
+            : '';
         const role = this.escapeHtml(station.role || 'N/A');
         const phone = this.escapeHtml(station.phone || 'neuvedeno');
         const email = this.escapeHtml(station.email || 'neuvedeno');
@@ -234,6 +273,7 @@ const MapStationsModule = {
                 <h4>${this.escapeHtml(station.station_id || 'N/A')}</h4>
                 <p><strong>Jméno:</strong> ${name}</p>
                 <p><strong>Název pozice:</strong> ${positionName}</p>
+                ${pinLine}
                 <p><strong>Role:</strong> ${role}</p>
                 <p><strong>Telefon:</strong> ${phone}</p>
                 <p><strong>E-mail:</strong> ${email}</p>
