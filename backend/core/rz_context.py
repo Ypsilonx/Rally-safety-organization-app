@@ -10,6 +10,8 @@ from pathlib import Path
 
 from pydantic import BaseModel, Field
 
+from backend.core.atomic_write import atomic_write_text
+
 
 class RzContext(BaseModel):
     """Persistent race context used across app modules.
@@ -69,9 +71,9 @@ class RzContextManager:
         Args:
             context: Context object to write.
         """
-        self.storage_path.write_text(
+        atomic_write_text(
+            self.storage_path,
             json.dumps(context.model_dump(mode="json"), ensure_ascii=False, indent=2),
-            encoding="utf-8",
         )
 
     def get_context(self) -> RzContext:

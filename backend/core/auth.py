@@ -8,6 +8,7 @@ from typing import Optional
 
 import bcrypt
 
+from backend.core.atomic_write import atomic_write_text
 from backend.models.user import (
     AssignmentHistoryEntry,
     KomisarAccess,
@@ -173,9 +174,8 @@ class AuthManager:
                         for entry in komisar.assignment_history
                     ],
                 }
-            
-            with open(self.pins_file, 'w', encoding='utf-8') as f:
-                json.dump(data, f, ensure_ascii=False, indent=2)
+
+            atomic_write_text(self.pins_file, json.dumps(data, ensure_ascii=False, indent=2))
         except Exception as e:
             print(f"❌ Error: Failed to save PINs to {self.pins_file}: {e}")
 

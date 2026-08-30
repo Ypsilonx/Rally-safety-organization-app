@@ -8,6 +8,7 @@ import json
 from datetime import UTC, datetime
 from pathlib import Path
 
+from backend.core.atomic_write import atomic_write_text
 from backend.models.people import CatalogPerson, CsvImportError, PeopleImportResult
 
 
@@ -46,10 +47,7 @@ class PeopleCatalog:
             "updated_at": datetime.now(UTC).isoformat(),
             "people": [person.model_dump(mode="json") for person in self._people],
         }
-        self.storage_path.write_text(
-            json.dumps(payload, ensure_ascii=False, indent=2),
-            encoding="utf-8",
-        )
+        atomic_write_text(self.storage_path, json.dumps(payload, ensure_ascii=False, indent=2))
 
     def list_people(self) -> list[CatalogPerson]:
         """Return people sorted by name.
