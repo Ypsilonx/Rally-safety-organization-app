@@ -14,6 +14,7 @@ class EventLogger:
     """Logs all rally events to JSONL file for post-race analysis."""
     
     def __init__(self):
+        """Připraví log adresář a otevře JSONL soubor pro aktuální RZ session."""
         self.settings = get_settings()
         self.log_dir = Path(self.settings.LOG_DIR)
         self.log_dir.mkdir(exist_ok=True)

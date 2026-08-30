@@ -11,9 +11,10 @@ class ConnectionManager:
     """Manages WebSocket connections with support for 160+ clients."""
     
     def __init__(self):
+        """Inicializuje prázdné registry aktivních spojení a jejich metadat."""
         # Active WebSocket connections: pin_code -> WebSocket
         self.active_connections: dict[str, WebSocket] = {}
-        
+
         # User metadata: pin_code -> {name, role, station_id}
         self.user_metadata: dict[str, dict] = {}
     
@@ -52,11 +53,15 @@ class ConnectionManager:
     
     async def send_personal_message(self, message: str, pin_code: str) -> bool:
         """Send message to specific user.
-        
+
+        Zatím bez volajícího - připraveno pro ROADMAP.md Fáze 5 §7
+        (notifikace konkrétnímu komisaři při přiřazení/změně stanice),
+        které ještě není naimplementované.
+
         Args:
             message: JSON message string
             pin_code: Target user PIN
-            
+
         Returns:
             True if sent successfully, False otherwise
         """
@@ -141,7 +146,10 @@ class ConnectionManager:
     async def broadcast_to_station(self, message: str, station_id: str,
                                    exclude_pin: Optional[str] = None) -> int:
         """Broadcast message only to users at specific station.
-        
+
+        Zatím bez volajícího - stejný důvod jako u send_personal_message,
+        viz ROADMAP.md Fáze 5 §7.
+
         Args:
             message: JSON message string
             station_id: Target station ID
@@ -197,36 +205,6 @@ class ConnectionManager:
         """
         return len(self.active_connections)
     
-    def get_users_by_role(self, role: str) -> list[dict]:
-        """Get all users with specific role.
-        
-        Args:
-            role: Role name to filter by
-            
-        Returns:
-            List of user metadata dicts
-        """
-        return [
-            {"pin_code": pin, **metadata}
-            for pin, metadata in self.user_metadata.items()
-            if metadata.get("role") == role
-        ]
-    
-    def get_users_at_station(self, station_id: str) -> list[dict]:
-        """Get all users at specific station.
-        
-        Args:
-            station_id: Station ID to filter by
-            
-        Returns:
-            List of user metadata dicts
-        """
-        return [
-            {"pin_code": pin, **metadata}
-            for pin, metadata in self.user_metadata.items()
-            if metadata.get("station_id") == station_id
-        ]
-
 
 # Global connection manager instance
 connection_manager = ConnectionManager()

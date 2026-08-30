@@ -526,21 +526,6 @@ class AuthManager:
         self._save_pins()
         return old_pin, access
     
-    def remove_pin(self, pin_code: str) -> bool:
-        """Remove komisař PIN.
-        
-        Args:
-            pin_code: PIN to remove
-            
-        Returns:
-            True if removed, False if not found
-        """
-        if pin_code in self.komisar_pins:
-            del self.komisar_pins[pin_code]
-            self._save_pins()  # Persist to file
-            return True
-        return False
-
     def remove_station_pin(self, station_id: str) -> KomisarAccess:
         """Delete station-bound PIN by station identifier.
 
