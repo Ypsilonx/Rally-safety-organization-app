@@ -308,7 +308,7 @@ const SetupAdminModule = {
      * @param {Object} app
      */
     openSetupScreen(app) {
-        if (!app.isVedeniUser()) {
+        if (!app.isAdminUser()) {
             return;
         }
 
@@ -344,7 +344,7 @@ const SetupAdminModule = {
      * @returns {Promise<void>}
      */
     async loadRzConfig(app, announceRefresh = false) {
-        if (!app.isVedeniUser()) {
+        if (!app.isAdminUser()) {
             return;
         }
 
@@ -377,7 +377,7 @@ const SetupAdminModule = {
      * @returns {Promise<void>}
      */
     async saveRzConfig(app) {
-        if (!app.isVedeniUser()) {
+        if (!app.isAdminUser()) {
             return;
         }
 
@@ -417,7 +417,7 @@ const SetupAdminModule = {
      * @returns {Promise<void>}
      */
     async resetCommunicationHistory(app) {
-        if (!app.isVedeniUser()) {
+        if (!app.isAdminUser()) {
             return;
         }
 
@@ -457,7 +457,7 @@ const SetupAdminModule = {
      * @returns {Promise<void>}
      */
     async loadAdminPeople(app, announceRefresh = false) {
-        if (!app.isVedeniUser()) {
+        if (!app.isAdminUser()) {
             return;
         }
 
@@ -631,7 +631,7 @@ const SetupAdminModule = {
      * @returns {Promise<void>}
      */
     async loadAdminStations(app, announceRefresh = false) {
-        if (!app.isVedeniUser()) {
+        if (!app.isAdminUser()) {
             return;
         }
 
@@ -1063,7 +1063,7 @@ const SetupAdminModule = {
      *     Promise that resolves when refresh is complete.
      */
     async bulkGeneratePinsFromMap(app) {
-        if (!app.isVedeniUser()) {
+        if (!app.isAdminUser()) {
             return;
         }
 

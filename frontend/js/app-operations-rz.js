@@ -194,6 +194,17 @@ const AppOperationsRzModule = {
     isVedeniUser(app) {
         return ['vedouci', 'zastupce', 'admin'].includes(app.user?.role);
     },
+
+    /**
+     * Return true when current user is strictly the ADMIN role (not
+     * vedouci/zastupce) - used to gate Setup obrazovka a station/people
+     * administration, odděleně od operačního dashboardu vedení.
+     * @param {Object} app
+     * @returns {boolean}
+     */
+    isAdminUser(app) {
+        return app.user?.role === 'admin';
+    },
 };
 
 window.AppOperationsRzModule = AppOperationsRzModule;

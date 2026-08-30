@@ -88,7 +88,11 @@ const App = {
         this.setupEventListeners();
 
         this.initializeMapModule();
-        
+
+        if (this.isAdminUser()) {
+            window.SetupAdminModule.openSetupScreen(this);
+        }
+
         console.log('App initialized for user:', this.user.name);
     },
 
@@ -127,6 +131,7 @@ const App = {
         
         // Show/hide admin panel (only for vedeni roles)
         const isVedeni = this.isVedeniUser();
+        const isAdmin = this.isAdminUser();
         const adminPanel = document.getElementById('admin-panel');
         const quickActions = document.getElementById('quick-actions');
         const appScreen = document.getElementById('app-screen');
@@ -135,13 +140,13 @@ const App = {
             appScreen.classList.remove('role-vedeni', 'role-komisar');
             appScreen.classList.add(isVedeni ? 'role-vedeni' : 'role-komisar');
         }
-        
+
         if (isVedeni) {
             adminPanel.classList.remove('hidden');
             quickActions.classList.add('hidden');
             const setupButton = document.getElementById('open-setup-btn');
             if (setupButton) {
-                setupButton.classList.remove('hidden');
+                setupButton.classList.toggle('hidden', !isAdmin);
             }
 
             const panelHeader = adminPanel.querySelector('.panel-header');
@@ -799,6 +804,10 @@ const App = {
      */
     isVedeniUser() {
         return window.AppOperationsRzModule.isVedeniUser(this);
+    },
+
+    isAdminUser() {
+        return window.AppOperationsRzModule.isAdminUser(this);
     },
 
     /**
