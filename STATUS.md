@@ -219,10 +219,15 @@ _Details in [ROADMAP.md](ROADMAP.md)_
 - ✅ Frontend: `app-operations.js` úplně zrušen, logika je jen v `app-operations-rz.js` a `app-operations-incidents.js`
 - ✅ Validace: backend test suite 17/17 passing, `data/pins.json`/`people_catalog.json`/`rz_context.json` zůstávají mimo git
 
-### 2026-08-30 (údržba)
+### 2026-08-30 (údržba + zpevnění pro produkci)
 - ✅ Frontend: sjednoceny hardcoded `http://localhost:8000` volání na centrální konstantu `API_BASE_URL` (14 míst v `app.js`, `map.js`, `setup-admin.js`, `app-operations-*.js`) — appka teď jde nasadit na jiný host/port bez zásahu do kódu
 - ✅ Git: odstraněny z trackování testovací session logy (`logs/rz_session_202602*.jsonl`), které se do repa dostaly ještě před přidáním `.gitignore` pravidla; obsahovaly jen fiktivní jména z vývojového testování
-- 📝 Dokumentace (README/STATUS) zarovnána se skutečnou strukturou backend/frontend souborů
+- ✅ Backend: nová sdílená utilita `backend/core/atomic_write.py` — `pins.json`, `people_catalog.json` a `rz_context.json` se teď zapisují atomicky (temp soubor + `os.replace`), pád procesu uprostřed zápisu už soubor nepoškodí
+- ✅ Backend: `DEBUG` má bezpečný default `False` (dřív `True`) — chybějící/nezměněný `.env` už neriskuje veřejné `/api/debug/pins`; startup navíc vypíše varování, když běží `DEBUG=True` na jiném hostu než localhost
+- ✅ Backend: CORS čte originy z nové `ALLOWED_ORIGINS` (`.env`), `allow_credentials` vypnuto (appka posílá token v hlavičce, ne cookie, takže wildcard + credentials nedávalo smysl)
+- ✅ Backend: odstraněn nepoužívaný `SESSION_SECRET` z configu (sessions jsou náhodné opaké tokeny v serverové paměti, podpis nic nepřidával)
+- ✅ Backend: `main.py` přepíná stdout/stderr na UTF-8 při startu — dřív mohl `print()` s emoji shodit server s `UnicodeEncodeError`, když výstup neběžel v UTF-8 konzoli/byl přesměrovaný do souboru
+- 📝 Dokumentace (README/STATUS/DEVELOPMENT) zarovnána se skutečnou strukturou backend/frontend souborů
 
 ### 2026-07-15 (Fáze 5 - frontend iterace 2)
 - ✅ Frontend: setup formulář má dropdown `Katalog osob` napojený na `GET /api/admin/people`
