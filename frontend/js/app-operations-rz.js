@@ -205,6 +205,31 @@ const AppOperationsRzModule = {
     isAdminUser(app) {
         return app.user?.role === 'admin';
     },
+
+    /**
+     * Odešle READY potvrzení za pozici vedení (VRZ/ZVRZ/VBRZ/ZVBRZ) -
+     * obdoba komisařské quick-action "Připraven", ale pro operační
+     * dashboard vedení. ADMIN toto tlačítko nevidí (nemá station_id,
+     * operations_state ho neeviduje).
+     * @param {Object} app
+     */
+    sendLeadershipReady(app) {
+        if (!this.isVedeniUser(app) || this.isAdminUser(app)) {
+            return;
+        }
+
+        window.wsClient.sendMessage({
+            message_type: 'status_update',
+            readiness_state: 'ready',
+            content: '✅ Vedení připraveno',
+            created_at: new Date().toISOString(),
+        });
+        app.logUiAction('leadership_ready', {
+            station_id: app.user.station_id || null,
+        });
+        app.requestGateStatusRefresh();
+        app.showToast('Stav odeslán', 'success');
+    },
 };
 
 window.AppOperationsRzModule = AppOperationsRzModule;

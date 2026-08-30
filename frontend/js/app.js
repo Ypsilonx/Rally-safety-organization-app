@@ -149,6 +149,11 @@ const App = {
                 setupButton.classList.toggle('hidden', !isAdmin);
             }
 
+            const leadershipReadyBtn = document.getElementById('btn-leadership-ready');
+            if (leadershipReadyBtn) {
+                leadershipReadyBtn.classList.toggle('hidden', isAdmin);
+            }
+
             const panelHeader = adminPanel.querySelector('.panel-header');
             const panelContent = adminPanel.querySelector('.panel-content');
             if (panelHeader) {
@@ -389,6 +394,13 @@ const App = {
         if (broadcastBtn) {
             broadcastBtn.addEventListener('click', () => {
                 this.sendBroadcast();
+            });
+        }
+
+        const leadershipReadyBtn = document.getElementById('btn-leadership-ready');
+        if (leadershipReadyBtn) {
+            leadershipReadyBtn.addEventListener('click', () => {
+                this.sendLeadershipReady();
             });
         }
 
@@ -808,6 +820,10 @@ const App = {
 
     isAdminUser() {
         return window.AppOperationsRzModule.isAdminUser(this);
+    },
+
+    sendLeadershipReady() {
+        window.AppOperationsRzModule.sendLeadershipReady(this);
     },
 
     /**
