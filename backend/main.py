@@ -1,10 +1,18 @@
 """Rally Safety App - FastAPI backend application setup."""
 
+import sys
 from contextlib import asynccontextmanager
 from datetime import datetime
 
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
+
+# Windows konzole/přesměrovaný výstup mohou mít jiné kódování než UTF-8
+# (např. cp1250 v cmd.exe) - bez tohoto by print() s emoji v _startup()
+# shodil celý server na UnicodeEncodeError hned při startu.
+for _stream in (sys.stdout, sys.stderr):
+    if hasattr(_stream, "reconfigure"):
+        _stream.reconfigure(encoding="utf-8", errors="replace")
 
 from backend.api.auth import router as auth_router
 from backend.api.admin import router as admin_router
@@ -22,6 +30,14 @@ async def _startup() -> None:
 
     # Load existing PINs from data/pins.json (persistent storage)
     all_pins = auth_manager.list_all_pins()
+
+    if settings.DEBUG and settings.HOST not in {"127.0.0.1", "localhost"}:
+        print(
+            "⚠️  POZOR: DEBUG=True a server naslouchá na "
+            f"{settings.HOST} (ne jen localhost). "
+            "/api/debug/pins je pak dostupné komukoliv v síti - "
+            "před ostrým nasazením nastav DEBUG=False v .env."
+        )
 
     print("=" * 60)
     print("🔐 PŘIHLAŠOVACÍ ÚDAJE")
@@ -73,11 +89,14 @@ app = FastAPI(
     lifespan=lifespan,
 )
 
-# CORS middleware - allow frontend to connect
+# CORS middleware - originy se nastavují přes ALLOWED_ORIGINS v .env.
+# allow_credentials zůstává False: appka posílá session token v hlavičce
+# X-Session-Token, ne v cookie, takže credentialed mode nepotřebuje
+# (a s wildcard originem by ho stejně prohlížeče odmítly).
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],  # In production, specify exact origins
-    allow_credentials=True,
+    allow_origins=settings.cors_origins,
+    allow_credentials=False,
     allow_methods=["*"],
     allow_headers=["*"],
 )

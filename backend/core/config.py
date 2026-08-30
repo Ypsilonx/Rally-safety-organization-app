@@ -10,19 +10,23 @@ class Settings(BaseSettings):
     # App settings
     APP_NAME: str = "Rally Safety App"
     APP_VERSION: str = "0.1.0"
-    DEBUG: bool = True
-    
+    # Bezpečný default je False - DEBUG (a s ním veřejný /api/debug/pins)
+    # se zapíná výslovně jen v lokálním .env pro vývoj.
+    DEBUG: bool = False
+
     # Server settings
     HOST: str = "0.0.0.0"
     PORT: int = 8000
     RELOAD: bool = True
-    
+
+    # CORS - čárkou oddělený seznam originů frontendu, nebo "*" pro vývoj
+    ALLOWED_ORIGINS: str = "*"
+
     # WebSocket settings
     WS_MAX_CONNECTIONS: int = 200
     WS_HEARTBEAT_INTERVAL: int = 30  # seconds
-    
+
     # Auth settings
-    SESSION_SECRET: str = "change-this-in-production-use-random-32-chars"
     SESSION_EXPIRE_MINUTES: int = 480  # 8 hours
     
     # Logging
@@ -34,6 +38,17 @@ class Settings(BaseSettings):
         env_file_encoding="utf-8",
         case_sensitive=True
     )
+
+    @property
+    def cors_origins(self) -> list[str]:
+        """Rozparsuje ALLOWED_ORIGINS na seznam pro CORSMiddleware.
+
+        Returns:
+            ["*"] pro vývojový wildcard, jinak seznam konkrétních originů.
+        """
+        if self.ALLOWED_ORIGINS.strip() == "*":
+            return ["*"]
+        return [origin.strip() for origin in self.ALLOWED_ORIGINS.split(",") if origin.strip()]
 
 
 @lru_cache
