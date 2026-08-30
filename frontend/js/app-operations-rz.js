@@ -192,7 +192,7 @@ const AppOperationsRzModule = {
      * @returns {boolean}
      */
     isVedeniUser(app) {
-        return app.user?.role === 'vedouci' || app.user?.role === 'zastupce';
+        return ['vedouci', 'zastupce', 'admin'].includes(app.user?.role);
     },
 };
 

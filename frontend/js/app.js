@@ -126,7 +126,7 @@ const App = {
         roleBadge.textContent = this.getRoleLabel(this.user.role);
         
         // Show/hide admin panel (only for vedeni roles)
-        const isVedeni = this.user.role === 'vedouci' || this.user.role === 'zastupce';
+        const isVedeni = this.isVedeniUser();
         const adminPanel = document.getElementById('admin-panel');
         const quickActions = document.getElementById('quick-actions');
         const appScreen = document.getElementById('app-screen');
