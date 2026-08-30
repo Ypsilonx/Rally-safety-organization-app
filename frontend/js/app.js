@@ -87,10 +87,10 @@ const App = {
         // Setup event listeners
         this.setupEventListeners();
 
-        this.initializeMapModule();
-
         if (this.isAdminUser()) {
             window.SetupAdminModule.openSetupScreen(this);
+        } else {
+            this.initializeMapModule();
         }
 
         console.log('App initialized for user:', this.user.name);

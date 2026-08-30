@@ -591,8 +591,10 @@ const SetupAdminModule = {
         app.currentScreen = 'dashboard';
         app.logUiAction('return_to_dashboard', {});
 
-        if (window.MapModule?.map) {
+        if (window.MapModule?.isInitialized) {
             setTimeout(() => window.MapModule.map.invalidateSize(), 120);
+        } else {
+            app.initializeMapModule();
         }
     },
 
