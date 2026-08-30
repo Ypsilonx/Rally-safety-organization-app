@@ -215,93 +215,27 @@ uv run pytest
 pytest backend/tests/ -v
 ```
 
-### Station Status API (heartbeat monitoring)
+### API Reference
+
+Kompletní a vždy aktuální dokumentace všech REST endpointů (parametry,
+response schémata, možnost si je rovnou vyzkoušet z prohlížeče) běží přímo
+na serveru - ruční seznam příkladů v README by se stejně dřív nebo později
+rozešel s realitou:
+
+- **Swagger UI:** http://localhost:8000/docs
+- **ReDoc:** http://localhost:8000/redoc
+
+Rychlý smoke test přes PowerShell:
 ```powershell
-# Přehled online/offline stavů stanic
-Invoke-RestMethod http://localhost:8000/api/stations/status
+# Health check
+Invoke-RestMethod http://localhost:8000/health
 
-# Incident gate readiness snapshot
-Invoke-RestMethod http://localhost:8000/api/stations/readiness
-
-# Station-first directory z perzistentních PINů
-Invoke-RestMethod http://localhost:8000/api/stations
-```
-
-### Admin Station API
-```powershell
-# Přihlášení vedení a získání session tokenu
+# Login vedení + seznam stanic pro admin správu
 $login = Invoke-RestMethod -Method Post http://localhost:8000/api/auth/login-vedeni `
 	-ContentType 'application/json' `
 	-Body '{"username":"VRZ","password":"demo123"}'
 
-# Seznam stanic pro admin správu
 Invoke-RestMethod http://localhost:8000/api/admin/stations `
-	-Headers @{ 'X-Session-Token' = $login.session_token }
-
-# Hromadné vygenerování PINů podle mapových pozic (PIN je vázaný na pozici, ne na jméno)
-Invoke-RestMethod -Method Post http://localhost:8000/api/admin/station/bulk-generate-pins `
-	-Headers @{ 'X-Session-Token' = $login.session_token } `
-	-ContentType 'application/json' `
-	-Body '{"regenerate_existing":false}'
-
-# Načtení aktuální konfigurace RZ (název + verze resetu komunikace)
-Invoke-RestMethod http://localhost:8000/api/admin/rz-config `
-	-Headers @{ 'X-Session-Token' = $login.session_token }
-
-# Nastavení názvu RZ (promítne se do hlavičky aplikace a názvu log souboru)
-Invoke-RestMethod -Method Post http://localhost:8000/api/admin/rz-config `
-	-Headers @{ 'X-Session-Token' = $login.session_token } `
-	-ContentType 'application/json' `
-	-Body '{"rz_name":"RZ Hošťálková"}'
-
-# Globální reset historie komunikace pro další RZ
-Invoke-RestMethod -Method Post http://localhost:8000/api/admin/reset-communication-history `
-	-Headers @{ 'X-Session-Token' = $login.session_token }
-
-# Vytvoření nové stanice s PINem a počátečním osazením
-Invoke-RestMethod -Method Post http://localhost:8000/api/admin/station/create-pin `
-	-Headers @{ 'X-Session-Token' = $login.session_token } `
-	-ContentType 'application/json' `
-	-Body '{"station_id":"PK-10","station_name":"Parkoviště 10","station_type":"parking","capacity":2,"description":"Příjezdové parkoviště","name":"Alena Testovací","role":"parkovani","phone":"+420555444333","note":"První osazení"}'
-
-# Regenerace PINu konkrétní pozice (starý PIN se okamžitě zneplatní)
-Invoke-RestMethod -Method Post http://localhost:8000/api/admin/station/TK-01/regenerate-pin `
-	-Headers @{ 'X-Session-Token' = $login.session_token }
-
-# Historie obsazení stanice
-Invoke-RestMethod http://localhost:8000/api/admin/station/TK-01/history `
-	-Headers @{ 'X-Session-Token' = $login.session_token }
-
-# Uvolnění stanice zneplatní PIN pro login, dokud nepřijde nové přiřazení
-Invoke-RestMethod -Method Post http://localhost:8000/api/admin/station/TK-01/release-user `
-	-Headers @{ 'X-Session-Token' = $login.session_token } `
-	-ContentType 'application/json' `
-	-Body '{"note":"Konec směny"}'
-
-# Přeřazení osoby na stanici se zachováním PINu
-Invoke-RestMethod -Method Post http://localhost:8000/api/admin/station/TK-01/reassign-user `
-	-Headers @{ 'X-Session-Token' = $login.session_token } `
-	-ContentType 'application/json' `
-	-Body '{"name":"Petr Nový","role":"komisar_trat","phone":"+420111222333","note":"Střídání směny"}'
-
-# Smazání PINu stanice
-Invoke-RestMethod -Method Delete http://localhost:8000/api/admin/station/PK-10/pin `
-	-Headers @{ 'X-Session-Token' = $login.session_token }
-
-# Import katalogu lidí z CSV textu (first_name/jmeno, last_name/prijmeni, phone/telefon, email/mail, address/bydliště, group/skupina)
-$csv = @"
-jmeno;prijmeni;telefon;mail;bydliště;skupina
-Jan;Novák;+420111222333;jan.novak@example.com;Praha;RZ
-Eva;Testovací;+420444555666;eva@example.com;Brno;TZ
-"@
-
-Invoke-RestMethod -Method Post http://localhost:8000/api/admin/people/import-csv `
-	-Headers @{ 'X-Session-Token' = $login.session_token } `
-	-ContentType 'application/json' `
-	-Body (@{ csv_content = $csv; replace_existing = $false } | ConvertTo-Json)
-
-# Seznam katalogu lidí pro setup dropdown
-Invoke-RestMethod http://localhost:8000/api/admin/people `
 	-Headers @{ 'X-Session-Token' = $login.session_token }
 ```
 
