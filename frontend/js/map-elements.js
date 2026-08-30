@@ -141,7 +141,7 @@ const MapElementsModule = {
         const contactName = properties.contact_name ? this.escapeHtml(properties.contact_name) : '';
         const contactPhone = properties.contact_phone ? this.escapeHtml(properties.contact_phone) : '';
         const kind = this.escapeHtml(properties.kind || 'element');
-        const note = this.escapeHtml(properties.note || '-');
+        const note = this.escapeHtmlWithLineBreaks(properties.note || '-');
         const commissionerRule = properties.requires_commissioner ? 'ano' : 'ne';
         const ruleText = this.escapeHtml(properties.commissioner_rule || '-');
         const contactLines = [];
@@ -249,6 +249,18 @@ const MapElementsModule = {
         const div = document.createElement('div');
         div.textContent = text;
         return div.innerHTML;
+    },
+
+    /**
+     * Escape text but allow authored "<br>" line breaks to render as such.
+     * GeoJSON `note` properties are edited manually and sometimes contain a
+     * literal "<br>" as an intentional line separator - plain escapeHtml
+     * would turn it into visible "&lt;br&gt;" text in the popup.
+     * @param {string} text
+     * @returns {string}
+     */
+    escapeHtmlWithLineBreaks(text) {
+        return this.escapeHtml(text).replace(/&lt;br\s*\/?&gt;/gi, '<br>');
     },
 };
 
