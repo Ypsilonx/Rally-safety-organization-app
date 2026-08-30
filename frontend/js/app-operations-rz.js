@@ -152,7 +152,7 @@ const AppOperationsRzModule = {
             return;
         }
 
-        const response = await fetch('http://localhost:8000/api/stations/readiness');
+        const response = await fetch(`${API_BASE_URL}/api/stations/readiness`);
         if (!response.ok) {
             gateLabel.textContent = 'Gate: nedostupné';
             gateLabel.classList.remove('gate-open', 'gate-closed');

@@ -13,7 +13,7 @@ const AppOperationsIncidentsModule = {
 
         let onlineCount = '-';
         try {
-            const statsResponse = await fetch('http://localhost:8000/api/stats');
+            const statsResponse = await fetch(`${API_BASE_URL}/api/stats`);
             if (statsResponse.ok) {
                 const stats = await statsResponse.json();
                 onlineCount = stats.active_connections || 0;

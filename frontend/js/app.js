@@ -203,7 +203,7 @@ const App = {
      * @returns {Promise<void>}
      */
     async refreshRzContext() {
-        const response = await fetch('http://localhost:8000/api/stations/rz-context');
+        const response = await fetch(`${API_BASE_URL}/api/stations/rz-context`);
         if (!response.ok) {
             return;
         }
@@ -888,7 +888,7 @@ const App = {
         }
 
         try {
-            await fetch('http://localhost:8000/api/audit/frontend-event', {
+            await fetch(`${API_BASE_URL}/api/audit/frontend-event`, {
                 method: 'POST',
                 headers,
                 body: JSON.stringify({

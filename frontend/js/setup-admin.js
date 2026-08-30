@@ -216,7 +216,7 @@ const SetupAdminModule = {
             return;
         }
 
-        const response = await this.adminFetch(app, 'http://localhost:8000/api/admin/rz-config');
+        const response = await this.adminFetch(app, `${API_BASE_URL}/api/admin/rz-config`);
         if (!response) {
             return;
         }
@@ -256,7 +256,7 @@ const SetupAdminModule = {
             return;
         }
 
-        const response = await this.adminFetch(app, 'http://localhost:8000/api/admin/rz-config', {
+        const response = await this.adminFetch(app, `${API_BASE_URL}/api/admin/rz-config`, {
             method: 'POST',
             body: JSON.stringify({ rz_name: rzName }),
         });
@@ -296,7 +296,7 @@ const SetupAdminModule = {
             return;
         }
 
-        const response = await this.adminFetch(app, 'http://localhost:8000/api/admin/reset-communication-history', {
+        const response = await this.adminFetch(app, `${API_BASE_URL}/api/admin/reset-communication-history`, {
             method: 'POST',
         });
 
@@ -329,7 +329,7 @@ const SetupAdminModule = {
             return;
         }
 
-        const response = await this.adminFetch(app, 'http://localhost:8000/api/admin/people');
+        const response = await this.adminFetch(app, `${API_BASE_URL}/api/admin/people`);
         if (!response) {
             return;
         }
@@ -503,7 +503,7 @@ const SetupAdminModule = {
             return;
         }
 
-        const response = await this.adminFetch(app, 'http://localhost:8000/api/admin/stations');
+        const response = await this.adminFetch(app, `${API_BASE_URL}/api/admin/stations`);
         if (!response) {
             return;
         }
@@ -835,7 +835,7 @@ const SetupAdminModule = {
 
         const response = await this.adminFetch(
             app,
-            `http://localhost:8000/api/admin/station/${encodeURIComponent(stationId)}/reassign-user`,
+            `${API_BASE_URL}/api/admin/station/${encodeURIComponent(stationId)}/reassign-user`,
             {
                 method: 'POST',
                 body: JSON.stringify({ name, role, phone, email, address, group, note }),
@@ -888,7 +888,7 @@ const SetupAdminModule = {
 
         const response = await this.adminFetch(
             app,
-            `http://localhost:8000/api/admin/station/${encodeURIComponent(stationId)}/release-user`,
+            `${API_BASE_URL}/api/admin/station/${encodeURIComponent(stationId)}/release-user`,
             {
                 method: 'POST',
                 body: JSON.stringify({ note }),
@@ -943,7 +943,7 @@ const SetupAdminModule = {
             return;
         }
 
-        const response = await this.adminFetch(app, 'http://localhost:8000/api/admin/station/bulk-generate-pins', {
+        const response = await this.adminFetch(app, `${API_BASE_URL}/api/admin/station/bulk-generate-pins`, {
             method: 'POST',
             body: JSON.stringify({ regenerate_existing: regenerateExisting }),
         });
@@ -1039,7 +1039,7 @@ const SetupAdminModule = {
 
         const response = await this.adminFetch(
             app,
-            `http://localhost:8000/api/admin/station/${encodeURIComponent(stationId)}/regenerate-pin`,
+            `${API_BASE_URL}/api/admin/station/${encodeURIComponent(stationId)}/regenerate-pin`,
             {
                 method: 'POST',
             },

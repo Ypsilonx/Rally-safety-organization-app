@@ -9,7 +9,7 @@ const MAP_CONFIG = {
     fallbackCenter: [49.1951, 16.6068],
     fallbackZoom: 12,
     trackColor: '#dc2626',
-    statusApiUrl: 'http://localhost:8000/api/stations/status',
+    statusApiUrl: `${API_BASE_URL}/api/stations/status`,
     stationRefreshMs: 15000,
     markerAlertDurationMs: 15 * 60 * 1000,
     trackGeoJsonUrl: '',
