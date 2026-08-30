@@ -63,6 +63,12 @@ Plný plán a checklisty jednotlivých fází jsou v [ROADMAP.md](ROADMAP.md).
 
 - ℹ️ Neurgentní: při frontend serveru nad `frontend/` se může objevit 404 pro `/data/example-track.geojson`.
     Aplikace používá fallback trať, funkčnost mapy tím není blokovaná.
+- ⚠️ Architektonické: pozice VRZ/ZVRZ/VBRZ/ZVBRZ mají zároveň PIN-station
+  záznam v `station_registry` (jméno lze "přeřadit" ze setup obrazovky) i
+  natvrdo dané přihlašovací jméno ve `VEDENI_CREDENTIALS`
+  (`backend/models/user.py`) — ty dva zdroje pravdy se můžou rozejít
+  (mapa ukáže jiné jméno, než jaké se reálně přihlásí a píše v chatu).
+  Řešení čeká na návrh (mění vztah auth/station_registry/vitality).
 
 ---
 
@@ -71,6 +77,22 @@ Plný plán a checklisty jednotlivých fází jsou v [ROADMAP.md](ROADMAP.md).
 > Starší průběžný vývoj (14.2. - 15.7.2026, Fáze 0-6 založení) je shrnutý
 > níže v jednom odstavci na fázi. Detail commit po commitu je v `git log
 > --oneline`, milníky fází mají git tagy `v0.1`-`v0.4`.
+
+### 2026-08-30 (opravy: admin gate, vitality vedení, popup poznámka)
+- ✅ Frontend: uživatel s rolí `admin` teď vidí Setup obrazovku a admin panel
+  — `isVedeniUser()` (`app-operations-rz.js`) a `setupUI()` (`app.js`)
+  kontrolovaly jen `vedouci`/`zastupce`, ačkoliv backend `admin` roli pro
+  admin endpointy už povoloval
+- ✅ Backend: vedení (VRZ/ZVRZ/VBRZ/ZVBRZ) se po přihlášení konečně
+  zapisuje do vitality trackingu a svítí online/offline stejně jako
+  komisaři — `websocket.py::_resolve_user` posílal pro session login
+  natvrdo `station_id: None` místo skutečné hodnoty ze session dat, takže
+  `vitality_monitor.mark_seen()` je vždy ignoroval
+- ✅ Frontend: popup mapového prvku correctně renderuje `<br>` v poznámce
+  jako řádkování místo doslovného textu `&lt;br&gt;` — nová
+  `escapeHtmlWithLineBreaks()` v `map-elements.js` escapuje vše kromě
+  úzké výjimky pro `<br>`/`<br/>` (ověřeno, že `<script>`/`<img onerror>`
+  zůstávají escapované)
 
 ### 2026-08-30 (Fáze 5 - filtry a search na setup obrazovce)
 - ✅ Frontend: setup obrazovka pro správu pozic má search (podle ID/názvu) a
