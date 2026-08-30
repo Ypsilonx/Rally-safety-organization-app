@@ -233,7 +233,7 @@ Invoke-RestMethod http://localhost:8000/health
 # Login vedení + seznam stanic pro admin správu
 $login = Invoke-RestMethod -Method Post http://localhost:8000/api/auth/login-vedeni `
 	-ContentType 'application/json' `
-	-Body '{"username":"VRZ","password":"demo123"}'
+	-Body '{"username":"admin","password":"demo123"}'
 
 Invoke-RestMethod http://localhost:8000/api/admin/stations `
 	-Headers @{ 'X-Session-Token' = $login.session_token }
