@@ -69,8 +69,8 @@ Pořadí po dokončení tohoto designu: B → C → D.
 
 `backend/api/admin.py` - funkce `require_vedeni` (dnes řádek 49) se
 přejmenuje na `require_admin` a zúží allowlist rolí z
-`{"vedouci", "zastupce", "admin"}` na `{"admin"}`. Všech 11 endpointů v
-routeru (`Depends(require_vedeni)` → `Depends(require_admin)`) tím
+`{"vedouci", "zastupce", "admin"}` na `{"admin"}`. Všech 13 výskytů
+`Depends(require_vedeni)` v routeru (→ `Depends(require_admin)`) tím
 automaticky zpřísní bez nutnosti měnit každý zvlášť.
 
 Dopad na testy: `backend/tests/test_admin_people_api.py::_admin_headers()`
