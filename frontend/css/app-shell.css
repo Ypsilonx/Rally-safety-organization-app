@@ -695,6 +695,24 @@
     font-size: 0.78rem;
 }
 
+.station-admin-filters {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 0.4rem;
+    margin-bottom: 0.55rem;
+}
+
+.station-admin-filters input,
+.station-admin-filters select {
+    width: 100%;
+    min-height: 32px;
+    padding: 0.3rem 0.5rem;
+    font-size: 0.78rem;
+    border: 1px solid var(--border-color);
+    border-radius: 6px;
+    background: #ffffff;
+}
+
 .station-admin-layout {
     display: grid;
     grid-template-columns: 1fr;

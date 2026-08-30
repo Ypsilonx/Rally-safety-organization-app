@@ -94,6 +94,138 @@ const SetupAdminModule = {
     },
 
     /**
+     * Return user-friendly label for station type used in filter dropdown.
+     * @param {string} stationType
+     * @returns {string}
+     */
+    getStationTypeLabel(stationType) {
+        const labels = {
+            track_point: 'Bod na trati',
+            corner: 'Zatáčka',
+            timing: 'Časomíra',
+            parking: 'Parkování',
+            medical: 'Zdravotník',
+            technical: 'Technika',
+            service: 'Servis',
+            start_finish: 'Start/Cíl',
+            other: 'Ostatní',
+        };
+        return labels[stationType] || stationType;
+    },
+
+    /**
+     * Return online/offline status for a station from the map's status cache.
+     * Reuses data already polled by MapModule (`/api/stations/status`) instead
+     * of triggering a separate request just for the setup filter.
+     * @param {string} stationId
+     * @returns {boolean|null} True/false when known, null when status not yet loaded.
+     */
+    isStationOnline(stationId) {
+        const cache = window.MapModule?.stationStatusCache;
+        if (!cache) {
+            return null;
+        }
+        const entry = cache.get(String(stationId || '').toLowerCase());
+        return entry ? Boolean(entry.online) : null;
+    },
+
+    /**
+     * Rebuild type/role filter dropdown options from currently loaded stations.
+     * @param {Object} app
+     */
+    populateStationAdminFilterOptions(app) {
+        const typeSelect = document.getElementById('station-admin-filter-type');
+        const roleSelect = document.getElementById('station-admin-filter-role');
+        if (!typeSelect || !roleSelect) {
+            return;
+        }
+
+        const types = [...new Set(app.adminStations.map((station) => station.station_type).filter(Boolean))].sort();
+        const roles = [...new Set(app.adminStations.map((station) => station.current_user?.role).filter(Boolean))].sort();
+
+        const previousType = typeSelect.value;
+        typeSelect.innerHTML = '<option value="">Typ: vše</option>' + types.map((type) => (
+            `<option value="${app.escapeHtml(type)}">${app.escapeHtml(this.getStationTypeLabel(type))}</option>`
+        )).join('');
+        typeSelect.value = types.includes(previousType) ? previousType : '';
+
+        const previousRole = roleSelect.value;
+        roleSelect.innerHTML = '<option value="">Role: vše</option>' + roles.map((role) => (
+            `<option value="${app.escapeHtml(role)}">${app.escapeHtml(app.getRoleLabel(role))}</option>`
+        )).join('');
+        roleSelect.value = roles.includes(previousRole) ? previousRole : '';
+    },
+
+    /**
+     * Apply active setup filters (search/type/status/role) to loaded stations.
+     * @param {Object} app
+     * @returns {Array<Object>}
+     */
+    getFilteredAdminStations(app) {
+        const filters = app.stationAdminFilters || {};
+        const search = String(filters.search || '').trim().toLowerCase();
+
+        return app.adminStations.filter((station) => {
+            if (search) {
+                const haystack = `${station.station_id || ''} ${station.station_name || ''}`.toLowerCase();
+                if (!haystack.includes(search)) {
+                    return false;
+                }
+            }
+
+            if (filters.type && station.station_type !== filters.type) {
+                return false;
+            }
+
+            if (filters.role && station.current_user?.role !== filters.role) {
+                return false;
+            }
+
+            if (filters.status === 'occupied' && !station.current_user) {
+                return false;
+            }
+            if (filters.status === 'free' && station.current_user) {
+                return false;
+            }
+            if (filters.status === 'offline' && this.isStationOnline(station.station_id) !== false) {
+                return false;
+            }
+
+            return true;
+        });
+    },
+
+    /**
+     * Update one setup filter field and re-render the station list.
+     * @param {Object} app
+     * @param {string} key
+     * @param {string} value
+     */
+    updateStationAdminFilter(app, key, value) {
+        app.stationAdminFilters = { ...app.stationAdminFilters, [key]: value };
+        this.renderAdminStationList(app);
+    },
+
+    /**
+     * Reset all setup filters back to defaults.
+     * @param {Object} app
+     */
+    resetStationAdminFilters(app) {
+        app.stationAdminFilters = { search: '', type: '', status: '', role: '' };
+
+        const searchInput = document.getElementById('station-admin-search-input');
+        const typeSelect = document.getElementById('station-admin-filter-type');
+        const statusSelect = document.getElementById('station-admin-filter-status');
+        const roleSelect = document.getElementById('station-admin-filter-role');
+        if (searchInput) searchInput.value = '';
+        if (typeSelect) typeSelect.value = '';
+        if (statusSelect) statusSelect.value = '';
+        if (roleSelect) roleSelect.value = '';
+
+        this.renderAdminStationList(app);
+    },
+
+    /**
      * Return default role suggested by station type.
      * @param {string} stationType
      * @returns {string}
@@ -519,6 +651,7 @@ const SetupAdminModule = {
             app.selectedAdminStationId = app.adminStations[0]?.station_id || null;
         }
 
+        this.populateStationAdminFilterOptions(app);
         this.renderAdminStationList(app);
         this.renderSelectedAdminStation(app);
 
@@ -542,7 +675,13 @@ const SetupAdminModule = {
             return;
         }
 
-        list.innerHTML = app.adminStations.map((station) => {
+        const filteredStations = this.getFilteredAdminStations(app);
+        if (!filteredStations.length) {
+            list.innerHTML = '<p class="station-admin-empty">Žádná pozice neodpovídá filtru.</p>';
+            return;
+        }
+
+        list.innerHTML = filteredStations.map((station) => {
             const active = station.station_id === app.selectedAdminStationId ? 'active' : '';
             const currentName = station.current_user?.name || 'Neobsazeno';
             const statusLabel = station.current_user ? 'Obsazeno' : 'Volné';

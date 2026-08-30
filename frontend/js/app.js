@@ -39,6 +39,7 @@ const App = {
     adminStations: [],
     adminPeople: [],
     selectedAdminStationId: null,
+    stationAdminFilters: { search: '', type: '', status: '', role: '' },
     currentScreen: 'dashboard',
     lastOfflineStations: [],
 
@@ -433,6 +434,41 @@ const App = {
                     console.error('Bulk PIN generation failed:', error);
                     this.showToast('Hromadné generování PINů selhalo', 'error');
                 });
+            });
+        }
+
+        const stationSearchInput = document.getElementById('station-admin-search-input');
+        if (stationSearchInput) {
+            stationSearchInput.addEventListener('input', () => {
+                window.SetupAdminModule.updateStationAdminFilter(this, 'search', stationSearchInput.value);
+            });
+        }
+
+        const stationTypeFilter = document.getElementById('station-admin-filter-type');
+        if (stationTypeFilter) {
+            stationTypeFilter.addEventListener('change', () => {
+                window.SetupAdminModule.updateStationAdminFilter(this, 'type', stationTypeFilter.value);
+            });
+        }
+
+        const stationStatusFilter = document.getElementById('station-admin-filter-status');
+        if (stationStatusFilter) {
+            stationStatusFilter.addEventListener('change', () => {
+                window.SetupAdminModule.updateStationAdminFilter(this, 'status', stationStatusFilter.value);
+            });
+        }
+
+        const stationRoleFilter = document.getElementById('station-admin-filter-role');
+        if (stationRoleFilter) {
+            stationRoleFilter.addEventListener('change', () => {
+                window.SetupAdminModule.updateStationAdminFilter(this, 'role', stationRoleFilter.value);
+            });
+        }
+
+        const stationFilterResetBtn = document.getElementById('btn-station-admin-filter-reset');
+        if (stationFilterResetBtn) {
+            stationFilterResetBtn.addEventListener('click', () => {
+                window.SetupAdminModule.resetStationAdminFilters(this);
             });
         }
 

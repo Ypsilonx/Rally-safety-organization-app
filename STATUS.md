@@ -72,6 +72,16 @@ Plný plán a checklisty jednotlivých fází jsou v [ROADMAP.md](ROADMAP.md).
 > níže v jednom odstavci na fázi. Detail commit po commitu je v `git log
 > --oneline`, milníky fází mají git tagy `v0.1`-`v0.4`.
 
+### 2026-08-30 (Fáze 5 - filtry a search na setup obrazovce)
+- ✅ Frontend: setup obrazovka pro správu pozic má search (podle ID/názvu) a
+  filtry typ/stav (obsazená/volná/offline)/role nad seznamem pozic —
+  `frontend/js/setup-admin.js` (`getFilteredAdminStations`,
+  `populateStationAdminFilterOptions`), ovládací prvky v `index.html`
+- ℹ️ Vědomě bez virtual scrollingu: pro 160 pozic je vykreslení zanedbatelné,
+  virtualizace by přidala komplexitu bez reálného přínosu (YAGNI)
+- ℹ️ Stav "offline" ve filtru čte existující `MapModule.stationStatusCache`
+  (polling z `/api/stations/status`), žádný nový backend endpoint
+
 ### 2026-08-30 (údržba + zpevnění pro produkci)
 - ✅ Frontend: sjednoceny hardcoded `http://localhost:8000` volání na centrální konstantu `API_BASE_URL` (14 míst v `app.js`, `map.js`, `setup-admin.js`, `app-operations-*.js`) — appka teď jde nasadit na jiný host/port bez zásahu do kódu
 - ✅ Git: odstraněny z trackování testovací session logy (`logs/rz_session_202602*.jsonl`), které se do repa dostaly ještě před přidáním `.gitignore` pravidla; obsahovaly jen fiktivní jména z vývojového testování
@@ -100,10 +110,11 @@ Plný plán a checklisty jednotlivých fází jsou v [ROADMAP.md](ROADMAP.md).
 
 ## 🎯 Next Actions
 
-1. Dokončit minimální řez Fáze 5: konfigurace mapových podkladů a předdefinovaných pozic na setup obrazovce
-2. Doplnit na setup obrazovce create/delete pozice a pohodlnější přesun osoby mezi dvěma pozicemi
-3. Rozhodnout, zda držet plně dynamický station registry v `pins.json`, nebo zavést samostatný katalog stanic
-4. Formální desktop/mobile průchod Fáze 4 (checklist + E2E gate) odložit na závěrečnou validační iteraci
+1. Export stanic + PINů do CSV/Excel ze setup obrazovky
+2. Doplnit na setup obrazovce pohodlnější přesun osoby mezi dvěma pozicemi (dnes jen reassign na jedné)
+3. Zapojit WS notifikace komisařům při přiřazení/změně stanice (primitivy v `connection_manager.py` už existují)
+4. Rozhodnout, zda držet plně dynamický station registry v `pins.json`, nebo zavést samostatný katalog stanic
+5. Formální desktop/mobile průchod Fáze 4 (checklist + E2E gate) odložit na závěrečnou validační iteraci
 
 ---
 

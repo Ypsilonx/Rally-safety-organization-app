@@ -104,9 +104,10 @@ detail modelů viz docstringy v `backend/models/station.py` a
 `backend/core/station_registry.py`.
 
 ### Zbývá:
-- [ ] Tabulka / virtual scrolling pro 160+ pozic na setup obrazovce
-- [ ] Filtry: typ, status (obsazená/volná/offline), role
-- [ ] Search by station ID nebo název
+- [x] Filtry (typ, status obsazená/volná/offline, role) a search podle ID/názvu
+      na setup obrazovce (30.8.2026) — vědomě bez virtual scrollingu: pro
+      160 položek je to zbytečná komplexita (YAGNI), skutečný problém byla
+      dohledatelnost, ne výkon renderu
 - [ ] Export stanic + PINů do CSV/Excel
 - [ ] Pohodlnější přesun osoby mezi dvěma pozicemi (dnes jen reassign na jedné)
 - [ ] WebSocket notifikace komisaři při přiřazení/změně stanice (primitivy

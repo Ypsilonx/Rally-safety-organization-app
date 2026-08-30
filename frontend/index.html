@@ -322,6 +322,24 @@
                     </div>
                     </div>
                 </div>
+                <div class="station-admin-filters">
+                    <input type="search" id="station-admin-search-input" name="station_search" placeholder="Hledat podle ID nebo názvu pozice..." class="station-admin-search-input">
+                    <select id="station-admin-filter-type" name="station_filter_type">
+                        <option value="">Typ: vše</option>
+                    </select>
+                    <select id="station-admin-filter-status" name="station_filter_status">
+                        <option value="">Stav: vše</option>
+                        <option value="occupied">Obsazená</option>
+                        <option value="free">Volná</option>
+                        <option value="offline">Offline</option>
+                    </select>
+                    <select id="station-admin-filter-role" name="station_filter_role">
+                        <option value="">Role: vše</option>
+                    </select>
+                    <button type="button" id="btn-station-admin-filter-reset" class="btn btn-secondary station-refresh-btn">
+                        Zrušit filtry
+                    </button>
+                </div>
                 <div class="station-admin-layout">
                     <div class="station-admin-list-wrap">
                         <div id="station-admin-list" class="station-admin-list">

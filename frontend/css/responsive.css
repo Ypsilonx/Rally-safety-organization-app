@@ -114,6 +114,10 @@
         grid-column: 1 / -1;
     }
 
+    .station-admin-filters {
+        grid-template-columns: minmax(160px, 2fr) repeat(3, minmax(120px, 1fr)) auto;
+    }
+
     .station-admin-layout {
         grid-template-columns: minmax(220px, 280px) minmax(380px, 1fr);
         gap: 0.55rem;
