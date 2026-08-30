@@ -18,10 +18,10 @@ Aktuální stav (před touto změnou) má tři problémy zjištěné při testov
    trati — ale frontend jim nedává žádné tlačítko k potvrzení, takže po
    libovolném incidentu by `rz_resume` byl natrvalo blokovaný bez
    `force_resume`.
-3. **PIN u pozic vedení je matoucí mrtvá váha.** `VRZ`/`ZVRZ`/`VBRZ`/`ZVBRZ`
-   mají v `pins.json` PIN záznam, ačkoliv se přes něj nikdy nedá přihlásit
-   (`auth.py::verify_pin` je pro tyto 4 station_id blokuje). Setup
-   obrazovka i mapový popup ho přesto ukazují a nabízí "Regenerovat PIN".
+3. **Vedení nemá kde vidět PIN, jakmile ztratí Setup obrazovku.** PIN se
+   dnes zobrazuje jen na Setup obrazovce (ADMIN-only po této změně) -
+   vedení ho ale potřebuje znát i operativně (např. nadiktovat komisaři
+   po telefonu), takže potřebuje nové, čistě informativní místo.
 
 ## Cíle
 
@@ -31,20 +31,37 @@ Aktuální stav (před touto změnou) má tři problémy zjištěné při testov
 - VRZ/ZVRZ/VBRZ/ZVBRZ mají operační dashboard (chat, incident handling,
   RZ stop/hold/resume) a nově i vlastní potvrzení READY - ale ztrácí
   přístup na Setup obrazovku a admin API.
-- PIN zmizí z UI pro pozice vedení (zůstává jako neviditelný interní detail
-  úložiště - žádná migrace dat).
+- PIN zůstává čitelný pro ADMINa i vedení (mapový popup), měnit ho ale
+  smí jen ADMIN ze Setup obrazovky (regenerace je vázaná na přiřazení
+  osoby, což je mutační ADMIN-only akce).
 
 ## Mimo scope (vědomě odloženo)
 
-- Zásah do datového modelu `pins.json`/`StationAccess.pin_code` (varianta
-  B z brainstormingu) - PIN zůstává interně beze změny, jen se přestane
-  zobrazovat a nabízet.
 - Konfigurovatelný počet pozic vedení / více ADMIN účtů - uživatel to
   zmínil jako možnou budoucí potřebu, ne aktuální požadavek. Řešení níže
   na to nezavírá dveře (permission check je podle role, ne podle
   hardcoded seznamu usernames), ale nic navíc se nestaví teď.
 - Úklid testovacích dat smíchaných v `data/` - uživatel to výslovně odložil
   na později.
+
+## Navazující kola (samostatné brainstormingy, mimo tento dokument)
+
+Při zpětné vazbě k tomuto návrhu vyplynuly další 3 nezávislé kusy práce,
+které se **nebudují v rámci tohoto designu** - dostanou vlastní
+brainstorming/spec, až na ně dojde řada:
+
+- **B) Kompletní správa pozic v UI** - `create-pin`/`delete pin` endpointy
+  na backendu existují, ale Setup obrazovka k nim nemá formulář/tlačítko;
+  chybí i endpoint pro editaci metadat existující pozice (název, typ,
+  kapacita) bez zásahu do přiřazení osoby.
+- **C) Upload mapových podkladů přes web** - dnes se cesta k
+  track/elements/station-template souborům jen ručně vypisuje do textového
+  pole a soubor musí už ležet na serveru; chybí skutečný upload + validace
+  formátu.
+- **D) Návody** - co má obsahovat mapový podklad a odkud ho vzít, jak
+  připravit CSV se seznamem osob.
+
+Pořadí po dokončení tohoto designu: B → C → D.
 
 ## Architektura
 
@@ -117,27 +134,54 @@ window.wsClient.sendMessage({
 jakéhokoliv odesílatele se `station_id` (což vedení má od včerejší
 opravy).
 
-### 5. PIN zmizí z UI pro pozice vedení
+### 5. PIN je vidět v mapovém popupu pro ADMIN i vedení
 
-`frontend/js/setup-admin.js::renderSelectedAdminStation()` a
-`renderAdminStationList()` - podmíněně skryjí `station-pin-badge` a
-tlačítko "Regenerovat PIN" (`regenerateSelectedStationPin`), když
-`isVedeniStation(station.station_id)` (helper už existuje, řádek 14-16).
-Totéž pro mapový popup v `map-stations.js::buildStationPopup()`.
+Revize po zpětné vazbě: PIN nemá z UI zmizet, ale vedení ztrácí Setup
+obrazovku (jediné dnešní místo, kde PIN vidí) - potřebuje tedy nové místo.
 
-Datový model (`pins.json`, `StationAccess.pin_code`) se nemění - žádná
-migrace, žádné riziko pro existující reálná data.
+**Bezpečnostní zjištění při návrhu:** `/api/stations/status` (odkud
+`map-stations.js` bere data pro popup) nemá žádnou autentizaci - je to
+existující stav (`backend/api/status.py` nemá na žádném route
+`Depends()`), ne něco, co zavádí tento design. Nejde do něj proto přidat
+`pin_code` - zpřístupnilo by to PIN kterékoliv stanice komukoliv bez
+přihlášení. Ostatní pole, co tam dnes jsou (telefon/e-mail/adresa),
+zůstávají veřejná jako dnes - to je samostatný bezpečnostní dluh mimo
+scope tohoto designu (zapsat do `STATUS.md`, neřešit teď).
+
+Řešení: nový endpoint `GET /api/stations/pins` v `status.py`, gated novou
+funkcí `require_vedeni_or_admin` (role `vedouci`/`zastupce`/`admin`,
+stejný `X-Session-Token` mechanismus jako `require_admin`), vrací
+`{station_id: pin_code}` pro všechny stanice. Komisaři (auth přes PIN, ne
+session token) touto branou neprojdou.
+
+`map-stations.js::refreshStationMarkers()` - pro `isVedeniUser()` (admin i
+vedení) doplní druhý fetch na `/api/stations/pins` vedle stávajícího
+`/api/stations/status`, výsledek domerguje do dat před stavbou popupu.
+Komisaři tento druhý fetch vůbec nevolají. `buildStationPopup()` dostane
+navíc řádek s PIN kódem, jen když je v datech přítomný.
+
+`map-stations.js` dnes nemá referenci na `App`/session token (na rozdíl
+od `setup-admin.js`, který dostává `app` jako parametr) - bude muset číst
+`window.App.user?.role` a `window.App.user?.session_token` přímo, stejně
+jako jiné standalone moduly přistupují k `window.SetupAdminModule` apod.
+
+Setup obrazovka (ADMIN-only) PIN zobrazuje beze změny jako dosud, včetně
+tlačítka "Regenerovat PIN" - to zůstává výhradně u ADMINa, protože je to
+mutační akce svázaná s přiřazením osoby.
 
 ## Testování
 
 - `backend/tests/test_admin_people_api.py` - přepnout `_admin_headers()`
   na `UserRole.ADMIN`, přidat test, že session s `UserRole.VEDOUCI` dostane
   na admin endpoint 403 (dnes by prošla).
+- `GET /api/stations/pins` - test bez tokenu vrátí 401, s PIN komisaře
+  místo session tokenu vrátí 401 (`verify_session` PIN neuzná), s vedeni/
+  admin session tokenem vrátí `{station_id: pin_code}` mapu.
 - Manuální průchod v prohlížeči (jako u předchozích oprav, na fiktivních
   datech): admin vidí Setup a nevidí ho vedouci/zastupce; vedouci/zastupce
-  vidí a mohou odeslat tlačítko Připraveno; PIN badge/tlačítko zmizí u
-  VRZ/ZVRZ/VBRZ/ZVBRZ v setup listu i mapovém popupu, u běžných stanic
-  zůstává.
+  vidí a mohou odeslat tlačítko Připraveno; mapový popup u libovolné
+  stanice (včetně VRZ/ZVRZ/VBRZ/ZVBRZ) ukazuje PIN jen přihlášenému
+  admin/vedení uživateli, ne komisaři.
 - End-to-end ověření readiness gate: aktivovat incident mode (poslat
   `message_type: incident`), ověřit že `can_resume()` vrátí VRZ v
   `missing_stations`, poslat READY za VRZ, ověřit že zmizí ze seznamu.

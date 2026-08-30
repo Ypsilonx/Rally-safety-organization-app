@@ -69,6 +69,14 @@ Plný plán a checklisty jednotlivých fází jsou v [ROADMAP.md](ROADMAP.md).
   (`backend/models/user.py`) — ty dva zdroje pravdy se můžou rozejít
   (mapa ukáže jiné jméno, než jaké se reálně přihlásí a píše v chatu).
   Řešení čeká na návrh (mění vztah auth/station_registry/vitality).
+- 🔒 Bezpečnostní dluh: `GET /api/stations/status`, `/api/stations`,
+  `/api/stations/{id}` a `/api/stations/{id}/users` (`backend/api/status.py`)
+  nemají žádnou autentizaci — kdokoliv s přístupem na server vidí jméno,
+  telefon, e-mail, adresu a skupinu ke každé pozici bez přihlášení. Zjištěno
+  při návrhu PIN endpointu (viz
+  `docs/superpowers/specs/2026-08-30-rz-admin-permissions-design.md`),
+  vědomě odloženo mimo scope tohoto designu — řešit jako samostatný úkol
+  (Fáze 10 "Security Basics" v ROADMAP.md).
 
 ---
 
