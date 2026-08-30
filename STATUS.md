@@ -86,6 +86,25 @@ Plný plán a checklisty jednotlivých fází jsou v [ROADMAP.md](ROADMAP.md).
 > níže v jednom odstavci na fázi. Detail commit po commitu je v `git log
 > --oneline`, milníky fází mají git tagy `v0.1`-`v0.4`.
 
+### 2026-08-30 (oddělení ADMIN role od vedení RZ + READY gate)
+- ✅ Backend: `/api/admin/*` je nově výhradně pro roli `admin`
+  (`require_admin` nahradilo `require_vedeni`, které dřív pouštělo i
+  vedouci/zastupce) - přiřazování osob, PINy, název RZ, reset komunikace
+  i mapová konfigurace jsou teď jen v rukou ADMINa
+- ✅ Backend: nový autentizovaný `GET /api/stations/pins` (jen
+  vedouci/zastupce/admin) vrací PIN mapu stanic - `/api/stations/status`
+  (veřejný, bez auth) zůstává beze změny, PIN se do něj záměrně nepřidal
+- ✅ Frontend: nová přísná `isAdminUser()` řídí Setup obrazovku a tlačítko
+  Setup (dřív ji viděla i vedení); ADMIN po přihlášení přistává rovnou na
+  Setup, může se kdykoliv přepnout na live dashboard
+- ✅ Frontend: vedení (vedouci/zastupce) má v admin-panelu nové tlačítko
+  "Vedení připraveno" - potvrzuje READY stejně jako komisaři na trati
+  (nutné od chvíle, co vedení díky opravě vitality trackingu vstupuje do
+  readiness gate)
+- ✅ Frontend: mapový popup stanice ukazuje PIN, jen když je přihlášený
+  uživatel admin/vedení - komisařům se PIN cizí stanice nezobrazí
+- 📄 Detail viz `docs/superpowers/specs/2026-08-30-rz-admin-permissions-design.md`
+
 ### 2026-08-30 (opravy: admin gate, vitality vedení, popup poznámka)
 - ✅ Frontend: uživatel s rolí `admin` teď vidí Setup obrazovku a admin panel
   — `isVedeniUser()` (`app-operations-rz.js`) a `setupUI()` (`app.js`)
