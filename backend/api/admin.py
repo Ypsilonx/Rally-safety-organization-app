@@ -86,6 +86,35 @@ def require_admin(
     return session
 
 
+def _build_station_notice(content: str, priority: str = "normal") -> str:
+    """Build JSON system-message payload for a personal station notification.
+
+    Stejný formát jako ostatní systémové hlášky (rz-config, reset historie) -
+    frontend je vykreslí do chatu/info panelu bez jakékoli úpravy, žádná
+    nová logika na klientovi není potřeba.
+
+    Args:
+        content: Human-readable Czech notice text.
+        priority: Message priority shown to the recipient client.
+
+    Returns:
+        JSON-encoded message ready for `connection_manager.send_personal_message`.
+    """
+    notice = {
+        "message_id": f"stationnotice_{datetime.now(UTC).timestamp()}",
+        "created_at": datetime.now(UTC).isoformat(),
+        "sender": {
+            "user_id": "system",
+            "name": "Systém",
+            "role": "system",
+        },
+        "message_type": "system",
+        "priority": priority,
+        "content": content,
+    }
+    return json.dumps(notice, ensure_ascii=False)
+
+
 @router.get("/rz-config")
 async def admin_get_rz_config(_: Annotated[dict[str, Any], Depends(require_admin)]) -> dict[str, Any]:
     """Return current persistent RZ context for setup UI.
@@ -391,6 +420,13 @@ async def admin_assign_station_user(
         },
     )
 
+    await connection_manager.send_personal_message(
+        _build_station_notice(
+            f"Přiřazení pozice {station_id} bylo aktualizováno: {request.name} ({request.role.value})."
+        ),
+        station.pin_code,
+    )
+
     return {
         "success": True,
         "station": station.model_dump(mode="json"),
@@ -445,6 +481,18 @@ async def admin_move_station_user(
             "assignee_name": to_station.current_user.name if to_station.current_user else None,
             "note": request.note,
         },
+    )
+
+    # Notifikace jde na PŮVODNÍ (zdrojovou) pozici - tam je člověk reálně
+    # ještě připojený, protože PIN je vázaný na stanici, ne na osobu.
+    # Na cílovou pozici notifikaci posílat nemá smysl, musela být volná.
+    await connection_manager.send_personal_message(
+        _build_station_notice(
+            f"Byl jsi přesunut z pozice {from_station_id} na pozici {to_station_id}. "
+            f"Odhlas se a přihlas se novým PINem {to_station.pin_code} pro pozici {to_station_id}.",
+            priority="high",
+        ),
+        from_station.pin_code,
     )
 
     return {
@@ -525,6 +573,11 @@ async def admin_release_station_user(
             "station_id": station_id,
             "note": request.note,
         },
+    )
+
+    await connection_manager.send_personal_message(
+        _build_station_notice(f"Byl jsi odebrán z pozice {station_id}."),
+        station.pin_code,
     )
 
     return {

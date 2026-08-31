@@ -78,6 +78,21 @@ Plný plán a checklisty jednotlivých fází jsou v [ROADMAP.md](ROADMAP.md).
 > níže v jednom odstavci na fázi. Detail commit po commitu je v `git log
 > --oneline`, milníky fází mají git tagy `v0.1`-`v0.4`.
 
+### 2026-08-31 (WS notifikace komisařům při přiřazení/změně stanice)
+- ✅ Backend: `send_personal_message` zapojen na PIN dotčené pozice ve
+  3 admin akcích (`backend/api/admin.py`): assign/reassign ("Přiřazení
+  pozice X bylo aktualizováno..."), release ("Byl jsi odebrán z pozice
+  X."), move ("Byl jsi přesunut na pozici Y. Odhlas se a přihlas se
+  novým PINem...") - notifikace u move jde na PŮVODNÍ pozici, tam je
+  člověk reálně ještě připojený (PIN je vázaný na stanici, ne na osobu)
+- ✅ Nová `_build_station_notice()` - stejný formát `system` zprávy jako
+  dosavadní hlášky (změna názvu RZ, reset komunikace), frontend ji
+  zobrazí beze změny - žádná nová logika na klientovi
+- ✅ Testy: 3 nové v `test_admin_notifications.py` (assign/release/move),
+  `connection_manager` nahrazen testovacím dvojníkem
+- ℹ️ `broadcast_to_station` zůstává nezapojený - spojení jsou 1:1 na PIN,
+  `send_personal_message` na cílový PIN pokrývá stejný případ
+
 ### 2026-08-31 (přesun osoby mezi pozicemi)
 - ✅ Backend: nová atomická operace `station_registry.move_user()` +
   `POST /api/admin/station/{from}/move-to/{to}` - uvolní zdrojovou pozici
@@ -204,9 +219,8 @@ Plný plán a checklisty jednotlivých fází jsou v [ROADMAP.md](ROADMAP.md).
 
 ## 🎯 Next Actions
 
-1. Zapojit WS notifikace komisařům při přiřazení/změně stanice (primitivy v `connection_manager.py` už existují)
-2. Rozhodnout, zda držet plně dynamický station registry v `pins.json`, nebo zavést samostatný katalog stanic
-3. Formální desktop/mobile průchod Fáze 4 (checklist + E2E gate) odložit na závěrečnou validační iteraci
+1. Rozhodnout, zda držet plně dynamický station registry v `pins.json`, nebo zavést samostatný katalog stanic
+2. Formální desktop/mobile průchod Fáze 4 (checklist + E2E gate) odložit na závěrečnou validační iteraci
 
 ---
 

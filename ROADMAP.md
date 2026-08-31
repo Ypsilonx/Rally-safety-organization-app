@@ -115,9 +115,12 @@ detail modelů viz docstringy v `backend/models/station.py` a
       "Přesunout" u obsazené pozice + výběr volné cílové pozice, atomicky
       na backendu (release + assign v jedné operaci, jeden audit log
       záznam) místo dvou ručních kroků přes formulář
-- [ ] WebSocket notifikace komisaři při přiřazení/změně stanice (primitivy
-      `send_personal_message`/`broadcast_to_station` v
-      `backend/core/connection_manager.py` už existují, jen nejsou zapojené)
+- [x] WebSocket notifikace komisaři při přiřazení/změně stanice (31.8.2026) -
+      `send_personal_message` na PIN dotčené pozice při assign/reassign,
+      release i move; reuse existujícího `system` typu zprávy, žádná nová
+      logika na frontendu (zpráva se zobrazí stejně jako dnešní systémové
+      hlášky). `broadcast_to_station` zůstává nezapojený - připojení jsou
+      1:1 na PIN, takže `send_personal_message` pokrývá stejný případ.
 - [ ] Potvrzení přiřazení od komisaře (optional)
 
 **Kritérium úspěchu:** PIN vázaný na stanici, změna člověka PIN neresetuje,

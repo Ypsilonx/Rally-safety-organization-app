@@ -90,9 +90,11 @@ Obojí se pak připojuje na stejný WebSocket endpoint
 
 `ConnectionManager` (in-memory `pin_code -> WebSocket`) má selective
 broadcast: `broadcast_to_all`, `broadcast_to_roles`, `broadcast_critical`.
-`send_personal_message`/`broadcast_to_station` existují, ale zatím nemají
-volajícího — jsou připravené pro ROADMAP.md Fázi 5 §7 (notifikace
-komisaři při přiřazení), nemaž je bez rozmyslu.
+`send_personal_message` je od 31.8.2026 zapojený (`backend/api/admin.py`
+assign/release/move-user posílají notifikaci na PIN dotčené pozice).
+`broadcast_to_station` zatím nemá volajícího — connections jsou 1:1 na
+PIN, takže `send_personal_message` zatím pokrývá stejné případy; nemaž
+ho bez rozmyslu.
 
 ### Frontend — pořadí načítání scriptů je závazné
 
@@ -120,4 +122,4 @@ CSS je rozdělené tematicky: `base.css`, `app-shell.css`, `communication.css`,
 - Bez databáze, bez frameworků na frontendu (žádné React/Vue/TypeScript) —
   dokud to explicitně nepřibude do roadmapy.
 - Když najdeš nepoužívaný kód, buď ho smaž, nebo do docstringu jasně napiš
-  proč tam zůstává (viz `send_personal_message` výše jako vzor).
+  proč tam zůstává (viz `broadcast_to_station` výše jako vzor).

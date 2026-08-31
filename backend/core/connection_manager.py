@@ -53,9 +53,8 @@ class ConnectionManager:
     async def send_personal_message(self, message: str, pin_code: str) -> bool:
         """Send message to specific user.
 
-        Zatím bez volajícího - připraveno pro ROADMAP.md Fáze 5 §7
-        (notifikace konkrétnímu komisaři při přiřazení/změně stanice),
-        které ještě není naimplementované.
+        Volá `backend/api/admin.py` při assign/reassign, release a move
+        stanice - notifikuje PIN dotčené pozice (ROADMAP.md Fáze 5 §7).
 
         Args:
             message: JSON message string
@@ -146,8 +145,9 @@ class ConnectionManager:
                                    exclude_pin: Optional[str] = None) -> int:
         """Broadcast message only to users at specific station.
 
-        Zatím bez volajícího - stejný důvod jako u send_personal_message,
-        viz ROADMAP.md Fáze 5 §7.
+        Zatím bez volajícího - `send_personal_message` (výše) pokrývá
+        stejný případ, protože spojení jsou 1:1 na PIN (viz ROADMAP.md
+        Fáze 5 §7). Nemaž bez rozmyslu.
 
         Args:
             message: JSON message string
