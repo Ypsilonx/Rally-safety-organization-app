@@ -6,6 +6,7 @@ from typing import Annotated, Any
 from fastapi import APIRouter, Depends, Header, HTTPException, status
 
 from backend.core.auth import auth_manager
+from backend.core.map_config import map_config_manager
 from backend.core.rz_context import rz_context_manager
 from backend.services.operations_state import operations_state
 from backend.services.vitality import vitality_monitor
@@ -100,6 +101,21 @@ async def get_rz_context() -> dict[str, Any]:
         "communication_reset_at": context.communication_reset_at,
         "updated_at": context.updated_at,
     }
+
+
+@router.get("/map-config")
+async def get_map_config() -> dict[str, Any]:
+    """Return current shared map configuration.
+
+    Veřejné bez autentizace - souřadnice a URL trati nejsou PII, stejná
+    úroveň jako `/rz-context`. Volají ho všichni klienti při startu mapy
+    i po live-sync notifikaci o změně verze.
+
+    Returns:
+        Track GeoJSON URL, souřadnicové přepisy stanic a verze configu.
+    """
+    config = map_config_manager.get_config()
+    return config.model_dump(mode="json")
 
 
 @router.get("/status")
