@@ -11,10 +11,11 @@ from fastapi import APIRouter, Depends, Header, HTTPException, status
 from backend.core.auth import auth_manager
 from backend.core.connection_manager import connection_manager
 from backend.core.event_logger import event_logger
+from backend.core.map_config import map_config_manager
 from backend.core.people_catalog import people_catalog
 from backend.core.rz_context import rz_context_manager
 from backend.core.station_registry import station_registry
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, model_validator
 
 from backend.models.people import PeopleCsvImportRequest
 from backend.models.station import (
@@ -45,6 +46,53 @@ class RzConfigUpdateRequest(BaseModel):
     """
 
     rz_name: str = Field(..., min_length=1, max_length=120)
+
+
+class StationCoordinateUpdate(BaseModel):
+    """One station's coordinate override.
+
+    Attributes:
+        station_id: Station identifier (nemusí existovat v
+            station_registry - souřadnice je čistě mapová vrstva).
+        latitude: Geographic latitude.
+        longitude: Geographic longitude.
+    """
+
+    station_id: str = Field(..., min_length=1, max_length=50)
+    latitude: float = Field(..., ge=-90, le=90)
+    longitude: float = Field(..., ge=-180, le=180)
+
+
+class MapConfigUpdateRequest(BaseModel):
+    """Payload for updating one part of the shared map configuration.
+
+    Právě jedno z `track_geojson_url` nebo `station_coordinate` musí být
+    vyplněné.
+
+    Attributes:
+        track_geojson_url: New GeoJSON track source (empty string resets
+            to default).
+        station_coordinate: New coordinate override for one station.
+    """
+
+    track_geojson_url: str | None = Field(None, max_length=500)
+    station_coordinate: StationCoordinateUpdate | None = None
+
+    @model_validator(mode="after")
+    def _validate_exactly_one_field(self) -> "MapConfigUpdateRequest":
+        """Ensure the request updates exactly one map config field.
+
+        Returns:
+            Validated request.
+
+        Raises:
+            ValueError: If both or neither field is provided.
+        """
+        if (self.track_geojson_url is None) == (self.station_coordinate is None):
+            raise ValueError(
+                "Musí být zadáno právě jedno z track_geojson_url nebo station_coordinate"
+            )
+        return self
 
 
 def require_admin(
@@ -86,7 +134,9 @@ def require_admin(
     return session
 
 
-def _build_station_notice(content: str, priority: str = "normal") -> str:
+def _build_station_notice(
+    content: str, priority: str = "normal", extra_fields: dict[str, Any] | None = None
+) -> str:
     """Build JSON system-message payload for a personal station notification.
 
     Stejný formát jako ostatní systémové hlášky (rz-config, reset historie) -
@@ -96,9 +146,12 @@ def _build_station_notice(content: str, priority: str = "normal") -> str:
     Args:
         content: Human-readable Czech notice text.
         priority: Message priority shown to the recipient client.
+        extra_fields: Volitelná další pole vmergovaná do zprávy (např.
+            `map_config_version` pro spuštění live-sync na klientovi).
 
     Returns:
-        JSON-encoded message ready for `connection_manager.send_personal_message`.
+        JSON-encoded message ready for `connection_manager.send_personal_message`
+        or `connection_manager.broadcast_to_all`.
     """
     notice = {
         "message_id": f"stationnotice_{datetime.now(UTC).timestamp()}",
@@ -112,6 +165,8 @@ def _build_station_notice(content: str, priority: str = "normal") -> str:
         "priority": priority,
         "content": content,
     }
+    if extra_fields:
+        notice.update(extra_fields)
     return json.dumps(notice, ensure_ascii=False)
 
 
@@ -667,4 +722,59 @@ async def admin_regenerate_station_pin(
         "success": True,
         "old_pin_code": old_pin,
         "station": station.model_dump(mode="json"),
+    }
+
+
+@router.post("/map-config")
+async def admin_update_map_config(
+    request: MapConfigUpdateRequest,
+    session: Annotated[dict[str, Any], Depends(require_admin)],
+) -> dict[str, Any]:
+    """Update one part of the shared map configuration and notify all clients live.
+
+    Args:
+        request: New track source, or a new station coordinate override.
+        session: Verified admin session.
+
+    Returns:
+        Updated map configuration.
+    """
+    if request.track_geojson_url is not None:
+        config = map_config_manager.set_track_source(request.track_geojson_url)
+        action = "update_map_track_source"
+        details: dict[str, Any] = {"track_geojson_url": request.track_geojson_url}
+        notice_content = "Podklad trati byl aktualizován."
+    else:
+        coordinate = request.station_coordinate
+        config = map_config_manager.set_station_coordinate(
+            coordinate.station_id, coordinate.latitude, coordinate.longitude
+        )
+        action = "update_map_station_coordinate"
+        details = {
+            "station_id": coordinate.station_id,
+            "latitude": coordinate.latitude,
+            "longitude": coordinate.longitude,
+        }
+        notice_content = f"Souřadnice pozice {coordinate.station_id} byly aktualizovány."
+
+    event_logger.log_event(
+        "admin_action",
+        {
+            "action": action,
+            "actor": session["username"],
+            "role": session["role"].value,
+            **details,
+        },
+    )
+
+    await connection_manager.broadcast_to_all(
+        _build_station_notice(
+            notice_content,
+            extra_fields={"map_config_version": config.version},
+        )
+    )
+
+    return {
+        "success": True,
+        "map_config": config.model_dump(mode="json"),
     }
