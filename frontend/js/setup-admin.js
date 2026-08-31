@@ -663,6 +663,72 @@ const SetupAdminModule = {
     },
 
     /**
+     * Sestaví CSV export stanic (ID, typ, PIN, obsazení) a spustí stažení
+     * v prohlížeči. Exportuje vždy všechny pozice bez ohledu na aktivní
+     * search/filtry na obrazovce - účel je kompletní seznam pro rozeslání
+     * PINů/kontaktů před rally.
+     * @param {Object} app
+     */
+    exportStationsCsv(app) {
+        if (!Array.isArray(app.adminStations) || !app.adminStations.length) {
+            app.showToast('Není co exportovat - seznam pozic je prázdný', 'error');
+            return;
+        }
+
+        const header = [
+            'station_id', 'station_name', 'station_type', 'pin_code',
+            'name', 'role', 'phone', 'email', 'address', 'group',
+        ];
+        const rows = app.adminStations.map((station) => [
+            station.station_id,
+            station.station_name,
+            station.station_type,
+            station.pin_code,
+            station.current_user?.name,
+            station.current_user?.role,
+            station.current_user?.phone,
+            station.current_user?.email,
+            station.current_user?.address,
+            station.current_user?.group,
+        ]);
+
+        const csvLines = [header, ...rows].map(
+            (row) => row.map((cell) => this.csvEscape(cell)).join(',')
+        );
+        // BOM na začátku - Excel bez něj u CSV s diakritikou hádá špatné kódování.
+        const csvContent = `\uFEFF${csvLines.join('\r\n')}\r\n`;
+
+        const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+        const url = URL.createObjectURL(blob);
+        const datestamp = new Date().toISOString().slice(0, 10);
+        const filename = `stanice-piny-${app.rzName}-${datestamp}.csv`.replace(/[^\w.-]+/g, '_');
+
+        const link = document.createElement('a');
+        link.href = url;
+        link.download = filename;
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        URL.revokeObjectURL(url);
+
+        app.showToast('CSV export stažen', 'success');
+    },
+
+    /**
+     * Escapuje jednu buňku pro CSV (RFC 4180) - obalí uvozovkami, pokud
+     * obsahuje čárku, uvozovku nebo nový řádek.
+     * @param {*} value
+     * @returns {string}
+     */
+    csvEscape(value) {
+        const text = value === null || value === undefined ? '' : String(value);
+        if (/[",\r\n]/.test(text)) {
+            return `"${text.replace(/"/g, '""')}"`;
+        }
+        return text;
+    },
+
+    /**
      * Render station selector list in setup screen.
      * @param {Object} app
      */

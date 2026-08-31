@@ -78,6 +78,14 @@ Plný plán a checklisty jednotlivých fází jsou v [ROADMAP.md](ROADMAP.md).
 > níže v jednom odstavci na fázi. Detail commit po commitu je v `git log
 > --oneline`, milníky fází mají git tagy `v0.1`-`v0.4`.
 
+### 2026-08-31 (CSV export stanic ze setup obrazovky)
+- ✅ Frontend: nové tlačítko "Export CSV" v `Pozice a obsazení` na setup
+  obrazovce (`setup-admin.js::exportStationsCsv`) - stáhne kompletní
+  seznam stanic (ID, název, typ, PIN, jméno/role/telefon/e-mail/adresa/
+  skupina aktuálně přiřazené osoby) bez ohledu na aktivní search/filtr,
+  žádný nový backend endpoint (data už jsou v `app.adminStations`)
+- ℹ️ Vědomě jen CSV, ne skutečný `.xlsx` - viz `ROADMAP.md` Fáze 5
+
 ### 2026-08-31 (bezpečnostní dluh - PII únik z veřejných station endpointů)
 - 🔒 Backend: `GET /api/stations/status` a `GET /api/stations/{id}/users`
   (`backend/api/status.py`) dřív vracely jméno, telefon, e-mail, adresu a
@@ -177,11 +185,10 @@ Plný plán a checklisty jednotlivých fází jsou v [ROADMAP.md](ROADMAP.md).
 
 ## 🎯 Next Actions
 
-1. Export stanic + PINů do CSV/Excel ze setup obrazovky
-2. Doplnit na setup obrazovce pohodlnější přesun osoby mezi dvěma pozicemi (dnes jen reassign na jedné)
-3. Zapojit WS notifikace komisařům při přiřazení/změně stanice (primitivy v `connection_manager.py` už existují)
-4. Rozhodnout, zda držet plně dynamický station registry v `pins.json`, nebo zavést samostatný katalog stanic
-5. Formální desktop/mobile průchod Fáze 4 (checklist + E2E gate) odložit na závěrečnou validační iteraci
+1. Doplnit na setup obrazovce pohodlnější přesun osoby mezi dvěma pozicemi (dnes jen reassign na jedné)
+2. Zapojit WS notifikace komisařům při přiřazení/změně stanice (primitivy v `connection_manager.py` už existují)
+3. Rozhodnout, zda držet plně dynamický station registry v `pins.json`, nebo zavést samostatný katalog stanic
+4. Formální desktop/mobile průchod Fáze 4 (checklist + E2E gate) odložit na závěrečnou validační iteraci
 
 ---
 

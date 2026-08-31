@@ -108,7 +108,9 @@ detail modelů viz docstringy v `backend/models/station.py` a
       na setup obrazovce (30.8.2026) — vědomě bez virtual scrollingu: pro
       160 položek je to zbytečná komplexita (YAGNI), skutečný problém byla
       dohledatelnost, ne výkon renderu
-- [ ] Export stanic + PINů do CSV/Excel
+- [x] Export stanic + PINů do CSV (31.8.2026) - vědomě jen CSV, ne skutečný
+      .xlsx (YAGNI - nová závislost jen kvůli formátování sešitu bez
+      reálného přínosu oproti tabulce otevřené v Excelu)
 - [ ] Pohodlnější přesun osoby mezi dvěma pozicemi (dnes jen reassign na jedné)
 - [ ] WebSocket notifikace komisaři při přiřazení/změně stanice (primitivy
       `send_personal_message`/`broadcast_to_station` v

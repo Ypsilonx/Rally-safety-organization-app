@@ -444,6 +444,13 @@ const App = {
             });
         }
 
+        const exportStationsCsvBtn = document.getElementById('btn-export-stations-csv');
+        if (exportStationsCsvBtn) {
+            exportStationsCsvBtn.addEventListener('click', () => {
+                window.SetupAdminModule.exportStationsCsv(this);
+            });
+        }
+
         const bulkGeneratePinsBtn = document.getElementById('btn-bulk-generate-pins');
         if (bulkGeneratePinsBtn) {
             bulkGeneratePinsBtn.addEventListener('click', () => {
