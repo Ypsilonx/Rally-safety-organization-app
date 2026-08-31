@@ -21,6 +21,7 @@ from backend.models.station import (
     StationAssignmentRequest,
     StationBulkGeneratePinsRequest,
     StationCreateRequest,
+    StationMoveRequest,
 )
 
 router = APIRouter(prefix="/api/admin", tags=["admin"])
@@ -393,6 +394,63 @@ async def admin_assign_station_user(
     return {
         "success": True,
         "station": station.model_dump(mode="json"),
+    }
+
+
+@router.post("/station/{from_station_id}/move-to/{to_station_id}")
+async def admin_move_station_user(
+    from_station_id: str,
+    to_station_id: str,
+    request: StationMoveRequest,
+    session: Annotated[dict[str, Any], Depends(require_admin)],
+) -> dict[str, Any]:
+    """Move the current assignee from one station to another in one operation.
+
+    Args:
+        from_station_id: Station identifier to move the person off.
+        to_station_id: Station identifier to move the person onto.
+        request: Optional move note.
+
+    Returns:
+        Updated source and target station views.
+
+    Raises:
+        HTTPException: If either station is unknown, the source has no
+            active assignment, the target is already occupied, or the
+            role is not allowed on the target station.
+    """
+    try:
+        from_station, to_station = station_registry.move_user(
+            from_station_id, to_station_id, request.note
+        )
+    except KeyError as error:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=str(error),
+        ) from error
+    except ValueError as error:
+        raise HTTPException(
+            status_code=status.HTTP_409_CONFLICT,
+            detail=str(error),
+        ) from error
+
+    event_logger.log_event(
+        "admin_action",
+        {
+            "action": "move_station_user",
+            "actor": session["username"],
+            "role": session["role"].value,
+            "from_station_id": from_station_id,
+            "to_station_id": to_station_id,
+            "assignee_name": to_station.current_user.name if to_station.current_user else None,
+            "note": request.note,
+        },
+    )
+
+    return {
+        "success": True,
+        "from_station": from_station.model_dump(mode="json"),
+        "to_station": to_station.model_dump(mode="json"),
     }
 
 

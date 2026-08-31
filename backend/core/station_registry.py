@@ -334,6 +334,61 @@ class StationRegistry:
         )
         return self._to_station_access(record)
 
+    def move_user(
+        self, from_station_id: str, to_station_id: str, note: str | None = None
+    ) -> tuple[StationAccess, StationAccess]:
+        """Move the current assignee from one station to another in one operation.
+
+        Zdrojová pozice se uvolní a cílová obsadí stejnou osobou beze ztráty
+        kontaktních údajů - historie na obou stranách zůstává (release na
+        zdroji, nové přiřazení na cíli). Oproti dvěma samostatným voláním
+        z frontendu (release + assign) zkracuje okno, ve kterém by síťová
+        chyba mohla osobu ztratit "mezi pozicemi".
+
+        Args:
+            from_station_id: Station identifier to move the person off.
+            to_station_id: Station identifier to move the person onto.
+            note: Optional operator note stored on both sides of the move.
+
+        Returns:
+            Tuple of (updated source station, updated target station).
+
+        Raises:
+            KeyError: If either station does not exist.
+            ValueError: If the source has no active assignment, the target
+                is already occupied, or the role is not allowed on the target.
+        """
+        from_access = self.get_station(from_station_id)
+        if from_access is None:
+            raise KeyError(f"Unknown station '{from_station_id}'")
+        if from_access.current_user is None:
+            raise ValueError(f"Station '{from_station_id}' has no active assignment to move")
+
+        to_access = self.get_station(to_station_id)
+        if to_access is None:
+            raise KeyError(f"Unknown station '{to_station_id}'")
+        if to_access.current_user is not None:
+            raise ValueError(f"Target station '{to_station_id}' is already occupied")
+
+        assignee = from_access.current_user
+        self._validate_station_role(to_station_id, assignee.role)
+
+        self.release_user(from_station_id, note=note or f"Přesunuto na pozici {to_station_id}")
+        updated_to = self.assign_user(
+            to_station_id,
+            StationAssignmentRequest(
+                name=assignee.name,
+                role=assignee.role,
+                phone=assignee.phone,
+                email=assignee.email,
+                address=assignee.address,
+                group=assignee.group,
+                note=note or f"Přesunuto z pozice {from_station_id}",
+            ),
+        )
+        updated_from = self.get_station(from_station_id)
+        return updated_from, updated_to
+
     def release_user(self, station_id: str, note: str | None = None) -> StationAccess:
         """Release current assignee from station PIN.
 

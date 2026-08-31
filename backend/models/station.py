@@ -161,6 +161,16 @@ class StationCreateRequest(BaseModel):
     note: Optional[str] = Field(None, max_length=200)
 
 
+class StationMoveRequest(BaseModel):
+    """Payload for moving the current assignee from one station to another.
+
+    Attributes:
+        note: Optional operator note explaining the move.
+    """
+
+    note: Optional[str] = Field(None, max_length=200)
+
+
 class StationBulkGeneratePinsRequest(BaseModel):
     """Payload for bulk station PIN generation from map templates.
 

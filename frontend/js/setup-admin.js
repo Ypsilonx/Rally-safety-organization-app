@@ -843,7 +843,33 @@ const SetupAdminModule = {
         form.classList.remove('hidden');
 
         this.renderAdminHistory(app, station.assigned_users || []);
+        this.renderMoveTargetOptions(app, station);
         this.loadSelectedSetupStationCoordinate(app);
+    },
+
+    /**
+     * Populate move-target dropdown with currently free stations.
+     * @param {Object} app
+     * @param {Object} station - Currently selected station.
+     */
+    renderMoveTargetOptions(app, station) {
+        const select = document.getElementById('admin-move-target-station');
+        const moveBtn = document.getElementById('btn-move-station');
+        if (!select || !moveBtn) {
+            return;
+        }
+
+        const freeStations = app.adminStations.filter(
+            (candidate) => !candidate.current_user && candidate.station_id !== station.station_id
+        );
+
+        select.innerHTML = '<option value="">Vyber cílovou pozici...</option>' + freeStations.map((candidate) => (
+            `<option value="${app.escapeHtml(candidate.station_id)}">${app.escapeHtml(candidate.station_id)} · ${app.escapeHtml(candidate.station_name || candidate.station_id)}</option>`
+        )).join('');
+
+        const canMove = Boolean(station.current_user) && freeStations.length > 0;
+        select.disabled = !canMove;
+        moveBtn.disabled = !canMove;
     },
 
     /**
@@ -1119,6 +1145,63 @@ const SetupAdminModule = {
             note,
         });
         app.showToast(`Pozice ${stationId} uvolněna`, 'success');
+    },
+
+    /**
+     * Move currently assigned person from selected station to a chosen free target.
+     * @param {Object} app
+     * @returns {Promise<void>}
+     */
+    async moveAdminStation(app) {
+        const stationId = document.getElementById('admin-station-id')?.value;
+        const targetStationId = document.getElementById('admin-move-target-station')?.value;
+        const station = this.getSelectedAdminStation(app);
+        const note = document.getElementById('admin-person-note')?.value.trim() || null;
+
+        if (!stationId || !station?.current_user) {
+            app.showToast('Vybraná pozice je volná, není koho přesunout', 'info');
+            return;
+        }
+        if (!targetStationId) {
+            app.showToast('Vyber cílovou pozici pro přesun', 'info');
+            return;
+        }
+
+        const confirmed = confirm(
+            `Přesunout ${station.current_user.name} z pozice ${stationId} na pozici ${targetStationId}?`
+        );
+        if (!confirmed) {
+            return;
+        }
+
+        const response = await this.adminFetch(
+            app,
+            `${API_BASE_URL}/api/admin/station/${encodeURIComponent(stationId)}/move-to/${encodeURIComponent(targetStationId)}`,
+            {
+                method: 'POST',
+                body: JSON.stringify({ note }),
+            },
+        );
+
+        if (!response) {
+            return;
+        }
+
+        if (!response.ok) {
+            const payload = await response.json().catch(() => null);
+            app.showToast(payload?.detail || 'Přesun se nepodařil', 'error');
+            return;
+        }
+
+        app.selectedAdminStationId = targetStationId;
+        await this.loadAdminStations(app);
+        await this.refreshMapStationsSafe();
+        this.notifyStationDirectoryChanged(app, stationId);
+        app.logUiAction('setup_assignment_moved', {
+            from_station_id: stationId,
+            to_station_id: targetStationId,
+        });
+        app.showToast(`Přesunuto z pozice ${stationId} na ${targetStationId}`, 'success');
     },
 
     /**

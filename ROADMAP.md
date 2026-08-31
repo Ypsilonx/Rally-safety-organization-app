@@ -111,7 +111,10 @@ detail modelů viz docstringy v `backend/models/station.py` a
 - [x] Export stanic + PINů do CSV (31.8.2026) - vědomě jen CSV, ne skutečný
       .xlsx (YAGNI - nová závislost jen kvůli formátování sešitu bez
       reálného přínosu oproti tabulce otevřené v Excelu)
-- [ ] Pohodlnější přesun osoby mezi dvěma pozicemi (dnes jen reassign na jedné)
+- [x] Pohodlnější přesun osoby mezi dvěma pozicemi (31.8.2026) - tlačítko
+      "Přesunout" u obsazené pozice + výběr volné cílové pozice, atomicky
+      na backendu (release + assign v jedné operaci, jeden audit log
+      záznam) místo dvou ručních kroků přes formulář
 - [ ] WebSocket notifikace komisaři při přiřazení/změně stanice (primitivy
       `send_personal_message`/`broadcast_to_station` v
       `backend/core/connection_manager.py` už existují, jen nejsou zapojené)

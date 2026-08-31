@@ -528,6 +528,16 @@ const App = {
             });
         }
 
+        const moveStationBtn = document.getElementById('btn-move-station');
+        if (moveStationBtn) {
+            moveStationBtn.addEventListener('click', () => {
+                window.SetupAdminModule.moveAdminStation(this).catch((error) => {
+                    console.error('Station move failed:', error);
+                    this.showToast('Přesun se nepodařil', 'error');
+                });
+            });
+        }
+
         const regeneratePinBtn = document.getElementById('btn-regenerate-station-pin');
         if (regeneratePinBtn) {
             regeneratePinBtn.addEventListener('click', () => {

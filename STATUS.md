@@ -78,6 +78,25 @@ Plný plán a checklisty jednotlivých fází jsou v [ROADMAP.md](ROADMAP.md).
 > níže v jednom odstavci na fázi. Detail commit po commitu je v `git log
 > --oneline`, milníky fází mají git tagy `v0.1`-`v0.4`.
 
+### 2026-08-31 (přesun osoby mezi pozicemi)
+- ✅ Backend: nová atomická operace `station_registry.move_user()` +
+  `POST /api/admin/station/{from}/move-to/{to}` - uvolní zdrojovou pozici
+  a obsadí cílovou stejnou osobou v jedné operaci (release + assign,
+  jeden audit log záznam `move_station_user`), ne dva samostatné kroky
+  z frontendu; validuje, že zdroj má aktivní osobu, cíl je volný a role
+  smí na cílovou pozici (VRZ/ZVRZ omezení se dodržuje i při přesunu)
+- ✅ Frontend: v detailu obsazené pozice nový výběr cílové pozice (jen
+  volné) + tlačítko "Přesunout", `confirm()` dialog stejně jako u
+  uvolnění pozice, po úspěchu refresh seznamu i mapy
+  (`setup-admin.js::moveAdminStation`, `renderMoveTargetOptions`)
+- ✅ Testy: 6 nových v `test_station_move_api.py` (úspěšný přesun,
+  obsazený cíl, prázdný zdroj, zakázaná role na VRZ pozici, neznámá
+  stanice, chybějící auth)
+- ℹ️ Ověřeno v prohlížeči jen po stránce UI (populace dropdownu,
+  disabled stav u volné pozice, žádné chyby v konzoli) - reálné
+  odeslání přesunu vědomě nevyzkoušeno proti produkčním datům
+  (zapsalo by trvalý historický záznam ke skutečným lidem)
+
 ### 2026-08-31 (CSV export stanic ze setup obrazovky)
 - ✅ Frontend: nové tlačítko "Export CSV" v `Pozice a obsazení` na setup
   obrazovce (`setup-admin.js::exportStationsCsv`) - stáhne kompletní
@@ -185,10 +204,9 @@ Plný plán a checklisty jednotlivých fází jsou v [ROADMAP.md](ROADMAP.md).
 
 ## 🎯 Next Actions
 
-1. Doplnit na setup obrazovce pohodlnější přesun osoby mezi dvěma pozicemi (dnes jen reassign na jedné)
-2. Zapojit WS notifikace komisařům při přiřazení/změně stanice (primitivy v `connection_manager.py` už existují)
-3. Rozhodnout, zda držet plně dynamický station registry v `pins.json`, nebo zavést samostatný katalog stanic
-4. Formální desktop/mobile průchod Fáze 4 (checklist + E2E gate) odložit na závěrečnou validační iteraci
+1. Zapojit WS notifikace komisařům při přiřazení/změně stanice (primitivy v `connection_manager.py` už existují)
+2. Rozhodnout, zda držet plně dynamický station registry v `pins.json`, nebo zavést samostatný katalog stanic
+3. Formální desktop/mobile průchod Fáze 4 (checklist + E2E gate) odložit na závěrečnou validační iteraci
 
 ---
 
