@@ -16,72 +16,6 @@ const SetupAdminModule = {
     },
 
     /**
-     * Return local storage key for setup map configuration.
-     * @returns {string}
-     */
-    getMapConfigStorageKey() {
-        return 'rally_setup_map_config_v1';
-    },
-
-    /**
-     * Read map config from local storage.
-     * @returns {{trackGeoJsonUrl: string, stationCoordinates: Object<string, Array<number>>}}
-     */
-    readStoredMapConfig() {
-        try {
-            const raw = localStorage.getItem(this.getMapConfigStorageKey());
-            if (!raw) {
-                return { trackGeoJsonUrl: '', stationCoordinates: {} };
-            }
-            const parsed = JSON.parse(raw);
-            return {
-                trackGeoJsonUrl: String(parsed.trackGeoJsonUrl || ''),
-                stationCoordinates: parsed.stationCoordinates && typeof parsed.stationCoordinates === 'object'
-                    ? parsed.stationCoordinates
-                    : {},
-            };
-        } catch (_error) {
-            return { trackGeoJsonUrl: '', stationCoordinates: {} };
-        }
-    },
-
-    /**
-     * Persist map config to local storage.
-     * @param {Object} payload
-     */
-    storeMapConfig(payload) {
-        localStorage.setItem(this.getMapConfigStorageKey(), JSON.stringify(payload));
-    },
-
-    /**
-     * Merge map runtime config with storage and apply on startup/setup open.
-     * @param {Object} app
-     */
-    applyStoredMapConfig(app) {
-        if (!window.MapModule) {
-            return;
-        }
-
-        const stored = this.readStoredMapConfig();
-        const runtime = window.MapModule.getRuntimeConfig
-            ? window.MapModule.getRuntimeConfig()
-            : { trackGeoJsonUrl: '', stationCoordinates: {} };
-
-        const mergedCoordinates = {
-            ...(runtime.stationCoordinates || {}),
-            ...(stored.stationCoordinates || {}),
-        };
-
-        window.MapModule.setTrackSource(stored.trackGeoJsonUrl || runtime.trackGeoJsonUrl || '');
-        window.MapModule.setStationCoordinates(mergedCoordinates);
-        this.storeMapConfig({
-            trackGeoJsonUrl: String(stored.trackGeoJsonUrl || runtime.trackGeoJsonUrl || ''),
-            stationCoordinates: mergedCoordinates,
-        });
-        this.syncMapConfigForm(app);
-    },
-
-    /**
      * Fill setup map config form with current values.
      * @param {Object} app
      */
@@ -304,6 +238,29 @@ const SetupAdminModule = {
     },
 
     /**
+     * Toggle screen visibility to Setup without reloading any data - used
+     * by openSetupScreen() and by the map coordinate picker (Task 6),
+     * který nesmí za běhu triggerovat reload seznamu pozic - přepsal by
+     * právě vyplněné lat/lon pole zpátky na dřív uloženou hodnotu.
+     * @param {Object} app
+     * @returns {boolean} True, pokud byly obě obrazovky nalezené a přepnuté.
+     */
+    showSetupScreenOnly(app) {
+        const appScreen = document.getElementById('app-screen');
+        const setupScreen = document.getElementById('setup-screen');
+        if (!appScreen || !setupScreen) {
+            return false;
+        }
+
+        appScreen.classList.remove('active');
+        appScreen.classList.add('hidden');
+        setupScreen.classList.remove('hidden');
+        setupScreen.classList.add('active');
+        app.currentScreen = 'setup';
+        return true;
+    },
+
+    /**
      * Switch to dedicated setup screen for positions and map configuration.
      * @param {Object} app
      */
@@ -312,20 +269,12 @@ const SetupAdminModule = {
             return;
         }
 
-        const appScreen = document.getElementById('app-screen');
-        const setupScreen = document.getElementById('setup-screen');
-        if (!appScreen || !setupScreen) {
+        if (!this.showSetupScreenOnly(app)) {
             return;
         }
-
-        appScreen.classList.remove('active');
-        appScreen.classList.add('hidden');
-        setupScreen.classList.remove('hidden');
-        setupScreen.classList.add('active');
-        app.currentScreen = 'setup';
         app.logUiAction('open_setup_screen', {});
 
-        this.applyStoredMapConfig(app);
+        this.syncMapConfigForm(app);
 
         Promise.all([
             this.loadAdminStations(app),
@@ -873,7 +822,7 @@ const SetupAdminModule = {
     },
 
     /**
-     * Apply custom track source from setup form.
+     * Apply custom track source from setup form and persist it on the server.
      * @param {Object} app
      * @returns {Promise<void>}
      */
@@ -884,13 +833,22 @@ const SetupAdminModule = {
         }
 
         const trackGeoJsonUrl = String(trackInput.value || '').trim();
-        window.MapModule.setTrackSource(trackGeoJsonUrl);
 
-        const stored = this.readStoredMapConfig();
-        this.storeMapConfig({
-            trackGeoJsonUrl,
-            stationCoordinates: stored.stationCoordinates || {},
+        const response = await this.adminFetch(app, `${API_BASE_URL}/api/admin/map-config`, {
+            method: 'POST',
+            body: JSON.stringify({ track_geojson_url: trackGeoJsonUrl }),
         });
+
+        if (!response) {
+            return;
+        }
+
+        if (!response.ok) {
+            app.showToast('Podklad trati se nepodařilo uložit', 'error');
+            return;
+        }
+
+        window.MapModule.setTrackSource(trackGeoJsonUrl);
         app.logUiAction('setup_track_source_updated', {
             track_geojson_url: trackGeoJsonUrl || 'default',
         });
@@ -932,7 +890,7 @@ const SetupAdminModule = {
     },
 
     /**
-     * Save selected station coordinates from setup form.
+     * Save selected station coordinates from setup form to the server.
      * @param {Object} app
      * @returns {Promise<void>}
      */
@@ -958,18 +916,27 @@ const SetupAdminModule = {
             return;
         }
 
-        const mergedCoordinates = {
+        const response = await this.adminFetch(app, `${API_BASE_URL}/api/admin/map-config`, {
+            method: 'POST',
+            body: JSON.stringify({
+                station_coordinate: { station_id: stationId, latitude, longitude },
+            }),
+        });
+
+        if (!response) {
+            return;
+        }
+
+        if (!response.ok) {
+            app.showToast('Souřadnice se nepodařilo uložit', 'error');
+            return;
+        }
+
+        window.MapModule.setStationCoordinates({
             ...window.MapModule.stationCoordinates,
             [stationId]: [latitude, longitude],
-        };
-
-        window.MapModule.setStationCoordinates(mergedCoordinates);
-
-        const stored = this.readStoredMapConfig();
-        this.storeMapConfig({
-            trackGeoJsonUrl: String(window.MapModule.config.trackGeoJsonUrl || stored.trackGeoJsonUrl || ''),
-            stationCoordinates: mergedCoordinates,
         });
+
         app.logUiAction('setup_station_coordinates_saved', {
             station_id: stationId,
             latitude,
@@ -993,10 +960,9 @@ const SetupAdminModule = {
             return;
         }
 
-        localStorage.removeItem(this.getMapConfigStorageKey());
         window.MapModule.resetRuntimeConfig();
 
-        this.applyStoredMapConfig(app);
+        this.syncMapConfigForm(app);
         app.logUiAction('setup_map_config_reset', {});
 
         if (window.MapModule.isInitialized) {

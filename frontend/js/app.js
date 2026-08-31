@@ -70,8 +70,10 @@ const App = {
             console.error('RZ context refresh failed:', error);
         });
 
-        if (window.SetupAdminModule?.applyStoredMapConfig) {
-            window.SetupAdminModule.applyStoredMapConfig(this);
+        if (window.MapModule?.loadServerMapConfig) {
+            window.MapModule.loadServerMapConfig().catch((error) => {
+                console.error('Initial map config load failed:', error);
+            });
         }
 
         this.startGateStatusRefresh();
