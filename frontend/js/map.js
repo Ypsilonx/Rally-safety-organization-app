@@ -76,6 +76,42 @@ const MapModule = {
     stationStatusCache: new Map(),
     stationRefreshTimer: null,
     isInitialized: false,
+    mapConfigVersion: 0,
+
+    /**
+     * Fetch server-persisted map config (track source + station coordinate
+     * overrides) and apply it as the highest-priority layer over static
+     * defaults/templates. Used both at map init and for live WS updates.
+     * @param {Object} [options]
+     * @param {boolean} [options.redraw=false] - Re-render track/markers
+     *     after applying (init() draws right after calling this itself,
+     *     so it passes false; live WS updates pass true).
+     * @returns {Promise<void>}
+     */
+    async loadServerMapConfig({ redraw = false } = {}) {
+        try {
+            const response = await fetch(`${API_BASE_URL}/api/stations/map-config`);
+            if (!response.ok) {
+                return;
+            }
+
+            const payload = await response.json();
+            if (payload.track_geojson_url) {
+                this.config.trackGeoJsonUrl = payload.track_geojson_url;
+            }
+            if (payload.station_coordinates && typeof payload.station_coordinates === 'object') {
+                this.stationCoordinates = { ...this.stationCoordinates, ...payload.station_coordinates };
+            }
+            this.mapConfigVersion = Number(payload.version || 0);
+
+            if (redraw && this.isInitialized) {
+                await this.refreshTrack();
+                await this.refreshStationMarkers();
+            }
+        } catch (_error) {
+            // Best-effort - existing map state (defaults/static templates) stays as-is.
+        }
+    },
 
     /**
      * Initialize map once after app login.
@@ -102,6 +138,8 @@ const MapModule = {
             maxZoom: 19,
             attribution: MAP_CONFIG.attribution,
         }).addTo(this.map);
+
+        await this.loadServerMapConfig();
 
         const geojson = await window.MapTrackModule.loadTrackGeoJson(this);
         window.MapTrackModule.renderTrack(this, geojson);
@@ -169,14 +207,21 @@ const MapModule = {
                 }
 
                 const payload = await response.json();
-                const incoming = payload?.coordinates;
-                if (!incoming || typeof incoming !== 'object') {
+                const candidateCoordinates = payload?.coordinates;
+                if (!candidateCoordinates || typeof candidateCoordinates !== 'object') {
                     continue;
                 }
 
+                const missingOnly = {};
+                Object.entries(candidateCoordinates).forEach(([stationId, coordinate]) => {
+                    if (!this.stationCoordinates[stationId]) {
+                        missingOnly[stationId] = coordinate;
+                    }
+                });
+
                 this.stationCoordinates = {
                     ...this.stationCoordinates,
-                    ...incoming,
+                    ...missingOnly,
                 };
                 break;
             } catch (_error) {
@@ -309,17 +354,6 @@ const MapModule = {
 
         const geojson = await window.MapElementsModule.loadElementsGeoJson(this);
         window.MapElementsModule.renderElements(this, geojson);
-    },
-
-    /**
-     * Return current runtime map configuration for setup persistence.
-     * @returns {{trackGeoJsonUrl: string, stationCoordinates: Object<string, Array<number>>}}
-     */
-    getRuntimeConfig() {
-        return {
-            trackGeoJsonUrl: this.config.trackGeoJsonUrl || '',
-            stationCoordinates: { ...this.stationCoordinates },
-        };
     },
 
     /**
