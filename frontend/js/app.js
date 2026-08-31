@@ -104,20 +104,23 @@ const App = {
      */
     initializeMapModule() {
         if (!window.MapModule || typeof window.MapModule.init !== 'function') {
-            return;
+            return Promise.resolve();
         }
 
-        requestAnimationFrame(() => {
-            window.MapModule.init()
-                .then(() => {
-                    if (!window.MapModule.isInitialized) {
-                        return window.MapModule.init();
-                    }
-                    return null;
-                })
-                .catch((error) => {
-                    console.error('Map initialization failed:', error);
-                });
+        return new Promise((resolve) => {
+            requestAnimationFrame(() => {
+                window.MapModule.init()
+                    .then(() => {
+                        if (!window.MapModule.isInitialized) {
+                            return window.MapModule.init();
+                        }
+                        return null;
+                    })
+                    .catch((error) => {
+                        console.error('Map initialization failed:', error);
+                    })
+                    .finally(resolve);
+            });
         });
     },
 
@@ -600,6 +603,16 @@ const App = {
         if (loadCoordsBtn) {
             loadCoordsBtn.addEventListener('click', () => {
                 window.SetupAdminModule.loadSelectedSetupStationCoordinate(this);
+            });
+        }
+
+        const pickCoordsBtn = document.getElementById('btn-map-station-pick');
+        if (pickCoordsBtn) {
+            pickCoordsBtn.addEventListener('click', () => {
+                window.SetupAdminModule.pickSelectedSetupStationCoordinateOnMap(this).catch((error) => {
+                    console.error('Map coordinate picker failed:', error);
+                    this.showToast('Výběr na mapě selhal', 'error');
+                });
             });
         }
 

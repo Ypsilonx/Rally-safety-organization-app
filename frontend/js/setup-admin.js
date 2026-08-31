@@ -951,6 +951,61 @@ const SetupAdminModule = {
     },
 
     /**
+     * Switch to the live dashboard and arm a one-shot map click listener
+     * that fills the selected station's lat/lon fields with the clicked
+     * point, then returns to Setup. Saving still requires the explicit
+     * "Uložit souřadnice pozice" button - clicking the map never saves
+     * silently.
+     *
+     * Setup obrazovka a dashboard (kde jediný žije Leaflet `#map`) jsou
+     * dvě vzájemně skryté obrazovky - proto je nutné dočasně přepnout na
+     * dashboard, počkat na inicializaci mapy a po kliku se vrátit zpět.
+     * Návrat používá `showSetupScreenOnly()` (ne plný `openSetupScreen()`)
+     * záměrně - `openSetupScreen()` by asynchronně přenačetl seznam pozic
+     * a jeho render by o chvíli později přepsal právě vyplněné pole zpátky
+     * na dřív uloženou hodnotu.
+     * @param {Object} app
+     * @returns {Promise<void>}
+     */
+    async pickSelectedSetupStationCoordinateOnMap(app) {
+        if (!app.selectedAdminStationId) {
+            app.showToast('Nejprve vyber pozici ze seznamu', 'info');
+            return;
+        }
+
+        const stationId = app.selectedAdminStationId;
+        this.openDashboardScreen(app);
+
+        if (!window.MapModule?.isInitialized) {
+            await app.initializeMapModule();
+        }
+        if (!window.MapModule?.map) {
+            app.showToast('Mapu se nepodařilo načíst', 'error');
+            return;
+        }
+
+        app.showToast(`Klikni do mapy pro umístění pozice ${stationId}`, 'info');
+        window.MapModule.map.once('click', (event) => {
+            if (app.selectedAdminStationId !== stationId) {
+                return;
+            }
+
+            this.showSetupScreenOnly(app);
+
+            const latInput = document.getElementById('map-station-lat');
+            const lonInput = document.getElementById('map-station-lon');
+            if (latInput) {
+                latInput.value = event.latlng.lat.toFixed(6);
+            }
+            if (lonInput) {
+                lonInput.value = event.latlng.lng.toFixed(6);
+            }
+
+            app.showToast('Souřadnice vyplněny - ulož je tlačítkem "Uložit souřadnice pozice"', 'success');
+        });
+    },
+
+    /**
      * Reset setup map configuration to defaults.
      * @param {Object} app
      * @returns {Promise<void>}
