@@ -189,11 +189,13 @@ const AppMessagingModule = {
         }
 
         const senderName = message.sender?.name || 'Systém';
+        const senderStation = message.sender?.station_id;
+        const senderLabel = senderStation ? `${senderName} · ${senderStation}` : senderName;
         const timestamp = app.formatTime(message.created_at);
 
         messageEl.innerHTML = `
             <div class="message-header">
-                <span class="message-sender">${senderName}</span>
+                <span class="message-sender">${app.escapeHtml(senderLabel)}</span>
                 <span class="message-time">${timestamp}</span>
             </div>
             <div class="message-content">${app.renderTaggedContent(message.content)}</div>

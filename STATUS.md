@@ -78,6 +78,13 @@ Plný plán a checklisty jednotlivých fází jsou v [ROADMAP.md](ROADMAP.md).
 > níže v jednom odstavci na fázi. Detail commit po commitu je v `git log
 > --oneline`, milníky fází mají git tagy `v0.1`-`v0.4`.
 
+### 2026-08-31 (chat zobrazuje jméno i pozici odesílatele)
+- ✅ Frontend: `displayMessage()` v `app-messaging.js` vedle jména ukazuje
+  i `station_id` odesílatele ("Vedoucí RZ · VRZ") - data už chodila v
+  `sender.station_id` (backend i lokální echo), chybělo jen vykreslení
+- 🔒 Menší oprava po cestě: jméno odesílatele se teď escapuje přes
+  `app.escapeHtml()` stejně jako zbytek zprávy (dřív šlo do DOM syrové)
+
 ### 2026-08-31 (WS notifikace komisařům při přiřazení/změně stanice)
 - ✅ Backend: `send_personal_message` zapojen na PIN dotčené pozice ve
   3 admin akcích (`backend/api/admin.py`): assign/reassign ("Přiřazení
