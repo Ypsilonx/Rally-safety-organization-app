@@ -38,6 +38,7 @@ logs/rz_*_session_*.jsonl
 data/people_catalog.json
 data/pins.json
 data/rz_context.json
+data/map_config.json
 data/*.kml
 data/*.xlsx.csv
 
