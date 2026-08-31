@@ -63,7 +63,7 @@ const SAMPLE_TRACK_FALLBACK = {
  */
 const MapModule = {
     config: MAP_CONFIG,
-    stationCoordinates: STATION_COORDINATES,
+    stationCoordinates: {},
     roleIconMap: ROLE_ICON_MAP,
     fallbackTrack: SAMPLE_TRACK_FALLBACK,
     map: null,
@@ -145,6 +145,7 @@ const MapModule = {
         window.MapTrackModule.renderTrack(this, geojson);
 
         await this.loadStationCoordinates();
+        this.applyDefaultStationCoordinates();
 
         this.elementLayer = L.layerGroup().addTo(this.map);
         const elementsGeojson = await window.MapElementsModule.loadElementsGeoJson(this);
@@ -230,6 +231,19 @@ const MapModule = {
         }
 
         await this.loadCommissionerCoordinates();
+    },
+
+    /**
+     * Fill any station coordinate still missing after server/static/
+     * commissioner layers with the hardcoded fallback defaults - lowest
+     * priority layer in the chain.
+     */
+    applyDefaultStationCoordinates() {
+        Object.entries(DEFAULT_STATION_COORDINATES).forEach(([stationId, coordinate]) => {
+            if (!this.stationCoordinates[stationId]) {
+                this.stationCoordinates[stationId] = coordinate;
+            }
+        });
     },
 
     /**
