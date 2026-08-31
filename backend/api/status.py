@@ -49,6 +49,42 @@ def require_vedeni_or_admin(
     return session
 
 
+def require_authenticated_user(
+    session_token: Annotated[str | None, Header(alias="X-Session-Token")] = None,
+    pin_code: Annotated[str | None, Header(alias="X-Pin-Code")] = None,
+) -> dict[str, Any]:
+    """Require any authenticated identity - vedení/admin session, nebo komisařský PIN.
+
+    Endpoint za touto branou vrací kontaktní údaje (telefon/e-mail/adresa)
+    přiřazených osob na ostatních stanicích - to smí vidět kdokoliv reálně
+    přihlášený do appky (obě auth tiers), ne anonymní HTTP klient bez PINu.
+
+    Args:
+        session_token: Session token vedení/admina.
+        pin_code: PIN kód komisaře vázaný na stanici.
+
+    Returns:
+        Rozpoznaná identita - session data, nebo zjednodušený záznam z PINu.
+
+    Raises:
+        HTTPException: Pokud není přiložen platný session token ani PIN.
+    """
+    if session_token:
+        session = auth_manager.verify_session(session_token)
+        if session:
+            return session
+
+    if pin_code:
+        access = auth_manager.verify_pin(pin_code)
+        if access:
+            return {"role": access.role, "name": access.name, "station_id": access.station_id}
+
+    raise HTTPException(
+        status_code=status.HTTP_401_UNAUTHORIZED,
+        detail="Authentication required (session token or PIN)",
+    )
+
+
 @router.get("/rz-context")
 async def get_rz_context() -> dict[str, Any]:
     """Return public RZ context used by all clients.
@@ -67,7 +103,9 @@ async def get_rz_context() -> dict[str, Any]:
 
 
 @router.get("/status")
-async def get_stations_status() -> dict[str, Any]:
+async def get_stations_status(
+    _: Annotated[dict[str, Any], Depends(require_authenticated_user)],
+) -> dict[str, Any]:
     """Return current online/offline status for tracked stations.
 
     Returns:
@@ -191,7 +229,10 @@ async def get_station_detail(
 
 
 @router.get("/{station_id}/users")
-async def get_station_users(station_id: str) -> dict[str, Any]:
+async def get_station_users(
+    station_id: str,
+    _: Annotated[dict[str, Any], Depends(require_vedeni_or_admin)],
+) -> dict[str, Any]:
     """Return assignment history entries for one station.
 
     Args:

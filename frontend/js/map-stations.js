@@ -31,6 +31,26 @@ const MapStationsModule = {
     },
 
     /**
+     * Build auth header for the current user - session token pro vedení/admin,
+     * PIN pro komisaře. `/api/stations/status` vrací kontaktní údaje (telefon,
+     * e-mail), proto musí být volání autentizované stejně jako přihlášení do appky.
+     * @returns {Object<string, string>}
+     */
+    buildStatusAuthHeaders() {
+        const user = window.Auth?.getCurrentUser?.();
+        if (!user) {
+            return {};
+        }
+        if (user.session_token) {
+            return { 'X-Session-Token': user.session_token };
+        }
+        if (user.pin_code) {
+            return { 'X-Pin-Code': user.pin_code };
+        }
+        return {};
+    },
+
+    /**
      * Fetch status API and render station markers.
      * @param {Object} mapModule
      * @returns {Promise<void>}
@@ -42,7 +62,7 @@ const MapStationsModule = {
 
         try {
             const [response, pinsByStation] = await Promise.all([
-                fetch(mapModule.config.statusApiUrl),
+                fetch(mapModule.config.statusApiUrl, { headers: this.buildStatusAuthHeaders() }),
                 this.fetchStationPins(),
             ]);
             if (!response.ok) {

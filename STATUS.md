@@ -1,6 +1,6 @@
 # Project Status & Progress Tracking
 
-**Last Updated:** 30. srpna 2026
+**Last Updated:** 31. srpna 2026
 **Current Phase:** Fáze 4 + Fáze 5 backend slice 🔄 IN PROGRESS
 **Next Phase:** Dokončení station-first backend API + napojení admin UI
 
@@ -69,12 +69,6 @@ Plný plán a checklisty jednotlivých fází jsou v [ROADMAP.md](ROADMAP.md).
   (`backend/models/user.py`) — ty dva zdroje pravdy se můžou rozejít
   (mapa ukáže jiné jméno, než jaké se reálně přihlásí a píše v chatu).
   Řešení čeká na návrh (mění vztah auth/station_registry/vitality).
-- 🔒 Bezpečnostní dluh: `GET /api/stations/status` a `/api/stations/{id}/users`
-  (`backend/api/status.py`) nemají žádnou autentizaci — kdokoliv s přístupem
-  na server vidí jméno, telefon, e-mail, adresu a skupinu ke každé pozici
-  bez přihlášení (PIN mezi nimi není — ten po opravě 30.8. už žádná veřejná
-  route nevrací). Vědomě odloženo — řešit jako samostatný úkol (Fáze 10
-  "Security Basics" v ROADMAP.md).
 
 ---
 
@@ -83,6 +77,22 @@ Plný plán a checklisty jednotlivých fází jsou v [ROADMAP.md](ROADMAP.md).
 > Starší průběžný vývoj (14.2. - 15.7.2026, Fáze 0-6 založení) je shrnutý
 > níže v jednom odstavci na fázi. Detail commit po commitu je v `git log
 > --oneline`, milníky fází mají git tagy `v0.1`-`v0.4`.
+
+### 2026-08-31 (bezpečnostní dluh - PII únik z veřejných station endpointů)
+- 🔒 Backend: `GET /api/stations/status` a `GET /api/stations/{id}/users`
+  (`backend/api/status.py`) dřív vracely jméno, telefon, e-mail, adresu a
+  skupinu ke každé pozici komukoliv bez přihlášení - opraveno novou
+  `require_authenticated_user` závislostí, která pustí buď platný
+  `X-Session-Token` (vedení/admin), nebo platný `X-Pin-Code` (komisař);
+  `/users` (nepoužívaný z frontendu) zagateován stejnou `require_vedeni_or_admin`
+  jako sourozenecké routy
+- ✅ Frontend: `map-stations.js` posílá na `/api/stations/status` auth
+  hlavičku podle typu přihlášení (`buildStatusAuthHeaders`) - mapa dál
+  funguje pro komisaře i vedení, jen už ne pro nepřihlášeného klienta
+- ✅ Testy: 6 nových regresních testů v `test_stations_status_api.py`
+  (anonym → 401, PIN → 200, session → 200, neplatný PIN → 401, `/users` gate)
+- 📄 Uzavírá bezpečnostní dluh popsaný v Active Issues (viz předchozí revize
+  tohoto souboru) - vědomě odloženo do Fáze 10 nezůstalo
 
 ### 2026-08-30 (oddělení ADMIN role od vedení RZ + READY gate)
 - ✅ Backend: `/api/admin/*` je nově výhradně pro roli `admin`
