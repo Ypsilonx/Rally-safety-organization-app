@@ -3,7 +3,11 @@
  * Handles real-time communication with backend server
  */
 
-const WS_BASE_URL = 'ws://localhost:8000';
+// Stejná logika jako API_BASE_URL v auth.js - na ostro wss:// na aktuální
+// doméně (přes reverse proxy), lokálně explicitní backend port.
+const WS_BASE_URL = ['localhost', '127.0.0.1'].includes(window.location.hostname)
+    ? 'ws://localhost:8000'
+    : `${window.location.protocol === 'https:' ? 'wss:' : 'ws:'}//${window.location.host}`;
 const RECONNECT_DELAY = 3000; // 3 seconds
 const MAX_RECONNECT_ATTEMPTS = 5;
 const HEARTBEAT_INTERVAL_MS = 30000; // 30 seconds

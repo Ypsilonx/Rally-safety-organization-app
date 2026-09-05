@@ -3,8 +3,13 @@
  * Handles 2-tier login system: Vedení (username+password) + Komisař (PIN)
  */
 
-// API Base URL
-const API_BASE_URL = 'http://localhost:8000';
+// API Base URL - lokální vývoj má frontend (8080) a backend (8000) na
+// různých portech, proto tam zůstává explicitní cíl. Na ostro běží frontend
+// i backend za stejnou doménou (reverse proxy routuje /api a /ws na backend,
+// viz DEPLOYMENT.md), takže stačí aktuální origin.
+const API_BASE_URL = ['localhost', '127.0.0.1'].includes(window.location.hostname)
+    ? 'http://localhost:8000'
+    : window.location.origin;
 
 /**
  * Authentication state manager
