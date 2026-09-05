@@ -9,6 +9,7 @@ from typing import Optional
 import bcrypt
 
 from backend.core.atomic_write import atomic_write_text
+from backend.core.config import get_settings
 from backend.models.user import (
     AssignmentHistoryEntry,
     KomisarAccess,
@@ -24,18 +25,40 @@ class AuthManager:
     PIN_LENGTH = 8
     RESERVED_VEDENI_STATION_IDS = set(LEADERSHIP_LOGIN_POSITIONS)
     
-    def __init__(self, pins_file: str = "data/pins.json"):
+    def __init__(
+        self,
+        pins_file: str = "data/pins.json",
+        vedeni_password_hash: Optional[str] = None,
+        session_expire_minutes: int = 480,
+    ):
         """Initialize auth manager with persistent PIN storage.
-        
+
         Args:
             pins_file: Path to JSON file for storing PINs
+            vedeni_password_hash: Bcrypt hash nahrazující vestavěné demo
+                heslo pro všechny účty vedení/admina (viz `VEDENI_CREDENTIALS`).
+                Bez zadání zůstává v platnosti demo heslo pro lokální vývoj -
+                na ostro se nastavuje přes `VEDENI_PASSWORD_HASH` v `.env`.
+            session_expire_minutes: Doba platnosti session tokenu vedení
+                (výchozí 8 hodin, konfigurovatelné přes `SESSION_EXPIRE_MINUTES`).
         """
         self.pins_file = Path(pins_file)
         self.pins_file.parent.mkdir(exist_ok=True)
-        
+        self._session_expire = timedelta(minutes=session_expire_minutes)
+
         # Load existing PINs from file or initialize empty
         self.komisar_pins: dict[str, KomisarAccess] = self._load_pins()
         self.active_sessions: dict[str, dict] = {}  # session_token -> user_data
+
+        # Vlastní kopie přihlašovacích údajů vedení - při zadaném override
+        # nahradí vestavěný demo hash, aniž by se sahalo na globální
+        # VEDENI_CREDENTIALS (ten zůstává bezpečným defaultem pro dev).
+        self._vedeni_credentials = VEDENI_CREDENTIALS
+        if vedeni_password_hash:
+            self._vedeni_credentials = {
+                username: {**data, "password_hash": vedeni_password_hash}
+                for username, data in VEDENI_CREDENTIALS.items()
+            }
 
     def _create_history_entry(
         self,
@@ -202,20 +225,20 @@ class AuthManager:
         """
         raw_username = str(username or "").strip()
         lookup_key = raw_username
-        if lookup_key not in VEDENI_CREDENTIALS:
+        if lookup_key not in self._vedeni_credentials:
             uppercase_key = raw_username.upper()
             lowercase_key = raw_username.lower()
-            if uppercase_key in VEDENI_CREDENTIALS:
+            if uppercase_key in self._vedeni_credentials:
                 lookup_key = uppercase_key
-            elif lowercase_key in VEDENI_CREDENTIALS:
+            elif lowercase_key in self._vedeni_credentials:
                 lookup_key = lowercase_key
             else:
                 return None
 
-        if lookup_key not in VEDENI_CREDENTIALS:
+        if lookup_key not in self._vedeni_credentials:
             return None
 
-        user_data = VEDENI_CREDENTIALS[lookup_key]
+        user_data = self._vedeni_credentials[lookup_key]
         stored_hash = user_data["password_hash"].encode('utf-8')
         
         if bcrypt.checkpw(password.encode('utf-8'), stored_hash):
@@ -270,9 +293,8 @@ class AuthManager:
             return None
         
         session_data = self.active_sessions[session_token]
-        # Check if session expired (8 hours default)
         created_at = session_data["created_at"]
-        if datetime.now(UTC) - created_at > timedelta(hours=8):
+        if datetime.now(UTC) - created_at > self._session_expire:
             del self.active_sessions[session_token]
             return None
         
@@ -677,4 +699,8 @@ def hash_password(password: str) -> str:
 
 
 # Global auth manager instance
-auth_manager = AuthManager()
+_settings = get_settings()
+auth_manager = AuthManager(
+    vedeni_password_hash=_settings.VEDENI_PASSWORD_HASH,
+    session_expire_minutes=_settings.SESSION_EXPIRE_MINUTES,
+)

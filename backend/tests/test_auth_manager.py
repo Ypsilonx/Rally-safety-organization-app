@@ -1,6 +1,7 @@
 """Unit tests for authentication manager behavior."""
 
 import json
+from datetime import timedelta
 from pathlib import Path
 
 import bcrypt
@@ -32,6 +33,43 @@ def test_generate_pin_is_persistent(tmp_path: Path) -> None:
     assert reloaded is not None
     assert reloaded.name == "Test Komisar"
     assert reloaded.role == UserRole.KOMISAR_TRAT
+
+
+def test_verify_password_uses_overridden_vedeni_hash(tmp_path: Path) -> None:
+    """Nastavený vedeni_password_hash nahrazuje vestavěné demo heslo."""
+    override_hash = hash_password("produkcni-heslo-2026")
+    manager = AuthManager(
+        pins_file=str(tmp_path / "pins.json"),
+        vedeni_password_hash=override_hash,
+    )
+
+    assert manager.verify_password("VRZ", "produkcni-heslo-2026") is not None
+    assert manager.verify_password("VRZ", "demo123") is None
+
+
+def test_verify_password_falls_back_to_default_hash_without_override(tmp_path: Path) -> None:
+    """Bez override zůstává v platnosti vestavěné demo heslo (dev default)."""
+    manager = AuthManager(pins_file=str(tmp_path / "pins.json"))
+
+    assert manager.verify_password("VRZ", "demo123") is not None
+
+
+def test_verify_session_expires_after_configured_minutes(tmp_path: Path) -> None:
+    """Session starší než session_expire_minutes už není platná."""
+    manager = AuthManager(pins_file=str(tmp_path / "pins.json"), session_expire_minutes=30)
+    token = manager.create_session(username="VRZ", name="Vedouci RZ", role=UserRole.VEDOUCI)
+    manager.active_sessions[token]["created_at"] -= timedelta(minutes=31)
+
+    assert manager.verify_session(token) is None
+
+
+def test_verify_session_valid_within_configured_minutes(tmp_path: Path) -> None:
+    """Session mladší než session_expire_minutes zůstává platná."""
+    manager = AuthManager(pins_file=str(tmp_path / "pins.json"), session_expire_minutes=30)
+    token = manager.create_session(username="VRZ", name="Vedouci RZ", role=UserRole.VEDOUCI)
+    manager.active_sessions[token]["created_at"] -= timedelta(minutes=29)
+
+    assert manager.verify_session(token) is not None
 
 
 def test_hash_password_returns_bcrypt_hash() -> None:

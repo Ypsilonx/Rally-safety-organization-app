@@ -28,6 +28,11 @@ class Settings(BaseSettings):
 
     # Auth settings
     SESSION_EXPIRE_MINUTES: int = 480  # 8 hours
+    # Bcrypt hash nahrazující vestavěné demo heslo ("demo123") pro vedení/
+    # admina. Bez nastavení appka na ostro běží s veřejně známým heslem ze
+    # zdrojového kódu - vygeneruj přes:
+    #   uv run python -c "from backend.core.auth import hash_password; print(hash_password('nove-heslo'))"
+    VEDENI_PASSWORD_HASH: str | None = None
     
     # Logging
     LOG_LEVEL: str = "INFO"

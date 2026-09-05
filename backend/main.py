@@ -39,6 +39,14 @@ async def _startup() -> None:
             "před ostrým nasazením nastav DEBUG=False v .env."
         )
 
+    if not settings.VEDENI_PASSWORD_HASH and not settings.DEBUG:
+        print(
+            "⚠️  POZOR: VEDENI_PASSWORD_HASH není nastavený - vedení/admin "
+            "se přihlašují vestavěným demo heslem ze zdrojového kódu. "
+            "Před ostrým nasazením vygeneruj vlastní hash a nastav ho "
+            "v .env (viz komentář u VEDENI_PASSWORD_HASH v backend/core/config.py)."
+        )
+
     print("=" * 60)
     print("🔐 PŘIHLAŠOVACÍ ÚDAJE")
     print("=" * 60)
