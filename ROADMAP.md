@@ -282,11 +282,13 @@ sekund - k formálnímu ověření v závěrečné validační iteraci.
 3. **Security Basics**
    - ✅ CORS přes `ALLOWED_ORIGINS` (hotovo, viz `.env.example`)
    - ✅ `DEBUG` bezpečný default False (hotovo)
+   - ✅ Rate limiting na login (`login-vedeni`/`login-komisar`), 2026-09-05
+   - ✅ Konfigurovatelné heslo vedení (`VEDENI_PASSWORD_HASH`), 2026-09-05
    - [ ] Input sanitization (XSS na chat obsahu)
    - [ ] Rate limiting pro WebSocket zprávy
 
 4. **Documentation**
-   - [ ] DEPLOYMENT.md: jak nasadit na server
+   - ✅ DEPLOYMENT.md: jak nasadit na server (2026-09-05)
    - [ ] USER_MANUAL.md: návod pro komisaře
    - API endpointy jsou už zdokumentované živě na `/docs` (FastAPI Swagger)
 

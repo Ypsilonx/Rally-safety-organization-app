@@ -1,6 +1,6 @@
 # Project Status & Progress Tracking
 
-**Last Updated:** 31. srpna 2026
+**Last Updated:** 5. září 2026
 **Current Phase:** Fáze 4 + Fáze 5 backend slice 🔄 IN PROGRESS
 **Next Phase:** Dokončení station-first backend API + napojení admin UI
 
@@ -77,6 +77,38 @@ Plný plán a checklisty jednotlivých fází jsou v [ROADMAP.md](ROADMAP.md).
 > Starší průběžný vývoj (14.2. - 15.7.2026, Fáze 0-6 založení) je shrnutý
 > níže v jednom odstavci na fázi. Detail commit po commitu je v `git log
 > --oneline`, milníky fází mají git tagy `v0.1`-`v0.4`.
+
+### 2026-09-05 (bezpečnostní audit před ostrým nasazením + DEPLOYMENT.md)
+- 🔒 Backend: nový in-memory `LoginRateLimiter` (`backend/core/rate_limiter.py`)
+  zapojený do `/api/auth/login-vedeni` i `/login-komisar` - 5 neúspěšných
+  pokusů z jedné IP / 60s → `429` na 60s, počítadlo se resetuje po úspěšném
+  loginu. Bez ochrany šlo PIN (8 číslic) i sdílené heslo vedení zkoušet
+  neomezenou rychlostí.
+- 🔒 Backend: heslo vedení/admina (`VEDENI_CREDENTIALS` v `backend/models/user.py`)
+  bylo natvrdo `demo123` pro všech 5 účtů přímo ve zdrojovém kódu. Nová
+  `VEDENI_PASSWORD_HASH` v `.env` (`backend/core/config.py`) ho přepíše bez
+  zásahu do kódu; bez nastavení appka běží s demo heslem a při `DEBUG=False`
+  o tom nahlas varuje při startu (`backend/main.py`).
+- 🐛 Backend: `SESSION_EXPIRE_MINUTES` z configu se nikde nepoužíval,
+  `AuthManager.verify_session` měl natvrdo 8 hodin - teď respektuje
+  nastavenou hodnotu (`AuthManager(session_expire_minutes=...)`).
+- 🧹 Backend: smazán nepoužívaný `POST /api/auth/verify-session` (frontend
+  ho nikdy nevolal; navíc posílal token jako query parametr, který by
+  skončil v access logech).
+- 🐛 Frontend: `API_BASE_URL`/`WS_BASE_URL` (`auth.js`, `websocket.js`) byly
+  natvrdo `localhost:8000` - na produkční doméně by appka volala localhost
+  prohlížeče každého uživatele a vůbec by nenaběhla. Teď se mimo
+  localhost/127.0.0.1 odvozují z `window.location` (frontend i backend na
+  stejné doméně přes reverse proxy, viz `DEPLOYMENT.md`). Ověřeno v
+  prohlížeči (Playwright), že lokální vývojová větev (port 8080/8000) běží
+  beze změny - login i WebSocket handshake fungují.
+- 📄 Nový `DEPLOYMENT.md` - architektura nasazení (Caddy TLS reverse proxy
+  + uvicorn na `127.0.0.1`), systemd service, `.env` checklist, firewall,
+  zálohování `data/*.json`, postup aktualizace.
+- ✅ Testy: 8 nových (`test_rate_limiter.py`, `test_login_rate_limiting.py`,
+  rozšířený `test_auth_manager.py`), 65/65 zelených, `ruff check` čistý.
+- ℹ️ Zbývá z auditu (vědomě neřešeno teď): sdílené heslo zůstává jedno pro
+  všech 5 účtů vedení (ne per-účet) - viz Active Issues.
 
 ### 2026-08-31 (chat zobrazuje jméno i pozici odesílatele)
 - ✅ Frontend: `displayMessage()` v `app-messaging.js` vedle jména ukazuje
@@ -237,7 +269,9 @@ Plný plán a checklisty jednotlivých fází jsou v [ROADMAP.md](ROADMAP.md).
 2. Mapa: role/type ikony, absolutní poslední aktivita, otestováno desktop + mobil.
 3. Incident workflow: definovaný postup `incident -> not_ready -> ready potvrzení -> resume`.
 4. Reconnect/auth: ověřen scénář restartu backendu a nuceného reloginu.
-5. Security baseline: CORS, rate limit zpráv, vstupní sanitizace.
+5. Security baseline: CORS, rate limit loginu ✅ (2026-09-05), rate limit
+   WS zpráv (Fáze 10, zatím chybí), vstupní sanitizace. Nasazení viz
+   `DEPLOYMENT.md` (TLS, `.env` checklist, `VEDENI_PASSWORD_HASH`).
 6. Testy: unit + základní integrační scénáře před každou rally.
 
 ---
