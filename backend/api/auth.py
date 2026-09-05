@@ -157,31 +157,3 @@ async def login_komisar(request: LoginKomisarRequest, http_request: Request):
         message="Login successful"
     )
 
-
-@router.post("/verify-session")
-async def verify_session(session_token: str):
-    """Verify if session token is still valid.
-
-    Args:
-        session_token: Session token to verify
-
-    Returns:
-        Session data if valid
-
-    Raises:
-        HTTPException: If session is invalid/expired (401)
-    """
-    session_data = auth_manager.verify_session(session_token)
-
-    if not session_data:
-        raise HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="Session expired or invalid"
-        )
-
-    return {
-        "valid": True,
-        "username": session_data["username"],
-        "name": session_data["name"],
-        "role": session_data["role"].value
-    }
